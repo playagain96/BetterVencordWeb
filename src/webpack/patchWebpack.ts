@@ -210,6 +210,10 @@ function patchPush() {
                         if (!patch.all) patches.splice(i--, 1);
                     }
                 }
+                Object.defineProperty(modules, id, {
+                    configurable: true,
+                    writable: true,
+                });
             }
         } catch (err) {
             logger.error("Error in handlePush", err);
@@ -224,4 +228,20 @@ function patchPush() {
         set: v => (handlePush.original = v),
         configurable: true
     });
+    window[WEBPACK_CHUNK].push([[Symbol()], {}, require => {
+        require.d = (target, exports) => {
+            for (const key in exports) {
+                if (!Reflect.has(exports, key) || target[key]) continue;
+
+                Object.defineProperty(target, key, {
+                    get: () => exports[key](),
+                    set: v => { exports[key] = () => v; },
+                    enumerable: true,
+                    configurable: true
+                });
+            }
+        };
+    }]);
+
+    window[WEBPACK_CHUNK].pop();
 }
