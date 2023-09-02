@@ -1,3 +1,3 @@
 @echo off
 git fetch upstream
-git rebase upstream/master
+git rebase upstream/main
