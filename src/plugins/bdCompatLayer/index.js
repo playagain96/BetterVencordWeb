@@ -1,20 +1,8 @@
 /*
- * Vencord, a modification for Discord's desktop app
- * Copyright (c) 2022 Vendicated and contributors
- *
- * This program is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <https://www.gnu.org/licenses/>.
-*/
+ * Vencord, a Discord client mod
+ * Copyright (c) 2023 Vendicated and contributors
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
 
 /* eslint-disable eqeqeq */
 import definePlugin, { OptionType } from "@utils/types";
@@ -25,6 +13,8 @@ const { Plugin } = require("@utils/types");
 import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalRoot, openModal } from "@utils/modal";
+
+import UI from "./UI";
 
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -116,18 +106,32 @@ const thePlugin = {
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
         const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
-        fetch(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.min.js").then(out => out.text()).then(out2 => {
-            eval.call(window, out2.replaceAll(".localStorage", ".Vencord.Util.localStorage"));
-            const temp = {};
-            BrowserFS.install(temp);
-            BrowserFS.configure({
-                // fs: "InMemory"
-                fs: "LocalStorage"
-            }, () => {
-                window.BdApi.ReqImpl.fs = temp.require("fs");
-                window.BdApi.ReqImpl.path = temp.require("path");
+        fetch(
+            proxyUrl +
+                "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.min.js"
+        )
+            .then((out) => out.text())
+            .then((out2) => {
+                eval.call(
+                    window,
+                    out2.replaceAll(
+                        ".localStorage",
+                        ".Vencord.Util.localStorage"
+                    )
+                );
+                const temp = {};
+                BrowserFS.install(temp);
+                BrowserFS.configure(
+                    {
+                        // fs: "InMemory"
+                        fs: "LocalStorage",
+                    },
+                    () => {
+                        window.BdApi.ReqImpl.fs = temp.require("fs");
+                        window.BdApi.ReqImpl.path = temp.require("path");
+                    }
+                );
             });
-        });
         const Utils = {
             readDirectory(dirPath) {
                 const fs = window.require("fs");
@@ -161,10 +165,19 @@ const thePlugin = {
                 for (const key in tree) {
                     // eslint-disable-next-line no-prototype-builtins
                     if (tree.hasOwnProperty(key)) {
-                        const newPath = currentPath ? currentPath + "/" + key : key;
+                        const newPath = currentPath
+                            ? currentPath + "/" + key
+                            : key;
 
-                        if (typeof tree[key] === "object" && tree[key] !== null && !(tree[key] instanceof ReadableStream)) {
-                            const nestedPaths = this.createPathFromTree(tree[key], newPath);
+                        if (
+                            typeof tree[key] === "object" &&
+                            tree[key] !== null &&
+                            !(tree[key] instanceof ReadableStream)
+                        ) {
+                            const nestedPaths = this.createPathFromTree(
+                                tree[key],
+                                newPath
+                            );
                             // paths = paths.concat(nestedPaths);
                             paths = Object.assign({}, paths, nestedPaths);
                         } else {
@@ -190,12 +203,13 @@ const thePlugin = {
                         fs.unlinkSync(currentPath);
                     }
                 }
-                if (directoryPath == "/")
-                    return;
+                if (directoryPath == "/") return;
                 fs.rmdirSync(directoryPath);
             },
             formatFs() {
-                const filesystem = this.createPathFromTree(this.readDirectory("/"));
+                const filesystem = this.createPathFromTree(
+                    this.readDirectory("/")
+                );
                 const fs = window.require("fs");
                 for (const key in filesystem) {
                     if (Object.hasOwnProperty.call(filesystem, key)) {
@@ -236,12 +250,14 @@ const thePlugin = {
                     //     fileInput.accept = "*";
                     //     fileInput.onchange = event => {
                     //         const file = event.target.files[0];
-                    this.openFileSelect().then(file => {
+                    this.openFileSelect().then((file) => {
                         // if (!file)
                         //     return null;
                         const reader = new FileReader();
                         reader.onload = () => {
-                            const blob = new Blob([reader.result], { type: file.type });
+                            const blob = new Blob([reader.result], {
+                                type: file.type,
+                            });
                             resolve(blob);
                         };
                         reader.readAsArrayBuffer(file);
@@ -252,11 +268,9 @@ const thePlugin = {
                 });
             },
             mkdirSyncRecursive(directory) {
-                if (directory == "")
-                    return;
+                if (directory == "") return;
                 const fs = window.require("fs");
-                if (fs.existsSync(directory))
-                    return;
+                if (fs.existsSync(directory)) return;
                 const path = window.require("path");
                 const parentDir = path.dirname(directory);
                 if (!fs.existsSync(parentDir)) {
@@ -267,16 +281,19 @@ const thePlugin = {
             stream2buffer(stream) {
                 return new Promise((resolve, reject) => {
                     const _buf = [];
-                    stream.on("data", chunk => _buf.push(chunk));
+                    stream.on("data", (chunk) => _buf.push(chunk));
                     stream.on("end", () => resolve(Buffer.concat(_buf)));
-                    stream.on("error", err => reject(err));
-
+                    stream.on("error", (err) => reject(err));
                 });
             },
         };
         const exportZip = async () => {
             if (!window.zip) {
-                eval(this.simpleGET("https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js").responseText);
+                eval(
+                    this.simpleGET(
+                        "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
+                    ).responseText
+                );
             }
             const { BlobWriter, ZipWriter } = window.zip;
             const zipFileWriter = new BlobWriter();
@@ -295,7 +312,11 @@ const thePlugin = {
         };
         const importZip = async () => {
             if (!window.zip) {
-                eval(this.simpleGET("https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js").responseText);
+                eval(
+                    this.simpleGET(
+                        "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
+                    ).responseText
+                );
             }
             const fs = window.require("fs");
             const path = window.require("path");
@@ -308,16 +329,28 @@ const thePlugin = {
             // debugger;
             for (let i = 0; i < entries.length; i++) {
                 const element = entries[i];
-                const dir = element.directory ? element.filename : path.dirname(element.filename);
-                const modElement = (dir == element.filename ? (dir.endsWith("/") ? dir.slice(0, 1) : dir) : dir);
+                const dir = element.directory
+                    ? element.filename
+                    : path.dirname(element.filename);
+                const modElement =
+                    dir == element.filename
+                        ? dir.endsWith("/")
+                            ? dir.slice(0, 1)
+                            : dir
+                        : dir;
                 Utils.mkdirSyncRecursive("/" + modElement);
                 const writer = new BlobWriter();
                 const out = await element.getData(writer);
                 // console.log(out);
                 // debugger;
-                if (element.directory)
-                    continue;
-                fs.writeFile("/" + element.filename, BrowserFS.BFSRequire("buffer").Buffer.from(await out.arrayBuffer()), () => { });
+                if (element.directory) continue;
+                fs.writeFile(
+                    "/" + element.filename,
+                    BrowserFS.BFSRequire("buffer").Buffer.from(
+                        await out.arrayBuffer()
+                    ),
+                    () => {}
+                );
             }
             const data = await zipReader.close();
             // console.log(data);
@@ -336,13 +369,26 @@ const thePlugin = {
         const completeFileSystem = () => {
             return Utils.createPathFromTree(Utils.readDirectory("/"));
         };
-        const importFile = async targetPath => {
+        const importFile = async (targetPath) => {
             const file = await Utils.openFileSelect();
             const fs = window.require("fs");
             const path = window.require("path");
-            fs.writeFile(targetPath, BrowserFS.BFSRequire("buffer").Buffer.from(await file.arrayBuffer()), () => { });
+            fs.writeFile(
+                targetPath,
+                BrowserFS.BFSRequire("buffer").Buffer.from(
+                    await file.arrayBuffer()
+                ),
+                () => {}
+            );
         };
-        window.BdCompatLayer = { Utils, exportZip, completeFileSystem, downloadZip, importZip, importFile };
+        window.BdCompatLayer = {
+            Utils,
+            exportZip,
+            completeFileSystem,
+            downloadZip,
+            importZip,
+            importFile,
+        };
         // const fsContext = {};
         // const setupFiler = (() => function () { return eval(Filer.responseText); }.call(fsContext));
         // setupFiler();
@@ -474,8 +520,9 @@ const thePlugin = {
         }
 
         class Patcher {
-
-            static get patches() { return this._patches || (this._patches = []); }
+            static get patches() {
+                return this._patches || (this._patches = []);
+            }
 
             /**
              * Returns all the patches done by a specific caller
@@ -487,7 +534,8 @@ const thePlugin = {
                 const patches = [];
                 for (const patch of this.patches) {
                     for (const childPatch of patch.children) {
-                        if (childPatch.caller === name) patches.push(childPatch);
+                        if (childPatch.caller === name)
+                            patches.push(childPatch);
                     }
                 }
                 return patches;
@@ -499,7 +547,8 @@ const thePlugin = {
              * @param {Array|string} patches - Either an array of patches to unpatch or a caller name
              */
             static unpatchAll(patches) {
-                if (typeof patches === "string") patches = this.getPatchesByCaller(patches);
+                if (typeof patches === "string")
+                    patches = this.getPatchesByCaller(patches);
 
                 for (const patch of patches) {
                     patch.unpatch();
@@ -507,46 +556,82 @@ const thePlugin = {
             }
 
             static resolveModule(module) {
-                if (!module || typeof (module) === "function" || (typeof (module) === "object" && !Array.isArray(module))) return module;
+                if (
+                    !module ||
+                    typeof module === "function" ||
+                    (typeof module === "object" && !Array.isArray(module))
+                )
+                    return module;
                 if (typeof module === "string") return DiscordModules[module];
-                if (Array.isArray(module)) return BdApi.Webpack.findByUniqueProperties(module);
+                if (Array.isArray(module))
+                    return BdApi.Webpack.findByUniqueProperties(module);
                 return null;
             }
 
             static makeOverride(patch) {
                 return function () {
                     let returnValue;
-                    if (!patch.children || !patch.children.length) return patch.originalFunction.apply(this, arguments);
-                    for (const superPatch of patch.children.filter(c => c.type === "before")) {
+                    if (!patch.children || !patch.children.length)
+                        return patch.originalFunction.apply(this, arguments);
+                    for (const superPatch of patch.children.filter(
+                        (c) => c.type === "before"
+                    )) {
                         try {
                             superPatch.callback(this, arguments);
-                        }
-                        catch (err) {
-                            console.error("Patcher", `Could not fire before callback of ${patch.functionName} for ${superPatch.caller}`, err);
+                        } catch (err) {
+                            console.error(
+                                "Patcher",
+                                `Could not fire before callback of ${patch.functionName} for ${superPatch.caller}`,
+                                err
+                            );
                         }
                     }
 
-                    const insteads = patch.children.filter(c => c.type === "instead");
-                    if (!insteads.length) { returnValue = patch.originalFunction.apply(this, arguments); }
-                    else {
+                    const insteads = patch.children.filter(
+                        (c) => c.type === "instead"
+                    );
+                    if (!insteads.length) {
+                        returnValue = patch.originalFunction.apply(
+                            this,
+                            arguments
+                        );
+                    } else {
                         for (const insteadPatch of insteads) {
                             try {
-                                const tempReturn = insteadPatch.callback(this, arguments, patch.originalFunction.bind(this));
-                                if (typeof (tempReturn) !== "undefined") returnValue = tempReturn;
-                            }
-                            catch (err) {
-                                console.error("Patcher", `Could not fire instead callback of ${patch.functionName} for ${insteadPatch.caller}`, err);
+                                const tempReturn = insteadPatch.callback(
+                                    this,
+                                    arguments,
+                                    patch.originalFunction.bind(this)
+                                );
+                                if (typeof tempReturn !== "undefined")
+                                    returnValue = tempReturn;
+                            } catch (err) {
+                                console.error(
+                                    "Patcher",
+                                    `Could not fire instead callback of ${patch.functionName} for ${insteadPatch.caller}`,
+                                    err
+                                );
                             }
                         }
                     }
 
-                    for (const slavePatch of patch.children.filter(c => c.type === "after")) {
+                    for (const slavePatch of patch.children.filter(
+                        (c) => c.type === "after"
+                    )) {
                         try {
-                            const tempReturn = slavePatch.callback(this, arguments, returnValue);
-                            if (typeof (tempReturn) !== "undefined") returnValue = tempReturn;
-                        }
-                        catch (err) {
-                            console.error("Patcher", `Could not fire after callback of ${patch.functionName} for ${slavePatch.caller}`, err);
+                            const tempReturn = slavePatch.callback(
+                                this,
+                                arguments,
+                                returnValue
+                            );
+                            if (typeof tempReturn !== "undefined")
+                                returnValue = tempReturn;
+                        } catch (err) {
+                            console.error(
+                                "Patcher",
+                                `Could not fire after callback of ${patch.functionName} for ${slavePatch.caller}`,
+                                err
+                            );
                         }
                     }
                     return returnValue;
@@ -554,7 +639,8 @@ const thePlugin = {
             }
 
             static rePatch(patch) {
-                patch.proxyFunction = patch.module[patch.functionName] = this.makeOverride(patch);
+                patch.proxyFunction = patch.module[patch.functionName] =
+                    this.makeOverride(patch);
             }
 
             static makePatch(module, functionName, name) {
@@ -564,18 +650,23 @@ const thePlugin = {
                     functionName,
                     originalFunction: module[functionName],
                     proxyFunction: null,
-                    revert: () => { // Calling revert will destroy any patches added to the same module after this
-                        patch.module[patch.functionName] = patch.originalFunction;
+                    revert: () => {
+                        // Calling revert will destroy any patches added to the same module after this
+                        patch.module[patch.functionName] =
+                            patch.originalFunction;
                         patch.proxyFunction = null;
                         patch.children = [];
                     },
                     counter: 0,
-                    children: []
+                    children: [],
                 };
-                patch.proxyFunction = module[functionName] = this.makeOverride(patch);
+                patch.proxyFunction = module[functionName] =
+                    this.makeOverride(patch);
                 Object.assign(module[functionName], patch.originalFunction);
-                module[functionName].__originalFunction = patch.originalFunction;
-                module[functionName].toString = () => patch.originalFunction.toString();
+                module[functionName].__originalFunction =
+                    patch.originalFunction;
+                module[functionName].toString = () =>
+                    patch.originalFunction.toString();
                 this.patches.push(patch);
                 return patch;
             }
@@ -610,7 +701,21 @@ const thePlugin = {
              * @param {boolean} [options.forcePatch=true] Set to `true` to patch even if the function doesnt exist. (Adds noop function in place).
              * @return {module:Patcher~unpatch} Function with no arguments and no return value that should be called to cancel (unpatch) this patch. You should save and run it when your plugin is stopped.
              */
-            static before(caller, moduleToPatch, functionName, callback, options = {}) { return this.pushChildPatch(caller, moduleToPatch, functionName, callback, Object.assign(options, { type: "before" })); }
+            static before(
+                caller,
+                moduleToPatch,
+                functionName,
+                callback,
+                options = {}
+            ) {
+                return this.pushChildPatch(
+                    caller,
+                    moduleToPatch,
+                    functionName,
+                    callback,
+                    Object.assign(options, { type: "before" })
+                );
+            }
 
             /**
              * This method patches onto another function, allowing your code to run after.
@@ -625,7 +730,21 @@ const thePlugin = {
              * @param {boolean} [options.forcePatch=true] Set to `true` to patch even if the function doesnt exist. (Adds noop function in place).
              * @return {module:Patcher~unpatch} Function with no arguments and no return value that should be called to cancel (unpatch) this patch. You should save and run it when your plugin is stopped.
              */
-            static after(caller, moduleToPatch, functionName, callback, options = {}) { return this.pushChildPatch(caller, moduleToPatch, functionName, callback, Object.assign(options, { type: "after" })); }
+            static after(
+                caller,
+                moduleToPatch,
+                functionName,
+                callback,
+                options = {}
+            ) {
+                return this.pushChildPatch(
+                    caller,
+                    moduleToPatch,
+                    functionName,
+                    callback,
+                    Object.assign(options, { type: "after" })
+                );
+            }
 
             /**
              * This method patches onto another function, allowing your code to run instead.
@@ -640,7 +759,21 @@ const thePlugin = {
              * @param {boolean} [options.forcePatch=true] Set to `true` to patch even if the function doesnt exist. (Adds noop function in place).
              * @return {module:Patcher~unpatch} Function with no arguments and no return value that should be called to cancel (unpatch) this patch. You should save and run it when your plugin is stopped.
              */
-            static instead(caller, moduleToPatch, functionName, callback, options = {}) { return this.pushChildPatch(caller, moduleToPatch, functionName, callback, Object.assign(options, { type: "instead" })); }
+            static instead(
+                caller,
+                moduleToPatch,
+                functionName,
+                callback,
+                options = {}
+            ) {
+                return this.pushChildPatch(
+                    caller,
+                    moduleToPatch,
+                    functionName,
+                    callback,
+                    Object.assign(options, { type: "instead" })
+                );
+            }
 
             /**
              * This method patches onto another function, allowing your code to run before, instead or after the original function.
@@ -657,18 +790,35 @@ const thePlugin = {
              * @param {boolean} [options.forcePatch=true] Set to `true` to patch even if the function doesnt exist. (Adds noop function in place).
              * @return {module:Patcher~unpatch} Function with no arguments and no return value that should be called to cancel (unpatch) this patch. You should save and run it when your plugin is stopped.
              */
-            static pushChildPatch(caller, moduleToPatch, functionName, callback, options = {}) {
+            static pushChildPatch(
+                caller,
+                moduleToPatch,
+                functionName,
+                callback,
+                options = {}
+            ) {
                 const { type = "after", forcePatch = true } = options;
                 const module = this.resolveModule(moduleToPatch);
                 if (!module) return null;
-                if (!module[functionName] && forcePatch) module[functionName] = function () { };
+                if (!module[functionName] && forcePatch)
+                    module[functionName] = function () {};
                 if (!(module[functionName] instanceof Function)) return null;
 
-                if (typeof moduleToPatch === "string") options.displayName = moduleToPatch;
-                const displayName = options.displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
+                if (typeof moduleToPatch === "string")
+                    options.displayName = moduleToPatch;
+                const displayName =
+                    options.displayName ||
+                    module.displayName ||
+                    module.name ||
+                    module.constructor.displayName ||
+                    module.constructor.name;
 
                 const patchId = `${displayName}.${functionName}`;
-                const patch = this.patches.find(p => p.module == module && p.functionName == functionName) || this.makePatch(module, functionName, patchId);
+                const patch =
+                    this.patches.find(
+                        (p) =>
+                            p.module == module && p.functionName == functionName
+                    ) || this.makePatch(module, functionName, patchId);
                 if (!patch.proxyFunction) this.rePatch(patch);
                 const child = {
                     caller,
@@ -676,20 +826,30 @@ const thePlugin = {
                     id: patch.counter,
                     callback,
                     unpatch: () => {
-                        patch.children.splice(patch.children.findIndex(cpatch => cpatch.id === child.id && cpatch.type === type), 1);
+                        patch.children.splice(
+                            patch.children.findIndex(
+                                (cpatch) =>
+                                    cpatch.id === child.id &&
+                                    cpatch.type === type
+                            ),
+                            1
+                        );
                         if (patch.children.length <= 0) {
-                            const patchNum = this.patches.findIndex(p => p.module == module && p.functionName == functionName);
+                            const patchNum = this.patches.findIndex(
+                                (p) =>
+                                    p.module == module &&
+                                    p.functionName == functionName
+                            );
                             if (patchNum < 0) return;
                             this.patches[patchNum].revert();
                             this.patches.splice(patchNum, 1);
                         }
-                    }
+                    },
                 };
                 patch.children.push(child);
                 patch.counter++;
                 return child.unpatch;
             }
-
         }
 
         // class Patcher {
@@ -796,13 +956,13 @@ const thePlugin = {
                 //         "id": ZeresPluginLibrary
                 //     }];
                 // },
-                isEnabled: name => {
+                isEnabled: (name) => {
                     return Vencord.Plugins.isPluginEnabled(name);
                 },
                 get: function (name) {
-                    return this.getAll().filter(x => x.name == name)[0];
+                    return this.getAll().filter((x) => x.name == name)[0];
                 },
-                reload: name => {
+                reload: (name) => {
                     Vencord.Plugins.stopPlugin(Vencord.Plugins.plugins[name]);
                     Vencord.Plugins.startPlugin(Vencord.Plugins.plugins[name]);
                 },
@@ -812,18 +972,24 @@ const thePlugin = {
                 rootFolder: "/BD",
                 get folder() {
                     return this.rootFolder + "/plugins";
-                }
+                },
             },
             DOM: {
                 addStyle(id, css) {
                     id = id.replace(/^[^a-z]+|[^\w-]+/gi, "-");
-                    const style = document.querySelector("bd-styles").querySelector(`#${id}`) || this.createElement("style", { id });
+                    const style =
+                        document
+                            .querySelector("bd-styles")
+                            .querySelector(`#${id}`) ||
+                        this.createElement("style", { id });
                     style.textContent = css;
                     document.querySelector("bd-styles").append(style);
                 },
                 removeStyle(id) {
                     id = id.replace(/^[^a-z]+|[^\w-]+/gi, "-");
-                    const exists = document.querySelector("bd-styles").querySelector(`#${id}`);
+                    const exists = document
+                        .querySelector("bd-styles")
+                        .querySelector(`#${id}`);
                     if (exists) exists.remove();
                 },
                 createElement(tag, options = {}, child = null) {
@@ -837,22 +1003,32 @@ const thePlugin = {
                 },
             },
             Components: {
-                get "Tooltip"() { return BdApiReimpl.Webpack.getModule(x => x.prototype.renderTooltip, { searchExports: true }); },
+                get Tooltip() {
+                    return BdApiReimpl.Webpack.getModule(
+                        (x) => x.prototype.renderTooltip,
+                        { searchExports: true }
+                    );
+                },
             },
             get React() {
                 return Vencord.Webpack.Common.React;
             },
             Webpack: {
                 Filters: {
-                    byDisplayName: name => {
-                        return module => { return module && module.displayName === name; };
+                    byDisplayName: (name) => {
+                        return (module) => {
+                            return module && module.displayName === name;
+                        };
                     },
                     byProps: (...props) => {
                         return Vencord.Webpack.filters.byProps(...props);
                     },
                     byStoreName(name) {
-                        return module => {
-                            return module?._dispatchToken && module?.getName?.() === name;
+                        return (module) => {
+                            return (
+                                module?._dispatchToken &&
+                                module?.getName?.() === name
+                            );
                         };
                     },
                 },
@@ -866,8 +1042,7 @@ const thePlugin = {
                     //     options = {
                     //         first: true,
                     //     };
-                    if (typeof options === "undefined")
-                        options = {};
+                    if (typeof options === "undefined") options = {};
                     // return options.first === false ? Vencord.Webpack.findAll(filter) : Vencord.Webpack.find(filter);
                     // return;
                     // if (typeof options.first === "undefined")
@@ -888,20 +1063,48 @@ const thePlugin = {
                     //     console.warn("Module not found: " + filter.toString());
                     //     return undefined;
                     // }
-                    const wrapFilter = filter => (exports, module, moduleId) => {
-                        try {
-                            if (exports?.default?.remove && exports?.default?.set && exports?.default?.clear && exports?.default?.get && !exports?.default?.sort) return false;
-                            if (exports.remove && exports.set && exports.clear && exports.get && !exports.sort) return false;
-                            if (exports?.default?.getToken || exports?.default?.getEmail || exports?.default?.showToken) return false;
-                            if (exports.getToken || exports.getEmail || exports.showToken) return false;
-                            return filter(exports, module, moduleId);
-                        }
-                        catch (err) {
-                            return false;
-                        }
-                    };
+                    const wrapFilter =
+                        (filter) => (exports, module, moduleId) => {
+                            try {
+                                if (
+                                    exports?.default?.remove &&
+                                    exports?.default?.set &&
+                                    exports?.default?.clear &&
+                                    exports?.default?.get &&
+                                    !exports?.default?.sort
+                                )
+                                    return false;
+                                if (
+                                    exports.remove &&
+                                    exports.set &&
+                                    exports.clear &&
+                                    exports.get &&
+                                    !exports.sort
+                                )
+                                    return false;
+                                if (
+                                    exports?.default?.getToken ||
+                                    exports?.default?.getEmail ||
+                                    exports?.default?.showToken
+                                )
+                                    return false;
+                                if (
+                                    exports.getToken ||
+                                    exports.getEmail ||
+                                    exports.showToken
+                                )
+                                    return false;
+                                return filter(exports, module, moduleId);
+                            } catch (err) {
+                                return false;
+                            }
+                        };
 
-                    const { first = true, defaultExport = true, searchExports = false } = options;
+                    const {
+                        first = true,
+                        defaultExport = true,
+                        searchExports = false,
+                    } = options;
                     const wrappedFilter = wrapFilter(filter);
 
                     const modules = Vencord.Webpack.cache;
@@ -950,30 +1153,68 @@ const thePlugin = {
                         if (!modules.hasOwnProperty(index)) continue;
 
                         let module = null;
-                        try { module = modules[index]; } catch { continue; }
+                        try {
+                            module = modules[index];
+                        } catch {
+                            continue;
+                        }
 
                         const { exports } = module;
-                        if (!exports || exports === window || exports === document.documentElement || exports[Symbol.toStringTag] === "DOMTokenList") continue;
+                        if (
+                            !exports ||
+                            exports === window ||
+                            exports === document.documentElement ||
+                            exports[Symbol.toStringTag] === "DOMTokenList"
+                        )
+                            continue;
 
-                        if (typeof (exports) === "object" && searchExports && !exports.TypedArray) {
+                        if (
+                            typeof exports === "object" &&
+                            searchExports &&
+                            !exports.TypedArray
+                        ) {
                             for (const key in exports) {
                                 let foundModule = null;
                                 let wrappedExport = null;
-                                try { wrappedExport = exports[key]; } catch { continue; }
+                                try {
+                                    wrappedExport = exports[key];
+                                } catch {
+                                    continue;
+                                }
 
                                 if (!wrappedExport) continue;
-                                if (wrappedFilter(wrappedExport, module, index)) foundModule = wrappedExport;
+                                if (wrappedFilter(wrappedExport, module, index))
+                                    foundModule = wrappedExport;
                                 if (!foundModule) continue;
                                 if (first) return foundModule;
                                 rm.push(foundModule);
                             }
-                        }
-                        else {
+                        } else {
                             let foundModule = null;
-                            if (exports.Z && wrappedFilter(exports.Z, module, index)) foundModule = defaultExport ? exports.Z : exports;
-                            if (exports.ZP && wrappedFilter(exports.ZP, module, index)) foundModule = defaultExport ? exports.ZP : exports;
-                            if (exports.__esModule && exports.default && wrappedFilter(exports.default, module, index)) foundModule = defaultExport ? exports.default : exports;
-                            if (wrappedFilter(exports, module, index)) foundModule = exports;
+                            if (
+                                exports.Z &&
+                                wrappedFilter(exports.Z, module, index)
+                            )
+                                foundModule = defaultExport
+                                    ? exports.Z
+                                    : exports;
+                            if (
+                                exports.ZP &&
+                                wrappedFilter(exports.ZP, module, index)
+                            )
+                                foundModule = defaultExport
+                                    ? exports.ZP
+                                    : exports;
+                            if (
+                                exports.__esModule &&
+                                exports.default &&
+                                wrappedFilter(exports.default, module, index)
+                            )
+                                foundModule = defaultExport
+                                    ? exports.default
+                                    : exports;
+                            if (wrappedFilter(exports, module, index))
+                                foundModule = exports;
                             if (!foundModule) continue;
                             if (first) return foundModule;
                             rm.push(foundModule);
@@ -983,24 +1224,37 @@ const thePlugin = {
                 },
                 waitForModule(filter) {
                     return new Promise((resolve, reject) => {
-                        Vencord.Webpack.waitFor(filter, module => {
+                        Vencord.Webpack.waitFor(filter, (module) => {
                             resolve(module);
                         });
                     });
                 },
                 getByDisplayName(name) {
-                    return this.getModule(BdApi.Webpack.Filters.byDisplayName(name));
+                    return this.getModule(
+                        BdApi.Webpack.Filters.byDisplayName(name)
+                    );
                 },
                 getAllByProps(...props) {
-                    return this.getModule(this.Filters.byProps(...props), { first: false });
+                    return this.getModule(this.Filters.byProps(...props), {
+                        first: false,
+                    });
                 },
                 getByProps(...props) {
                     return this.getModule(this.Filters.byProps(...props), {});
                 },
                 getByPrototypes(...fields) {
-                    return this.getModule(x => x.prototype && fields.every(field => field in x.prototype), {});
+                    return this.getModule(
+                        (x) =>
+                            x.prototype &&
+                            fields.every((field) => field in x.prototype),
+                        {}
+                    );
                 },
-                findByUniqueProperties(props, first = true) { return first ? this.getByProps(...props) : this.getAllByProps(...props); },
+                findByUniqueProperties(props, first = true) {
+                    return first
+                        ? this.getByProps(...props)
+                        : this.getAllByProps(...props);
+                },
                 getStore(name) {
                     return this.getModule(this.Filters.byStoreName(name));
                 },
@@ -1017,20 +1271,21 @@ const thePlugin = {
 
                     for (const key in cache) {
                         // eslint-disable-next-line no-prototype-builtins
-                        if (cache.hasOwnProperty(key) && cache[key].hasOwnProperty("exports")) {
+                        if (
+                            cache.hasOwnProperty(key) &&
+                            cache[key].hasOwnProperty("exports")
+                        ) {
                             result[key] = cache[key].exports;
                         }
                     }
                     return result;
-                }
+                },
             },
             isSettingEnabled(collection, category, id) {
                 return false;
             },
-            enableSetting(collection, category, id) {
-            },
-            disableSetting(collection, category, id) {
-            },
+            enableSetting(collection, category, id) {},
+            disableSetting(collection, category, id) {},
             // getData(pluginName, key) {
             //     return Vencord.Settings.plugins[pluginName] ? Vencord.Settings.plugins[pluginName][key] : {};
             // },
@@ -1045,7 +1300,7 @@ const thePlugin = {
                 },
                 save(...args) {
                     return BdApiReimpl.setData(...args);
-                }
+                },
             },
             pluginData: {},
             getData(key, value) {
@@ -1059,21 +1314,46 @@ const thePlugin = {
                 return this.pluginData[key][value];
             },
             latestDataCheck(key) {
-                if (typeof (this.pluginData[key]) !== "undefined") return;
-                if (!window.require("fs").existsSync(BdApiReimpl.Plugins.folder + "/" + key + ".config.json")) {
+                if (typeof this.pluginData[key] !== "undefined") return;
+                if (
+                    !window
+                        .require("fs")
+                        .existsSync(
+                            BdApiReimpl.Plugins.folder +
+                                "/" +
+                                key +
+                                ".config.json"
+                        )
+                ) {
                     this.pluginData[key] = {};
                     return;
                 }
-                this.pluginData[key] = JSON.parse(window.require("fs").readFileSync(BdApiReimpl.Plugins.folder + "/" + key + ".config.json"));
+                this.pluginData[key] = JSON.parse(
+                    window
+                        .require("fs")
+                        .readFileSync(
+                            BdApiReimpl.Plugins.folder +
+                                "/" +
+                                key +
+                                ".config.json"
+                        )
+                );
             },
             setData(key, value, data) {
                 if (!value || !key || !data) return;
                 this.latestDataCheck(key);
                 this.pluginData[key][value] = data;
-                window.require("fs").writeFileSync(BdApiReimpl.Plugins.folder + "/" + key + ".config.json", JSON.stringify(this.pluginData[key], null, 4));
+                window
+                    .require("fs")
+                    .writeFileSync(
+                        BdApiReimpl.Plugins.folder + "/" + key + ".config.json",
+                        JSON.stringify(this.pluginData[key], null, 4)
+                    );
             },
             findModuleByProps(...props) {
-                return BdApi.findModule(module => props.every(prop => typeof module[prop] !== "undefined"));
+                return BdApi.findModule((module) =>
+                    props.every((prop) => typeof module[prop] !== "undefined")
+                );
             },
             findModule(filter) {
                 return this.Webpack.getModule(filter);
@@ -1082,31 +1362,48 @@ const thePlugin = {
                 const patchID = `bd-patch-after-${data.displayName.toLowerCase()}-${this.__generateRandomHexString()}`;
 
                 const cancelPatch = () => {
-                    if (!data.options.silent) console.log(`Unpatching after of ${data.displayName} ${data.methodName}`);
+                    if (!data.options.silent)
+                        console.log(
+                            `Unpatching after of ${data.displayName} ${data.methodName}`
+                        );
                     uninject(patchID);
                 };
 
-                inject(patchID, data.what, data.methodName, function afterPatch(args, res) {
-                    const patchData = {
-                        // eslint-disable-next-line no-invalid-this
-                        thisObject: this,
-                        methodArguments: args,
-                        returnValue: res,
-                        cancelPatch: cancelPatch,
-                        originalMethod: origMethod,
-                        callOriginalMethod: () => patchData.returnValue = patchData.originalMethod.apply(patchData.thisObject, patchData.methodArguments)
-                    };
+                inject(
+                    patchID,
+                    data.what,
+                    data.methodName,
+                    function afterPatch(args, res) {
+                        const patchData = {
+                            // eslint-disable-next-line no-invalid-this
+                            thisObject: this,
+                            methodArguments: args,
+                            returnValue: res,
+                            cancelPatch: cancelPatch,
+                            originalMethod: origMethod,
+                            callOriginalMethod: () =>
+                                (patchData.returnValue =
+                                    patchData.originalMethod.apply(
+                                        patchData.thisObject,
+                                        patchData.methodArguments
+                                    )),
+                        };
 
-                    try {
-                        data.options.after(patchData);
-                    } catch (err) {
-                        console.error(err, `Error in after callback of ${data.displayName} ${data.methodName}`);
-                    }
+                        try {
+                            data.options.after(patchData);
+                        } catch (err) {
+                            console.error(
+                                err,
+                                `Error in after callback of ${data.displayName} ${data.methodName}`
+                            );
+                        }
 
-                    if (data.options.once) cancelPatch();
+                        if (data.options.once) cancelPatch();
 
-                    return patchData.returnValue;
-                }, false);
+                        return patchData.returnValue;
+                    },
+                    false
+                );
 
                 return cancelPatch;
             },
@@ -1114,57 +1411,87 @@ const thePlugin = {
                 const patchID = `bd-patch-before-${data.displayName.toLowerCase()}-${this.__generateRandomHexString()}`;
 
                 const cancelPatch = () => {
-                    if (!data.options.silent) console.log(`Unpatching before of ${data.displayName} ${data.methodName}`);
+                    if (!data.options.silent)
+                        console.log(
+                            `Unpatching before of ${data.displayName} ${data.methodName}`
+                        );
                     uninject(patchID);
                 };
 
-                inject(patchID, data.what, data.methodName, function beforePatch(args, res) {
-                    const patchData = {
-                        // eslint-disable-next-line no-invalid-this
-                        thisObject: this,
-                        methodArguments: args,
-                        returnValue: res,
-                        cancelPatch: cancelPatch,
-                        originalMethod: origMethod,
-                        callOriginalMethod: () => patchData.returnValue = patchData.originalMethod.apply(patchData.thisObject, patchData.methodArguments)
-                    };
+                inject(
+                    patchID,
+                    data.what,
+                    data.methodName,
+                    function beforePatch(args, res) {
+                        const patchData = {
+                            // eslint-disable-next-line no-invalid-this
+                            thisObject: this,
+                            methodArguments: args,
+                            returnValue: res,
+                            cancelPatch: cancelPatch,
+                            originalMethod: origMethod,
+                            callOriginalMethod: () =>
+                                (patchData.returnValue =
+                                    patchData.originalMethod.apply(
+                                        patchData.thisObject,
+                                        patchData.methodArguments
+                                    )),
+                        };
 
-                    try {
-                        data.options.before(patchData);
-                    } catch (err) {
-                        console.error(err, `Error in before callback of ${data.displayName} ${data.methodName}`);
-                    }
+                        try {
+                            data.options.before(patchData);
+                        } catch (err) {
+                            console.error(
+                                err,
+                                `Error in before callback of ${data.displayName} ${data.methodName}`
+                            );
+                        }
 
-                    if (data.options.once) cancelPatch();
+                        if (data.options.once) cancelPatch();
 
-                    return patchData.methodArguments;
-                }, true);
+                        return patchData.methodArguments;
+                    },
+                    true
+                );
 
                 return cancelPatch;
             },
             monkeyPatch(what, methodName, options = {}) {
-                const displayName = options.displayName || what.displayName || what[methodName].displayName
-                    || what.name || what.constructor.displayName || what.constructor.name || "MissingName";
+                const displayName =
+                    options.displayName ||
+                    what.displayName ||
+                    what[methodName].displayName ||
+                    what.name ||
+                    what.constructor.displayName ||
+                    what.constructor.name ||
+                    "MissingName";
 
                 // if (options.instead) return BdApi.__warn('Powercord API currently does not support replacing the entire method!')
 
                 if (!what[methodName])
                     if (options.force) {
                         // eslint-disable-next-line no-empty-function
-                        what[methodName] = function forcedFunction() { };
+                        what[methodName] = function forcedFunction() {};
                     } else {
-                        return console.error(null, `${methodName} doesn't exist in ${displayName}!`);
+                        return console.error(
+                            null,
+                            `${methodName} doesn't exist in ${displayName}!`
+                        );
                     }
 
-
                 if (!options.silent)
-                    console.log(`Patching ${displayName}'s ${methodName} method`);
+                    console.log(
+                        `Patching ${displayName}'s ${methodName} method`
+                    );
 
                 const origMethod = what[methodName];
 
                 if (options.instead) {
                     const cancel = () => {
-                        if (!options.silent) console.log(`Unpatching instead of ${displayName} ${methodName}`);
+                        if (!options.silent)
+                            console.log(
+                                `Unpatching instead of ${displayName} ${methodName}`
+                            );
                         what[methodName] = origMethod;
                     };
                     what[methodName] = function () {
@@ -1173,23 +1500,45 @@ const thePlugin = {
                             methodArguments: arguments,
                             cancelPatch: cancel,
                             originalMethod: origMethod,
-                            callOriginalMethod: () => data.returnValue = data.originalMethod.apply(data.thisObject, data.methodArguments)
+                            callOriginalMethod: () =>
+                                (data.returnValue = data.originalMethod.apply(
+                                    data.thisObject,
+                                    data.methodArguments
+                                )),
                         };
-                        const tempRet = BdApi.suppressErrors(options.instead, "`instead` callback of " + what[methodName].displayName)(data);
+                        const tempRet = BdApi.suppressErrors(
+                            options.instead,
+                            "`instead` callback of " +
+                                what[methodName].displayName
+                        )(data);
                         if (tempRet !== undefined) data.returnValue = tempRet;
                         return data.returnValue;
                     };
-                    if (displayName != "MissingName") what[methodName].displayName = displayName;
+                    if (displayName != "MissingName")
+                        what[methodName].displayName = displayName;
                     return cancel;
                 }
 
-
                 const patches = [];
-                if (options.before) patches.push(BdApi.__injectBefore({ what, methodName, options, displayName }, origMethod));
-                if (options.after) patches.push(BdApi.__injectAfter({ what, methodName, options, displayName }, origMethod));
-                if (displayName != "MissingName") what[methodName].displayName = displayName;
+                if (options.before)
+                    patches.push(
+                        BdApi.__injectBefore(
+                            { what, methodName, options, displayName },
+                            origMethod
+                        )
+                    );
+                if (options.after)
+                    patches.push(
+                        BdApi.__injectAfter(
+                            { what, methodName, options, displayName },
+                            origMethod
+                        )
+                    );
+                if (displayName != "MissingName")
+                    what[methodName].displayName = displayName;
 
-                const finalCancelPatch = () => patches.forEach(patch => patch());
+                const finalCancelPatch = () =>
+                    patches.forEach((patch) => patch());
 
                 return finalCancelPatch;
             },
@@ -1206,10 +1555,10 @@ const thePlugin = {
                 const randomBytes = new Uint8Array(4);
                 window.crypto.getRandomValues(randomBytes);
                 const hexString = Array.from(randomBytes)
-                    .map(b => ("00" + b.toString(16)).slice(-2))
+                    .map((b) => ("00" + b.toString(16)).slice(-2))
                     .join("");
                 return hexString;
-            }
+            },
         };
         const Reimplentations = {
             /*  "fs": {
@@ -1239,10 +1588,10 @@ const thePlugin = {
             //         return path.normalize(args.join("/").replace(/\/{2,}/g, "/"));
             //     }
             // },
-            "request": (url, cb) => {
-                cb({ "err": "err" }, undefined, undefined);
+            request: (url, cb) => {
+                cb({ err: "err" }, undefined, undefined);
             },
-            "events": {
+            events: {
                 EventEmitter: class {
                     constructor() {
                         this.callbacks = {};
@@ -1256,32 +1605,42 @@ const thePlugin = {
                     off(event, cb) {
                         const cbs = this.callbacks[event];
                         if (cbs) {
-                            this.callbacks[event] = cbs.filter(callback => callback !== cb);
+                            this.callbacks[event] = cbs.filter(
+                                (callback) => callback !== cb
+                            );
                         }
                     }
 
                     emit(event, data) {
                         const cbs = this.callbacks[event];
                         if (cbs) {
-                            cbs.forEach(cb => cb(data));
+                            cbs.forEach((cb) => cb(data));
                         }
                     }
-                }
+                },
             },
-            "electron": {},
+            electron: {},
         };
-        const RequireReimpl = name => {
+        const RequireReimpl = (name) => {
             return Reimplentations[name];
         };
         window.BdApi = BdApiReimpl;
+        window.BdApi.UI = new UI();
         window.require = RequireReimpl;
         window.BdApi.ReqImpl = Reimplentations;
 
         let DiscordModules = {};
-        const WebpackModules = (function () { return BdApi.Webpack; })();
-        const ModuleDataText = this.simpleGET(proxyUrl + "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js").responseText.replaceAll("\r", "");
+        const WebpackModules = (function () {
+            return BdApi.Webpack;
+        })();
+        const ModuleDataText = this.simpleGET(
+            proxyUrl +
+                "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
+        ).responseText.replaceAll("\r", "");
         // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
-        const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1];
+        const ev =
+            "(" +
+            ModuleDataText.split("export default Utilities.memoizeObject(")[1];
         const sourceBlob = new Blob([ev], { type: "application/javascript" });
         const sourceBlobUrl = URL.createObjectURL(sourceBlob);
         DiscordModules = eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
@@ -1289,22 +1648,37 @@ const thePlugin = {
             /**
              * @type {string}
              */
-            const ModuleDataText = simpleGET(proxyUrl + "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js").responseText.replaceAll("\r", "");
-            const ModuleDataAssembly = "(()=>{const module = { exports: {} };" + ModuleDataText + "\nreturn module;})();";
-            const sourceBlob = new Blob([ModuleDataAssembly], { type: "application/javascript" });
+            const ModuleDataText = simpleGET(
+                proxyUrl +
+                    "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js"
+            ).responseText.replaceAll("\r", "");
+            const ModuleDataAssembly =
+                "(()=>{const module = { exports: {} };" +
+                ModuleDataText +
+                "\nreturn module;})();";
+            const sourceBlob = new Blob([ModuleDataAssembly], {
+                type: "application/javascript",
+            });
             const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-            return eval(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl).exports;
+            return eval(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl)
+                .exports;
         }
 
         // const { inject, uninject } = summonInjector(this.simpleGET);
 
-        const addContextMenu = (() => {
+        const addContextMenu = () => {
             /**
              * @type {string}
              */
-            const ModuleDataText = this.simpleGET(proxyUrl + "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js").responseText.replaceAll("\r", "");
+            const ModuleDataText = this.simpleGET(
+                proxyUrl +
+                    "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js"
+            ).responseText.replaceAll("\r", "");
             // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
-            const linesToRemove = this.findFirstLineWithoutX(ModuleDataText, "import");
+            const linesToRemove = this.findFirstLineWithoutX(
+                ModuleDataText,
+                "import"
+            );
             // eslint-disable-next-line prefer-const
             let ModuleDataArr = ModuleDataText.split("\n");
             ModuleDataArr.splice(0, linesToRemove);
@@ -1323,11 +1697,20 @@ const thePlugin = {
             // };
 
             // const ModuleDataAssembly = "(()=>{" + addLogger.toString() + ";const Logger = addLogger();const {React} = eval(`(" + this.objectToString(DiscordModules) + ")`);" + ModuleDataArr.join("\n") + "\nreturn ContextMenu;})();";
-            const ModuleDataAssembly = "(()=>{" + addLogger.toString() + ";const Logger = addLogger();const {React} = DiscordModules;" + ModuleDataArr.join("\n") + "\nreturn ContextMenu;})();";
-            const sourceBlob = new Blob([ModuleDataAssembly], { type: "application/javascript" });
+            const ModuleDataAssembly =
+                "(()=>{" +
+                addLogger.toString() +
+                ";const Logger = addLogger();const {React} = DiscordModules;" +
+                ModuleDataArr.join("\n") +
+                "\nreturn ContextMenu;})();";
+            const sourceBlob = new Blob([ModuleDataAssembly], {
+                type: "application/javascript",
+            });
             const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-            window.BdApi.ContextMenu = new (eval(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl))();
-        });
+            window.BdApi.ContextMenu = new (eval(
+                ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl
+            ))();
+        };
         addContextMenu();
 
         const fakeLoading = document.createElement("span");
@@ -1340,8 +1723,7 @@ const thePlugin = {
         const fakeBdStyles = document.createElement("bd-styles");
         document.body.appendChild(fakeBdStyles);
         const checkInterval = setInterval(() => {
-            if (window.BdApi.ReqImpl.fs === undefined)
-                return;
+            if (window.BdApi.ReqImpl.fs === undefined) return;
             clearInterval(checkInterval);
             // for (const key in this.options) {
             //     if (Object.hasOwnProperty.call(this.options, key)) {
@@ -1372,23 +1754,41 @@ const thePlugin = {
                             const url = Settings.plugins[this.name][key];
                             // const filenameFromUrl = url.split("/").pop();
                             const response = this.simpleGET(proxyUrl + url);
-                            const filenameFromUrl = response.responseURL.split("/").pop();
+                            const filenameFromUrl = response.responseURL
+                                .split("/")
+                                .pop();
                             // this.convertPlugin(this.simpleGET(proxyUrl + url).responseText, filenameFromUrl).then(plugin => {
 
-                            localFs.writeFileSync(window.BdApi.Plugins.folder + "/" + filenameFromUrl, response.responseText);
+                            localFs.writeFileSync(
+                                window.BdApi.Plugins.folder +
+                                    "/" +
+                                    filenameFromUrl,
+                                response.responseText
+                            );
                         } catch (error) {
-                            console.error(error, "\nWhile loading: " + Settings.plugins[this.name][key]);
+                            console.error(
+                                error,
+                                "\nWhile loading: " +
+                                    Settings.plugins[this.name][key]
+                            );
                         }
                     }
                 }
             }
 
-            const pluginFolder = localFs.readdirSync(BdApiReimpl.Plugins.folder).sort();
-            const plugins = pluginFolder.filter(x => x.endsWith(".plugin.js"));
+            const pluginFolder = localFs
+                .readdirSync(BdApiReimpl.Plugins.folder)
+                .sort();
+            const plugins = pluginFolder.filter((x) =>
+                x.endsWith(".plugin.js")
+            );
             for (let i = 0; i < plugins.length; i++) {
                 const element = plugins[i];
-                const pluginJS = localFs.readFileSync(BdApiReimpl.Plugins.folder + "/" + element, "utf8");
-                this.convertPlugin(pluginJS, element).then(plugin => {
+                const pluginJS = localFs.readFileSync(
+                    BdApiReimpl.Plugins.folder + "/" + element,
+                    "utf8"
+                );
+                this.convertPlugin(pluginJS, element).then((plugin) => {
                     this.addCustomPlugin(plugin);
                 });
             }
@@ -1415,7 +1815,7 @@ const thePlugin = {
         GeneratedPlugins.push(generated);
     },
     async removeAllCustomPlugins() {
-        const arrayToObject = array => {
+        const arrayToObject = (array) => {
             const object = array.reduce((obj, element, index) => {
                 obj[index] = element;
                 return obj;
@@ -1428,7 +1828,7 @@ const thePlugin = {
          */
         const { GeneratedPlugins } = window;
         const copyOfGeneratedPlugin = arrayToObject(GeneratedPlugins);
-        const removePlugin = generatedPlugin => {
+        const removePlugin = (generatedPlugin) => {
             const generated = generatedPlugin;
             Vencord.Settings.plugins[generated.name].enabled = false;
             Vencord.Plugins.stopPlugin(generated);
@@ -1453,24 +1853,24 @@ const thePlugin = {
         final.authors = [
             {
                 id: 0n,
-            }
+            },
         ];
         final.name = "";
         final.internals = {};
         final.description = "";
         final.id = "";
-        final.start = () => { };
-        final.stop = () => { };
+        final.start = () => {};
+        final.stop = () => {};
         const { React } = Vencord.Webpack.Common;
         const openSettingsModal = () => {
-            openModal(props => {
+            openModal((props) => {
                 // let el = final.instance.getSettingsPanel();
                 // if (el instanceof Node) {
                 //     el = Vencord.Webpack.Common.React.createElement("div", { dangerouslySetInnerHTML: { __html: el.outerHTML } });
                 // }
                 const panel = final.instance.getSettingsPanel();
                 let child = panel;
-                if (panel instanceof Node || typeof (panel) === "string")
+                if (panel instanceof Node || typeof panel === "string")
                     child = class ReactWrapper extends React.Component {
                         constructor(props) {
                             super(props);
@@ -1484,36 +1884,87 @@ const thePlugin = {
                         }
 
                         componentDidMount() {
-                            if (this.element instanceof Node) this.elementRef.current.appendChild(this.element);
+                            if (this.element instanceof Node)
+                                this.elementRef.current.appendChild(
+                                    this.element
+                                );
                         }
 
                         render() {
                             if (this.state.hasError) return null;
                             const props = {
                                 className: "bd-addon-settings-wrap",
-                                ref: this.elementRef
+                                ref: this.elementRef,
                             };
-                            if (typeof (this.element) === "string") props.dangerouslySetInnerHTML = { __html: this.element };
+                            if (typeof this.element === "string")
+                                props.dangerouslySetInnerHTML = {
+                                    __html: this.element,
+                                };
                             return React.createElement("div", props);
                         }
                     };
-                if (typeof (child) === "function") child = React.createElement(child);
+                if (typeof child === "function")
+                    child = React.createElement(child);
 
-                const modal = props => {
+                const modal = (props) => {
                     const mc = BdApi.Webpack.getByProps("Header", "Footer");
-                    const TextElement = BdApi.Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors);
-                    const Buttons = BdApi.Webpack.getModule(m => m.BorderColors, { searchExports: true });
-                    return React.createElement(ErrorBoundary, {}, React.createElement(ModalRoot, Object.assign({ size: mc.Sizes.MEDIUM, className: "bd-addon-modal" + " " + mc.Sizes.MEDIUM }, props),
-                        React.createElement(mc.Header, { separator: false, className: "bd-addon-modal-header" },
-                            React.createElement(TextElement, { tag: "h1", size: TextElement.Sizes.SIZE_20, strong: true }, `${final.name} Settings`)
-                        ),
-                        React.createElement(mc.Content, { className: "bd-addon-modal-settings" },
-                            React.createElement(ErrorBoundary, {}, child)
-                        ),
-                        React.createElement(mc.Footer, { className: "bd-addon-modal-footer" },
-                            React.createElement(Buttons, { onClick: props.onClose, className: "bd-button" }, "Close")
+                    const TextElement = BdApi.Webpack.getModule(
+                        (m) => m?.Sizes?.SIZE_32 && m.Colors
+                    );
+                    const Buttons = BdApi.Webpack.getModule(
+                        (m) => m.BorderColors,
+                        { searchExports: true }
+                    );
+                    return React.createElement(
+                        ErrorBoundary,
+                        {},
+                        React.createElement(
+                            ModalRoot,
+                            Object.assign(
+                                {
+                                    size: mc.Sizes.MEDIUM,
+                                    className:
+                                        "bd-addon-modal" +
+                                        " " +
+                                        mc.Sizes.MEDIUM,
+                                },
+                                props
+                            ),
+                            React.createElement(
+                                mc.Header,
+                                {
+                                    separator: false,
+                                    className: "bd-addon-modal-header",
+                                },
+                                React.createElement(
+                                    TextElement,
+                                    {
+                                        tag: "h1",
+                                        size: TextElement.Sizes.SIZE_20,
+                                        strong: true,
+                                    },
+                                    `${final.name} Settings`
+                                )
+                            ),
+                            React.createElement(
+                                mc.Content,
+                                { className: "bd-addon-modal-settings" },
+                                React.createElement(ErrorBoundary, {}, child)
+                            ),
+                            React.createElement(
+                                mc.Footer,
+                                { className: "bd-addon-modal-footer" },
+                                React.createElement(
+                                    Buttons,
+                                    {
+                                        onClick: props.onClose,
+                                        className: "bd-button",
+                                    },
+                                    "Close"
+                                )
+                            )
                         )
-                    ));
+                    );
                 };
                 return modal(props);
             });
@@ -1523,8 +1974,12 @@ const thePlugin = {
                 type: OptionType.COMPONENT,
                 description: "Open settings",
                 component: () =>
-                    React.createElement(Vencord.Webpack.Common.Button, { onClick: openSettingsModal }, "Open settings")
-            }
+                    React.createElement(
+                        Vencord.Webpack.Common.Button,
+                        { onClick: openSettingsModal },
+                        "Open settings"
+                    ),
+            },
         };
 
         let metaEndLine = 0;
@@ -1535,7 +1990,12 @@ const thePlugin = {
             /**
              * @type {string[]}
              */
-            const metadata = data.split("/**")[1].split("*/")[0].replaceAll("\n", "").split("*").filter(x => x !== "" && x !== " ");
+            const metadata = data
+                .split("/**")[1]
+                .split("*/")[0]
+                .replaceAll("\n", "")
+                .split("*")
+                .filter((x) => x !== "" && x !== " ");
             metaEndLine = metadata.length + 3;
             for (let i = 0; i < metadata.length; i++) {
                 const element = metadata[i].trim();
@@ -1547,7 +2007,9 @@ const thePlugin = {
                     final.description = element.split("@description ")[1];
                 }
                 if (element.startsWith("@authorId")) {
-                    final.authors[0].id = Number(element.split("@authorId ")[1] + "n");
+                    final.authors[0].id = Number(
+                        element.split("@authorId ")[1] + "n"
+                    );
                 }
                 if (element.startsWith("@author")) {
                     final.authors[0].name = element.split("@author ")[1];
@@ -1557,7 +2019,9 @@ const thePlugin = {
 
         function evalInContext(js, context) {
             // Return the results of the in-line anonymous function we .call with the passed context
-            return function () { return eval(js); }.call(context);
+            return function () {
+                return eval(js);
+            }.call(context);
         }
 
         /**
@@ -1572,7 +2036,8 @@ const thePlugin = {
             // const context = {
             // "generatedClass": null,
             // };
-            const debugLine = "\ntry{" + codeData + "}catch(e){console.error(e);debugger;}";
+            const debugLine =
+                "\ntry{" + codeData + "}catch(e){console.error(e);debugger;}";
             const additionalCode = [
                 "const module = { exports: {} };",
                 "const global = window;",
@@ -1583,8 +2048,14 @@ const thePlugin = {
             ];
             // codeData = "(()=>{const module = { exports: {} };const global = window;const __filename=BdApi.Plugins.folder+`/" + filename + "`;const __dirname=BdApi.Plugins.folder;debugger;" + (true ? debugLine : codeData) + "\nreturn module;})();\n";
             // eslint-disable-next-line no-constant-condition
-            codeData = "(()=>{" + additionalCode.join("") + (true ? debugLine : codeData) + "\nreturn module;})();\n";
-            const sourceBlob = new Blob([codeData], { type: "application/javascript" });
+            codeData =
+                "(()=>{" +
+                additionalCode.join("") +
+                (true ? debugLine : codeData) +
+                "\nreturn module;})();\n";
+            const sourceBlob = new Blob([codeData], {
+                type: "application/javascript",
+            });
             const sourceBlobUrl = URL.createObjectURL(sourceBlob);
             codeData += "\n//# sourceURL=" + sourceBlobUrl;
             if (!window.GeneratedPluginsBlobs)
@@ -1619,17 +2090,17 @@ const thePlugin = {
             for (let i = 0; i < functions.length; i++) {
                 const element = functions[i];
                 if (final.instance[element].bind)
-                    final[element] = final.instance[element].bind(final.instance);
-                else
-                    final[element] = final.instance[element];
+                    final[element] = final.instance[element].bind(
+                        final.instance
+                    );
+                else final[element] = final.instance[element];
             }
         }
 
         generateMeta(bdplugin);
         generateCode(bdplugin);
         generateFunctions(bdplugin);
-        if (final.instance.getName)
-            final.name = final.instance.getName();
+        if (final.instance.getName) final.name = final.instance.getName();
         if (final.instance.getVersion)
             final.version = final.instance.getVersion();
         if (final.instance.getDescription)
@@ -1637,7 +2108,10 @@ const thePlugin = {
         // if (final.instance.getAuthor)
         //     final.authors[0].id = final.instance.getAuthor();
         // eslint-disable-next-line eqeqeq
-        if (final.start.toString() == (() => { }).toString() && typeof final.instance.onStart === "function") {
+        if (
+            final.start.toString() == (() => {}).toString() &&
+            typeof final.instance.onStart === "function"
+        ) {
             final.start = final.instance.onStart.bind(final.instance);
             final.stop = final.instance.onStop.bind(final.instance);
         }
@@ -1646,7 +2120,7 @@ const thePlugin = {
     },
     stop() {
         this.removeAllCustomPlugins();
-    }
+    },
 };
 
 export default definePlugin(thePlugin);
