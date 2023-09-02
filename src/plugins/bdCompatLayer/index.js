@@ -806,9 +806,13 @@ const thePlugin = {
                     Vencord.Plugins.stopPlugin(Vencord.Plugins.plugins[name]);
                     Vencord.Plugins.startPlugin(Vencord.Plugins.plugins[name]);
                 },
-                rootFolder: "/BD",
+                // rootFolder: "/BD",
                 // folder: (function () { return window.BdApi.Plugins.rootFolder + "/plugins"; })(),
-                folder: "/BD/plugins",
+                // folder: "/BD/plugins",
+                rootFolder: "/BD",
+                get folder() {
+                    return this.rootFolder + "/plugins";
+                }
             },
             DOM: {
                 addStyle(id, css) {
@@ -1000,9 +1004,25 @@ const thePlugin = {
                 getStore(name) {
                     return this.getModule(this.Filters.byStoreName(name));
                 },
-                require: (() => {
+                // require: (() => {
+                //     return Vencord.Webpack.wreq;
+                // })(),
+                get require() {
                     return Vencord.Webpack.wreq;
-                })(),
+                },
+                get modules() {
+                    // this function is really really wrong
+                    const { cache } = Vencord.Webpack;
+                    const result = {};
+
+                    for (const key in cache) {
+                        // eslint-disable-next-line no-prototype-builtins
+                        if (cache.hasOwnProperty(key) && cache[key].hasOwnProperty("exports")) {
+                            result[key] = cache[key].exports;
+                        }
+                    }
+                    return result;
+                }
             },
             isSettingEnabled(collection, category, id) {
                 return false;
@@ -1562,6 +1582,7 @@ const thePlugin = {
                 // "debugger;",
             ];
             // codeData = "(()=>{const module = { exports: {} };const global = window;const __filename=BdApi.Plugins.folder+`/" + filename + "`;const __dirname=BdApi.Plugins.folder;debugger;" + (true ? debugLine : codeData) + "\nreturn module;})();\n";
+            // eslint-disable-next-line no-constant-condition
             codeData = "(()=>{" + additionalCode.join("") + (true ? debugLine : codeData) + "\nreturn module;})();\n";
             const sourceBlob = new Blob([codeData], { type: "application/javascript" });
             const sourceBlobUrl = URL.createObjectURL(sourceBlob);
