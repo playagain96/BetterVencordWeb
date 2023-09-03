@@ -2039,28 +2039,32 @@ const thePlugin = {
         if (!(final.name && final.version && final.description))
             throw new Error("Incomplete plugin");
 
+        const createTextForm = (field1, field2) => {
+            return React.createElement(
+                "div",
+                {},
+                React.createElement(
+                    Vencord.Webpack.Common.Forms.FormTitle,
+                    {
+                        tag: "h3",
+                    },
+                    [
+                        field1,
+                        React.createElement(
+                            Vencord.Webpack.Common.Forms.FormText,
+                            {},
+                            field2,
+                        ),
+                    ]
+                ),
+            );
+        };
+
         if (final.invite && typeof final.invite === "string") {
             final.options = {
                 inviteLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => React.createElement(
-                        "div",
-                        {},
-                        React.createElement(
-                            Vencord.Webpack.Common.Forms.FormTitle,
-                            {
-                                tag: "h3",
-                            },
-                            [
-                                "Author's server:",
-                                React.createElement(
-                                    Vencord.Webpack.Common.Forms.FormText,
-                                    {},
-                                    final.invite,
-                                ),
-                            ]
-                        ),
-                    )
+                    component: () => createTextForm("Author's server:", final.invite),
                 },
                 ...final.options,
             };
@@ -2069,24 +2073,7 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => React.createElement(
-                        "div",
-                        {},
-                        React.createElement(
-                            Vencord.Webpack.Common.Forms.FormTitle,
-                            {
-                                tag: "h3",
-                            },
-                            [
-                                "Plugin source:",
-                                React.createElement(
-                                    Vencord.Webpack.Common.Forms.FormText,
-                                    {},
-                                    final.source,
-                                ),
-                            ]
-                        ),
-                    )
+                    component: () => createTextForm("Plugin source:", final.source),
                 },
                 ...final.options,
             };
