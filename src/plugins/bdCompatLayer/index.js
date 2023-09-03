@@ -2065,6 +2065,32 @@ const thePlugin = {
                 ...final.options,
             };
         }
+        if (final.source && typeof final.source === "string") {
+            final.options = {
+                sourceLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => React.createElement(
+                        "div",
+                        {},
+                        React.createElement(
+                            Vencord.Webpack.Common.Forms.FormTitle,
+                            {
+                                tag: "h3",
+                            },
+                            [
+                                "Plugin source:",
+                                React.createElement(
+                                    Vencord.Webpack.Common.Forms.FormText,
+                                    {},
+                                    final.source,
+                                ),
+                            ]
+                        ),
+                    )
+                },
+                ...final.options,
+            };
+        }
         // if (final.instance.getAuthor)
         //     final.authors[0].id = final.instance.getAuthor();
         // eslint-disable-next-line eqeqeq
