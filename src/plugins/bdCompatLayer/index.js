@@ -972,6 +972,7 @@ const thePlugin = {
             // unpatchAll: () => { },
             // },
             Patcher,
+            UI: new UI(),
             Plugins: {
                 getAll: () => {
                     // return Vencord.Plugins.plugins;
@@ -1626,7 +1627,7 @@ const thePlugin = {
             return ReImplementationObject[name];
         };
         window.BdApi = BdApiReimpl;
-        window.BdApi.UI = new UI();
+        // window.BdApi.UI = new UI();
         window.require = RequireReimpl;
         window.BdApi.ReqImpl = ReImplementationObject;
 
