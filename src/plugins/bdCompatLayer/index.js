@@ -1242,7 +1242,7 @@ const thePlugin = {
                 },
                 getByStringsOptimal(...strings) {
                     return module => {
-                        if (!module?.toString || typeof(module?.toString) !== "function") return; // Not stringable
+                        if (!module?.toString || typeof (module?.toString) !== "function") return; // Not stringable
                         let moduleString = "";
                         try { moduleString = module?.toString([]); }
                         catch (err) { moduleString = module?.toString(); }
@@ -1253,8 +1253,7 @@ const thePlugin = {
                         return true;
                     };
                 },
-                getByStrings(...strings)
-                {
+                getByStrings(...strings) {
                     return module => {
                         const moduleString = module?.toString([]) || "";
                         if (!moduleString) return false; // Could not create string
