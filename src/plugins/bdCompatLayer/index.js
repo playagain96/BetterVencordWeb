@@ -386,14 +386,6 @@ const thePlugin = {
                 () => { }
             );
         };
-        window.BdCompatLayer = {
-            Utils,
-            exportZip,
-            completeFileSystem,
-            downloadZip,
-            importZip,
-            importFile,
-        };
         const windowBdCompatLayer = {
             Utils,
             exportZip,
