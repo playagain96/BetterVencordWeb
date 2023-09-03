@@ -15,9 +15,9 @@ import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalRoot, openModal } from "@utils/modal";
 
-import { FakeEventEmitter } from "./fakeStuff";
+import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
 import UI from "./UI";
-import { evalInScope, getDeferred } from "./utils";
+import { getDeferred } from "./utils";
 
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -1618,7 +1618,9 @@ const thePlugin = {
         window.require = RequireReimpl;
         window.BdApi.ReqImpl = ReImplementationObject;
 
-        let DiscordModules = {};
+        const DiscordModulesInjectorOutput = addDiscordModules();
+        const DiscordModules = DiscordModulesInjectorOutput.output;
+        windowBdCompatLayer.discordModulesBlobUrl = DiscordModulesInjectorOutput.sourceBlobUrl;
         // const WebpackModules = (function () {
         //     return BdApi.Webpack;
         // })();
@@ -1633,31 +1635,6 @@ const thePlugin = {
         // const sourceBlob = new Blob([ev], { type: "application/javascript" });
         // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
         // DiscordModules = eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
-        const addDiscordModules = () => {
-            const context = {
-                get WebpackModules() {
-                    return BdApi.Webpack;
-                }
-            };
-            // context.WebpackModules = (function () {
-            //     return BdApi.Webpack;
-            // })();
-            const ModuleDataText = this.simpleGET(
-                proxyUrl +
-                "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
-            ).responseText.replaceAll("\r", "");
-            // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
-            const ev =
-                "(" +
-                ModuleDataText.split("export default Utilities.memoizeObject(")[1];
-            const sourceBlob = new Blob([ev], { type: "application/javascript" });
-            const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-            // return eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
-            // console.log(evaled);
-            windowBdCompatLayer.discordModulesBlobUrl = sourceBlobUrl;
-            return evalInScope(ev + "\n//# sourceURL=" + sourceBlobUrl, context);
-        };
-        DiscordModules = addDiscordModules();
         function summonInjector(simpleGET) {
             /**
              * @type {string}
@@ -1680,64 +1657,10 @@ const thePlugin = {
 
         // const { inject, uninject } = summonInjector(this.simpleGET);
 
-        const addContextMenu = () => {
-            /**
-             * @type {string}
-             */
-            const ModuleDataText = this.simpleGET(
-                proxyUrl +
-                "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js"
-            ).responseText.replaceAll("\r", "");
-            const context = {
-                get WebpackModules() {
-                    return BdApi.Webpack;
-                },
-                DiscordModules,
-                get Patcher() {
-                    return BdApi.Patcher;
-                }
-            };
-            // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
-            const linesToRemove = this.findFirstLineWithoutX(
-                ModuleDataText,
-                "import"
-            );
-            // eslint-disable-next-line prefer-const
-            let ModuleDataArr = ModuleDataText.split("\n");
-            ModuleDataArr.splice(0, linesToRemove);
-            ModuleDataArr.pop();
-            ModuleDataArr.pop();
-            // const Logger = {
-            //     warn: function (...args) {
-            //         console.warn(...args);
-            //     },
-            //     info: function (...args) {
-            //         console.log(...args);
-            //     },
-            //     err: function (...args) {
-            //         console.error(...args);
-            //     },
-            // };
-
-            // const ModuleDataAssembly = "(()=>{" + addLogger.toString() + ";const Logger = addLogger();const {React} = eval(`(" + this.objectToString(DiscordModules) + ")`);" + ModuleDataArr.join("\n") + "\nreturn ContextMenu;})();";
-            const ModuleDataAssembly =
-                "(()=>{" +
-                addLogger.toString() +
-                ";const Logger = addLogger();const {React} = DiscordModules;" +
-                ModuleDataArr.join("\n") +
-                "\nreturn ContextMenu;})();";
-            const sourceBlob = new Blob([ModuleDataAssembly], {
-                type: "application/javascript",
-            });
-            const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-            // window.BdApi.ContextMenu = new (eval(
-            //     ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl
-            // ))();
-            const evaluatedContextMenu = evalInScope(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl, context);
-            window.BdApi.ContextMenu = new evaluatedContextMenu();
-            windowBdCompatLayer.contextMenuBlobUrl = sourceBlobUrl;
-        };
-        addContextMenu();
+        const ContextMenuInjectorOutput = addContextMenu();
+        const ContextMenu = ContextMenuInjectorOutput.output;
+        windowBdCompatLayer.contextMenuBlobUrl = ContextMenuInjectorOutput.sourceBlobUrl;
+        BdApiReimpl.ContextMenu = ContextMenu;
 
         const fakeLoading = document.createElement("span");
         fakeLoading.style.display = "none";
