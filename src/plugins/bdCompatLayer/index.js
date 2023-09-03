@@ -131,6 +131,7 @@ const thePlugin = {
                     () => {
                         window.BdApi.ReqImpl.fs = temp.require("fs");
                         window.BdApi.ReqImpl.path = temp.require("path");
+                        windowBdCompatLayer.fsReadyPromise.resolve();
                     }
                 );
             });
