@@ -2061,11 +2061,11 @@ const thePlugin = {
             );
         };
 
-        if (final.author && typeof final.author === "string") {
+        if (final.authors[0].name && typeof final.authors[0].name === "string") {
             final.options = {
                 inviteLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author:", final.author),
+                    component: () => createTextForm("Author(s):", final.authors[0].name),
                 },
                 ...final.options,
             };
