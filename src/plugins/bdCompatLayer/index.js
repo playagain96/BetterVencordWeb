@@ -14,7 +14,9 @@ import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalRoot, openModal } from "@utils/modal";
 
+import { FakeEventEmitter } from "./fakeStuff";
 import UI from "./UI";
+import { getDeferred } from "./utils";
 
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -389,6 +391,16 @@ const thePlugin = {
             importZip,
             importFile,
         };
+        const windowBdCompatLayer = {
+            Utils,
+            exportZip,
+            completeFileSystem,
+            downloadZip,
+            importZip,
+            importFile,
+            fsReadyPromise: getDeferred(),
+        };
+        window.BdCompatLayer = windowBdCompatLayer;
         // const fsContext = {};
         // const setupFiler = (() => function () { return eval(Filer.responseText); }.call(fsContext));
         // setupFiler();
@@ -1560,7 +1572,7 @@ const thePlugin = {
                 return hexString;
             },
         };
-        const Reimplentations = {
+        const ReImplementationObject = {
             /*  "fs": {
                  "writeFile": () => Promise.resolve(),
              }, */
@@ -1592,42 +1604,17 @@ const thePlugin = {
                 cb({ err: "err" }, undefined, undefined);
             },
             events: {
-                EventEmitter: class {
-                    constructor() {
-                        this.callbacks = {};
-                    }
-
-                    on(event, cb) {
-                        if (!this.callbacks[event]) this.callbacks[event] = [];
-                        this.callbacks[event].push(cb);
-                    }
-
-                    off(event, cb) {
-                        const cbs = this.callbacks[event];
-                        if (cbs) {
-                            this.callbacks[event] = cbs.filter(
-                                (callback) => callback !== cb
-                            );
-                        }
-                    }
-
-                    emit(event, data) {
-                        const cbs = this.callbacks[event];
-                        if (cbs) {
-                            cbs.forEach((cb) => cb(data));
-                        }
-                    }
-                },
+                EventEmitter: FakeEventEmitter,
             },
             electron: {},
         };
         const RequireReimpl = (name) => {
-            return Reimplentations[name];
+            return ReImplementationObject[name];
         };
         window.BdApi = BdApiReimpl;
         window.BdApi.UI = new UI();
         window.require = RequireReimpl;
-        window.BdApi.ReqImpl = Reimplentations;
+        window.BdApi.ReqImpl = ReImplementationObject;
 
         let DiscordModules = {};
         const WebpackModules = (function () {
@@ -1722,9 +1709,11 @@ const thePlugin = {
         }, 500);
         const fakeBdStyles = document.createElement("bd-styles");
         document.body.appendChild(fakeBdStyles);
-        const checkInterval = setInterval(() => {
-            if (window.BdApi.ReqImpl.fs === undefined) return;
-            clearInterval(checkInterval);
+        // const checkInterval = setInterval(() => {
+        //     if (window.BdApi.ReqImpl.fs === undefined)
+        //         return;
+        //     clearInterval(checkInterval);
+        windowBdCompatLayer.fsReadyPromise.promise.then(() => {
             // for (const key in this.options) {
             //     if (Object.hasOwnProperty.call(this.options, key)) {
             //         if (Settings.plugins[this.name][key]) {
@@ -1792,7 +1781,7 @@ const thePlugin = {
                     this.addCustomPlugin(plugin);
                 });
             }
-        }, 1000);
+        });
     },
     findFirstLineWithoutX(str, x) {
         const lines = str.split("\n");
@@ -1843,10 +1832,10 @@ const thePlugin = {
         GeneratedPlugins.length = 0;
     },
     /**
-     * @param {string} bdplugin
+     * @param {string} BetterDiscordPlugin
      * @returns {Plugin}
      */
-    async convertPlugin(bdplugin, filename) {
+    async convertPlugin(BetterDiscordPlugin, filename) {
         const final = {};
         final.started = false;
         // final.patches = [];
@@ -2089,17 +2078,16 @@ const thePlugin = {
 
             for (let i = 0; i < functions.length; i++) {
                 const element = functions[i];
-                if (final.instance[element].bind)
-                    final[element] = final.instance[element].bind(
-                        final.instance
-                    );
-                else final[element] = final.instance[element];
+                // if (final.instance[element].bind)
+                //     final[element] = final.instance[element].bind(final.instance);
+                // else
+                final[element] = final.instance[element];
             }
         }
 
-        generateMeta(bdplugin);
-        generateCode(bdplugin);
-        generateFunctions(bdplugin);
+        generateMeta(BetterDiscordPlugin);
+        generateCode(BetterDiscordPlugin);
+        generateFunctions(BetterDiscordPlugin);
         if (final.instance.getName) final.name = final.instance.getName();
         if (final.instance.getVersion)
             final.version = final.instance.getVersion();
@@ -2108,13 +2096,18 @@ const thePlugin = {
         // if (final.instance.getAuthor)
         //     final.authors[0].id = final.instance.getAuthor();
         // eslint-disable-next-line eqeqeq
-        if (
-            final.start.toString() == (() => {}).toString() &&
-            typeof final.instance.onStart === "function"
-        ) {
-            final.start = final.instance.onStart.bind(final.instance);
-            final.stop = final.instance.onStop.bind(final.instance);
-        }
+        // if (final.start.toString() == (() => { }).toString() && typeof final.instance.onStart === "function") {
+        //     final.start = final.instance.onStart.bind(final.instance);
+        //     final.stop = final.instance.onStop.bind(final.instance);
+        // }
+        const startFunction = function () {
+            this.instance.start();
+        };
+        const stopFunction = function () {
+            this.instance.stop();
+        };
+        final.start = startFunction.bind(final);
+        final.stop = stopFunction.bind(final);
         console.log(final);
         return final;
     },
