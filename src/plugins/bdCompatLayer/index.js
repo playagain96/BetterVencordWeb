@@ -2046,20 +2046,6 @@ const thePlugin = {
                     component: () => React.createElement(
                         "div",
                         {},
-                        // [
-                        //     React.createElement(
-                        //         Vencord.Webpack.Common.Forms.FormTitle,
-                        //         {
-                        //             tag: "h3",
-                        //         },
-                        //         "Test"
-                        //     ),
-                        //     React.createElement(
-                        //         Vencord.Webpack.Common.Forms.FormText,
-                        //         {},
-                        //         "Test"
-                        //     ),
-                        // ]
                         React.createElement(
                             Vencord.Webpack.Common.Forms.FormTitle,
                             {
