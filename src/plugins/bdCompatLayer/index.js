@@ -131,8 +131,10 @@ const thePlugin = {
                         fs: "LocalStorage",
                     },
                     () => {
-                        window.BdApi.ReqImpl.fs = temp.require("fs");
-                        window.BdApi.ReqImpl.path = temp.require("path");
+                        // window.BdApi.ReqImpl.fs = temp.require("fs");
+                        // window.BdApi.ReqImpl.path = temp.require("path");
+                        ReImplementationObject.fs = temp.require("fs");
+                        ReImplementationObject.path = temp.require("path");
                         windowBdCompatLayer.fsReadyPromise.resolve();
                     }
                 );
@@ -1590,7 +1592,7 @@ const thePlugin = {
         window.BdApi = BdApiReimpl;
         // window.BdApi.UI = new UI();
         window.require = RequireReimpl;
-        window.BdApi.ReqImpl = ReImplementationObject;
+        // window.BdApi.ReqImpl = ReImplementationObject;
 
         const DiscordModulesInjectorOutput = addDiscordModules(proxyUrl);
         const DiscordModules = DiscordModulesInjectorOutput.output;
