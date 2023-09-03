@@ -27,3 +27,11 @@ export function getDeferred() {
 
     return { resolve, reject, promise };
 }
+
+// export function evalInScope(js, contextAsScope) {
+//     return new Function(`with (this) { return (${js}); }`).call(contextAsScope);
+// }
+export function evalInScope(js, contextAsScope) {
+    // eslint-disable-next-line quotes
+    return new Function(["contextAsScope", "js"],"return (function() { with(this) { return eval(js); } }).call(contextAsScope)")(contextAsScope, js);
+}

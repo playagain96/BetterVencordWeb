@@ -4,6 +4,7 @@
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
 
+"use strict";
 /* eslint-disable eqeqeq */
 import definePlugin, { OptionType } from "@utils/types";
 // import { readFileSync } from "fs";
@@ -16,7 +17,7 @@ import { ModalRoot, openModal } from "@utils/modal";
 
 import { FakeEventEmitter } from "./fakeStuff";
 import UI from "./UI";
-import { getDeferred } from "./utils";
+import { evalInScope, getDeferred } from "./utils";
 
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -110,10 +111,10 @@ const thePlugin = {
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
         fetch(
             proxyUrl +
-                "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.min.js"
+            "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.min.js"
         )
-            .then((out) => out.text())
-            .then((out2) => {
+            .then(out => out.text())
+            .then(out2 => {
                 eval.call(
                     window,
                     out2.replaceAll(
@@ -253,7 +254,7 @@ const thePlugin = {
                     //     fileInput.accept = "*";
                     //     fileInput.onchange = event => {
                     //         const file = event.target.files[0];
-                    this.openFileSelect().then((file) => {
+                    this.openFileSelect().then(file => {
                         // if (!file)
                         //     return null;
                         const reader = new FileReader();
@@ -284,9 +285,9 @@ const thePlugin = {
             stream2buffer(stream) {
                 return new Promise((resolve, reject) => {
                     const _buf = [];
-                    stream.on("data", (chunk) => _buf.push(chunk));
+                    stream.on("data", chunk => _buf.push(chunk));
                     stream.on("end", () => resolve(Buffer.concat(_buf)));
-                    stream.on("error", (err) => reject(err));
+                    stream.on("error", err => reject(err));
                 });
             },
         };
@@ -352,7 +353,7 @@ const thePlugin = {
                     BrowserFS.BFSRequire("buffer").Buffer.from(
                         await out.arrayBuffer()
                     ),
-                    () => {}
+                    () => { }
                 );
             }
             const data = await zipReader.close();
@@ -372,7 +373,7 @@ const thePlugin = {
         const completeFileSystem = () => {
             return Utils.createPathFromTree(Utils.readDirectory("/"));
         };
-        const importFile = async (targetPath) => {
+        const importFile = async targetPath => {
             const file = await Utils.openFileSelect();
             const fs = window.require("fs");
             const path = window.require("path");
@@ -381,7 +382,7 @@ const thePlugin = {
                 BrowserFS.BFSRequire("buffer").Buffer.from(
                     await file.arrayBuffer()
                 ),
-                () => {}
+                () => { }
             );
         };
         window.BdCompatLayer = {
@@ -587,7 +588,7 @@ const thePlugin = {
                     if (!patch.children || !patch.children.length)
                         return patch.originalFunction.apply(this, arguments);
                     for (const superPatch of patch.children.filter(
-                        (c) => c.type === "before"
+                        c => c.type === "before"
                     )) {
                         try {
                             superPatch.callback(this, arguments);
@@ -601,7 +602,7 @@ const thePlugin = {
                     }
 
                     const insteads = patch.children.filter(
-                        (c) => c.type === "instead"
+                        c => c.type === "instead"
                     );
                     if (!insteads.length) {
                         returnValue = patch.originalFunction.apply(
@@ -629,7 +630,7 @@ const thePlugin = {
                     }
 
                     for (const slavePatch of patch.children.filter(
-                        (c) => c.type === "after"
+                        c => c.type === "after"
                     )) {
                         try {
                             const tempReturn = slavePatch.callback(
@@ -814,7 +815,7 @@ const thePlugin = {
                 const module = this.resolveModule(moduleToPatch);
                 if (!module) return null;
                 if (!module[functionName] && forcePatch)
-                    module[functionName] = function () {};
+                    module[functionName] = function () { };
                 if (!(module[functionName] instanceof Function)) return null;
 
                 if (typeof moduleToPatch === "string")
@@ -829,7 +830,7 @@ const thePlugin = {
                 const patchId = `${displayName}.${functionName}`;
                 const patch =
                     this.patches.find(
-                        (p) =>
+                        p =>
                             p.module == module && p.functionName == functionName
                     ) || this.makePatch(module, functionName, patchId);
                 if (!patch.proxyFunction) this.rePatch(patch);
@@ -841,7 +842,7 @@ const thePlugin = {
                     unpatch: () => {
                         patch.children.splice(
                             patch.children.findIndex(
-                                (cpatch) =>
+                                cpatch =>
                                     cpatch.id === child.id &&
                                     cpatch.type === type
                             ),
@@ -849,7 +850,7 @@ const thePlugin = {
                         );
                         if (patch.children.length <= 0) {
                             const patchNum = this.patches.findIndex(
-                                (p) =>
+                                p =>
                                     p.module == module &&
                                     p.functionName == functionName
                             );
@@ -958,7 +959,7 @@ const thePlugin = {
             // Patcher: {
             // unpatchAll: () => { },
             // },
-            Patcher: Patcher,
+            Patcher,
             Plugins: {
                 getAll: () => {
                     // return Vencord.Plugins.plugins;
@@ -969,13 +970,13 @@ const thePlugin = {
                 //         "id": ZeresPluginLibrary
                 //     }];
                 // },
-                isEnabled: (name) => {
+                isEnabled: name => {
                     return Vencord.Plugins.isPluginEnabled(name);
                 },
                 get: function (name) {
-                    return this.getAll().filter((x) => x.name == name)[0];
+                    return this.getAll().filter(x => x.name == name)[0];
                 },
-                reload: (name) => {
+                reload: name => {
                     Vencord.Plugins.stopPlugin(Vencord.Plugins.plugins[name]);
                     Vencord.Plugins.startPlugin(Vencord.Plugins.plugins[name]);
                 },
@@ -1018,7 +1019,7 @@ const thePlugin = {
             Components: {
                 get Tooltip() {
                     return BdApiReimpl.Webpack.getModule(
-                        (x) => x.prototype.renderTooltip,
+                        x => x.prototype.renderTooltip,
                         { searchExports: true }
                     );
                 },
@@ -1028,8 +1029,8 @@ const thePlugin = {
             },
             Webpack: {
                 Filters: {
-                    byDisplayName: (name) => {
-                        return (module) => {
+                    byDisplayName: name => {
+                        return module => {
                             return module && module.displayName === name;
                         };
                     },
@@ -1037,7 +1038,7 @@ const thePlugin = {
                         return Vencord.Webpack.filters.byProps(...props);
                     },
                     byStoreName(name) {
-                        return (module) => {
+                        return module => {
                             return (
                                 module?._dispatchToken &&
                                 module?.getName?.() === name
@@ -1077,7 +1078,7 @@ const thePlugin = {
                     //     return undefined;
                     // }
                     const wrapFilter =
-                        (filter) => (exports, module, moduleId) => {
+                        filter => (exports, module, moduleId) => {
                             try {
                                 if (
                                     exports?.default?.remove &&
@@ -1237,7 +1238,7 @@ const thePlugin = {
                 },
                 waitForModule(filter) {
                     return new Promise((resolve, reject) => {
-                        Vencord.Webpack.waitFor(filter, (module) => {
+                        Vencord.Webpack.waitFor(filter, module => {
                             resolve(module);
                         });
                     });
@@ -1257,9 +1258,9 @@ const thePlugin = {
                 },
                 getByPrototypes(...fields) {
                     return this.getModule(
-                        (x) =>
+                        x =>
                             x.prototype &&
-                            fields.every((field) => field in x.prototype),
+                            fields.every(field => field in x.prototype),
                         {}
                     );
                 },
@@ -1297,8 +1298,8 @@ const thePlugin = {
             isSettingEnabled(collection, category, id) {
                 return false;
             },
-            enableSetting(collection, category, id) {},
-            disableSetting(collection, category, id) {},
+            enableSetting(collection, category, id) { },
+            disableSetting(collection, category, id) { },
             // getData(pluginName, key) {
             //     return Vencord.Settings.plugins[pluginName] ? Vencord.Settings.plugins[pluginName][key] : {};
             // },
@@ -1333,9 +1334,9 @@ const thePlugin = {
                         .require("fs")
                         .existsSync(
                             BdApiReimpl.Plugins.folder +
-                                "/" +
-                                key +
-                                ".config.json"
+                            "/" +
+                            key +
+                            ".config.json"
                         )
                 ) {
                     this.pluginData[key] = {};
@@ -1346,9 +1347,9 @@ const thePlugin = {
                         .require("fs")
                         .readFileSync(
                             BdApiReimpl.Plugins.folder +
-                                "/" +
-                                key +
-                                ".config.json"
+                            "/" +
+                            key +
+                            ".config.json"
                         )
                 );
             },
@@ -1364,8 +1365,8 @@ const thePlugin = {
                     );
             },
             findModuleByProps(...props) {
-                return BdApi.findModule((module) =>
-                    props.every((prop) => typeof module[prop] !== "undefined")
+                return BdApi.findModule(module =>
+                    props.every(prop => typeof module[prop] !== "undefined")
                 );
             },
             findModule(filter) {
@@ -1396,10 +1397,10 @@ const thePlugin = {
                             originalMethod: origMethod,
                             callOriginalMethod: () =>
                                 (patchData.returnValue =
-                                    patchData.originalMethod.apply(
-                                        patchData.thisObject,
-                                        patchData.methodArguments
-                                    )),
+                                patchData.originalMethod.apply(
+                                    patchData.thisObject,
+                                    patchData.methodArguments
+                                )),
                         };
 
                         try {
@@ -1445,10 +1446,10 @@ const thePlugin = {
                             originalMethod: origMethod,
                             callOriginalMethod: () =>
                                 (patchData.returnValue =
-                                    patchData.originalMethod.apply(
-                                        patchData.thisObject,
-                                        patchData.methodArguments
-                                    )),
+                                patchData.originalMethod.apply(
+                                    patchData.thisObject,
+                                    patchData.methodArguments
+                                )),
                         };
 
                         try {
@@ -1484,7 +1485,7 @@ const thePlugin = {
                 if (!what[methodName])
                     if (options.force) {
                         // eslint-disable-next-line no-empty-function
-                        what[methodName] = function forcedFunction() {};
+                        what[methodName] = function forcedFunction() { };
                     } else {
                         return console.error(
                             null,
@@ -1522,7 +1523,7 @@ const thePlugin = {
                         const tempRet = BdApi.suppressErrors(
                             options.instead,
                             "`instead` callback of " +
-                                what[methodName].displayName
+                            what[methodName].displayName
                         )(data);
                         if (tempRet !== undefined) data.returnValue = tempRet;
                         return data.returnValue;
@@ -1551,7 +1552,7 @@ const thePlugin = {
                     what[methodName].displayName = displayName;
 
                 const finalCancelPatch = () =>
-                    patches.forEach((patch) => patch());
+                    patches.forEach(patch => patch());
 
                 return finalCancelPatch;
             },
@@ -1568,7 +1569,7 @@ const thePlugin = {
                 const randomBytes = new Uint8Array(4);
                 window.crypto.getRandomValues(randomBytes);
                 const hexString = Array.from(randomBytes)
-                    .map((b) => ("00" + b.toString(16)).slice(-2))
+                    .map(b => ("00" + b.toString(16)).slice(-2))
                     .join("");
                 return hexString;
             },
@@ -1609,7 +1610,7 @@ const thePlugin = {
             },
             electron: {},
         };
-        const RequireReimpl = (name) => {
+        const RequireReimpl = name => {
             return ReImplementationObject[name];
         };
         window.BdApi = BdApiReimpl;
@@ -1618,27 +1619,52 @@ const thePlugin = {
         window.BdApi.ReqImpl = ReImplementationObject;
 
         let DiscordModules = {};
-        const WebpackModules = (function () {
-            return BdApi.Webpack;
-        })();
-        const ModuleDataText = this.simpleGET(
-            proxyUrl +
+        // const WebpackModules = (function () {
+        //     return BdApi.Webpack;
+        // })();
+        // const ModuleDataText = this.simpleGET(
+        //     proxyUrl +
+        //     "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
+        // ).responseText.replaceAll("\r", "");
+        // // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
+        // const ev =
+        //     "(" +
+        //     ModuleDataText.split("export default Utilities.memoizeObject(")[1];
+        // const sourceBlob = new Blob([ev], { type: "application/javascript" });
+        // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
+        // DiscordModules = eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
+        const addDiscordModules = () => {
+            const context = {
+                get WebpackModules() {
+                    return BdApi.Webpack;
+                }
+            };
+            // context.WebpackModules = (function () {
+            //     return BdApi.Webpack;
+            // })();
+            const ModuleDataText = this.simpleGET(
+                proxyUrl +
                 "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
-        ).responseText.replaceAll("\r", "");
-        // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
-        const ev =
-            "(" +
-            ModuleDataText.split("export default Utilities.memoizeObject(")[1];
-        const sourceBlob = new Blob([ev], { type: "application/javascript" });
-        const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-        DiscordModules = eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
+            ).responseText.replaceAll("\r", "");
+            // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
+            const ev =
+                "(" +
+                ModuleDataText.split("export default Utilities.memoizeObject(")[1];
+            const sourceBlob = new Blob([ev], { type: "application/javascript" });
+            const sourceBlobUrl = URL.createObjectURL(sourceBlob);
+            // return eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
+            // console.log(evaled);
+            windowBdCompatLayer.discordModulesBlobUrl = sourceBlobUrl;
+            return evalInScope(ev + "\n//# sourceURL=" + sourceBlobUrl, context);
+        };
+        DiscordModules = addDiscordModules();
         function summonInjector(simpleGET) {
             /**
              * @type {string}
              */
             const ModuleDataText = simpleGET(
                 proxyUrl +
-                    "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js"
+                "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js"
             ).responseText.replaceAll("\r", "");
             const ModuleDataAssembly =
                 "(()=>{const module = { exports: {} };" +
@@ -1660,8 +1686,17 @@ const thePlugin = {
              */
             const ModuleDataText = this.simpleGET(
                 proxyUrl +
-                    "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js"
+                "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js"
             ).responseText.replaceAll("\r", "");
+            const context = {
+                get WebpackModules() {
+                    return BdApi.Webpack;
+                },
+                DiscordModules,
+                get Patcher() {
+                    return BdApi.Patcher;
+                }
+            };
             // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
             const linesToRemove = this.findFirstLineWithoutX(
                 ModuleDataText,
@@ -1695,9 +1730,12 @@ const thePlugin = {
                 type: "application/javascript",
             });
             const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-            window.BdApi.ContextMenu = new (eval(
-                ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl
-            ))();
+            // window.BdApi.ContextMenu = new (eval(
+            //     ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl
+            // ))();
+            const evaluatedContextMenu = evalInScope(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl, context);
+            window.BdApi.ContextMenu = new evaluatedContextMenu();
+            windowBdCompatLayer.contextMenuBlobUrl = sourceBlobUrl;
         };
         addContextMenu();
 
@@ -1751,15 +1789,15 @@ const thePlugin = {
 
                             localFs.writeFileSync(
                                 window.BdApi.Plugins.folder +
-                                    "/" +
-                                    filenameFromUrl,
+                                "/" +
+                                filenameFromUrl,
                                 response.responseText
                             );
                         } catch (error) {
                             console.error(
                                 error,
                                 "\nWhile loading: " +
-                                    Settings.plugins[this.name][key]
+                                Settings.plugins[this.name][key]
                             );
                         }
                     }
@@ -1769,7 +1807,7 @@ const thePlugin = {
             const pluginFolder = localFs
                 .readdirSync(BdApiReimpl.Plugins.folder)
                 .sort();
-            const plugins = pluginFolder.filter((x) =>
+            const plugins = pluginFolder.filter(x =>
                 x.endsWith(".plugin.js")
             );
             for (let i = 0; i < plugins.length; i++) {
@@ -1778,7 +1816,7 @@ const thePlugin = {
                     BdApiReimpl.Plugins.folder + "/" + element,
                     "utf8"
                 );
-                this.convertPlugin(pluginJS, element).then((plugin) => {
+                this.convertPlugin(pluginJS, element).then(plugin => {
                     this.addCustomPlugin(plugin);
                 });
             }
@@ -1805,7 +1843,7 @@ const thePlugin = {
         GeneratedPlugins.push(generated);
     },
     async removeAllCustomPlugins() {
-        const arrayToObject = (array) => {
+        const arrayToObject = array => {
             const object = array.reduce((obj, element, index) => {
                 obj[index] = element;
                 return obj;
@@ -1818,7 +1856,7 @@ const thePlugin = {
          */
         const { GeneratedPlugins } = window;
         const copyOfGeneratedPlugin = arrayToObject(GeneratedPlugins);
-        const removePlugin = (generatedPlugin) => {
+        const removePlugin = generatedPlugin => {
             const generated = generatedPlugin;
             Vencord.Settings.plugins[generated.name].enabled = false;
             Vencord.Plugins.stopPlugin(generated);
@@ -1849,11 +1887,11 @@ const thePlugin = {
         final.internals = {};
         final.description = "";
         final.id = "";
-        final.start = () => {};
-        final.stop = () => {};
+        final.start = () => { };
+        final.stop = () => { };
         const { React } = Vencord.Webpack.Common;
         const openSettingsModal = () => {
-            openModal((props) => {
+            openModal(props => {
                 // let el = final.instance.getSettingsPanel();
                 // if (el instanceof Node) {
                 //     el = Vencord.Webpack.Common.React.createElement("div", { dangerouslySetInnerHTML: { __html: el.outerHTML } });
@@ -1896,13 +1934,13 @@ const thePlugin = {
                 if (typeof child === "function")
                     child = React.createElement(child);
 
-                const modal = (props) => {
+                const modal = props => {
                     const mc = BdApi.Webpack.getByProps("Header", "Footer");
                     const TextElement = BdApi.Webpack.getModule(
-                        (m) => m?.Sizes?.SIZE_32 && m.Colors
+                        m => m?.Sizes?.SIZE_32 && m.Colors
                     );
                     const Buttons = BdApi.Webpack.getModule(
-                        (m) => m.BorderColors,
+                        m => m.BorderColors,
                         { searchExports: true }
                     );
                     return React.createElement(
@@ -1985,7 +2023,7 @@ const thePlugin = {
                 .split("*/")[0]
                 .replaceAll("\n", "")
                 .split("*")
-                .filter((x) => x !== "" && x !== " ");
+                .filter(x => x !== "" && x !== " ");
             metaEndLine = metadata.length + 3;
             for (let i = 0; i < metadata.length; i++) {
                 const element = metadata[i].trim();
@@ -2112,8 +2150,26 @@ const thePlugin = {
         console.log(final);
         return final;
     },
-    stop() {
-        this.removeAllCustomPlugins();
+    async stop() {
+        console.warn("Removing plugins...");
+        await this.removeAllCustomPlugins();
+        console.warn("Removing compat layer...");
+        delete window.BdCompatLayer;
+        console.warn("Removing BdApi...");
+        delete window.BdApi;
+        console.warn("Freeing blobs...");
+        Object.values(window.GeneratedPluginsBlobs).forEach(x => {
+            URL.revokeObjectURL(x);
+            delete window.GeneratedPluginsBlobs[x];
+        });
+        URL.revokeObjectURL(windowBdCompatLayer.contextMenuBlobUrl);
+        URL.revokeObjectURL(windowBdCompatLayer.discordModulesBlobUrl);
+        if (window.zip) {
+            console.warn("Removing ZIP...");
+            delete window.zip;
+        }
+        console.warn("Removing FileSystem...");
+        delete window.BrowserFS;
     },
 };
 
