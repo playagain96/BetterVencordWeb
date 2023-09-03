@@ -87,6 +87,12 @@ export const addContextMenu = (DiscordModules, proxyUrl) => {
     ModuleDataArr.splice(0, linesToRemove);
     ModuleDataArr.pop();
     ModuleDataArr.pop();
+    // for (let i = 0; i < ModuleDataArr.length; i++) {
+    //     const element = ModuleDataArr[i];
+    //     if (element.trimStart().startsWith("Patcher.before(\"ContextMenuPatcher\", ")) {
+    //         ModuleDataArr[i] = "debugger;" + element;
+    //     }
+    // }
     const ModuleDataAssembly =
         "(()=>{" +
         addLogger.toString() +

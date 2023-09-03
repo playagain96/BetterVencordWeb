@@ -2034,6 +2034,8 @@ const thePlugin = {
         return final;
     },
     async stop() {
+        console.warn("UnPatching context menu...");
+        BdApi.Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
         await this.removeAllCustomPlugins();
         console.warn("Freeing blobs...");
