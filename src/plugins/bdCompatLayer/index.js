@@ -29,7 +29,7 @@ import { ModalRoot, openModal } from "@utils/modal";
 
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
 import UI from "./UI";
-import { getDeferred } from "./utils";
+import { getDeferred, simpleGET } from "./utils";
 
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -71,17 +71,6 @@ const thePlugin = {
             default: "",
             restartNeeded: true,
         },
-    },
-    simpleGET(url, headers) {
-        var httpRequest = new XMLHttpRequest();
-
-        httpRequest.open("GET", url, false);
-        if (headers)
-            for (var header in headers) {
-                httpRequest.setRequestHeader(header, headers[header]);
-            }
-        httpRequest.send();
-        return httpRequest;
     },
     objectToString(obj) {
         if (typeof obj === "function") {
@@ -306,7 +295,7 @@ const thePlugin = {
         const exportZip = async () => {
             if (!window.zip) {
                 eval(
-                    this.simpleGET(
+                    simpleGET(
                         "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
                     ).responseText
                 );
@@ -329,7 +318,7 @@ const thePlugin = {
         const importZip = async () => {
             if (!window.zip) {
                 eval(
-                    this.simpleGET(
+                    simpleGET(
                         "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
                     ).responseText
                 );
@@ -524,26 +513,6 @@ const thePlugin = {
         // window.RegisterPlugin = data => {
 
         // };
-
-        function addLogger() {
-            return {
-                warn: function (...args) {
-                    console.warn(...args);
-                },
-                info: function (...args) {
-                    console.log(...args);
-                },
-                err: function (...args) {
-                    console.error(...args);
-                },
-                stacktrace: function (...args) {
-                    console.error(...args);
-                },
-                error: function (...args) {
-                    console.error(...args);
-                },
-            };
-        }
 
         class Patcher {
             static get patches() {
@@ -1648,25 +1617,25 @@ const thePlugin = {
         // const sourceBlob = new Blob([ev], { type: "application/javascript" });
         // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
         // DiscordModules = eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
-        function summonInjector(simpleGET) {
-            /**
-             * @type {string}
-             */
-            const ModuleDataText = simpleGET(
-                proxyUrl +
-                "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js"
-            ).responseText.replaceAll("\r", "");
-            const ModuleDataAssembly =
-                "(()=>{const module = { exports: {} };" +
-                ModuleDataText +
-                "\nreturn module;})();";
-            const sourceBlob = new Blob([ModuleDataAssembly], {
-                type: "application/javascript",
-            });
-            const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-            return eval(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl)
-                .exports;
-        }
+        // function summonInjector(simpleGET) {
+        //     /**
+        //      * @type {string}
+        //      */
+        //     const ModuleDataText = simpleGET(
+        //         proxyUrl +
+        //         "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js"
+        //     ).responseText.replaceAll("\r", "");
+        //     const ModuleDataAssembly =
+        //         "(()=>{const module = { exports: {} };" +
+        //         ModuleDataText +
+        //         "\nreturn module;})();";
+        //     const sourceBlob = new Blob([ModuleDataAssembly], {
+        //         type: "application/javascript",
+        //     });
+        //     const sourceBlobUrl = URL.createObjectURL(sourceBlob);
+        //     return eval(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl)
+        //         .exports;
+        // }
 
         // const { inject, uninject } = summonInjector(this.simpleGET);
 
@@ -1717,7 +1686,7 @@ const thePlugin = {
                         try {
                             const url = Settings.plugins[this.name][key];
                             // const filenameFromUrl = url.split("/").pop();
-                            const response = this.simpleGET(proxyUrl + url);
+                            const response = simpleGET(proxyUrl + url);
                             const filenameFromUrl = response.responseURL
                                 .split("/")
                                 .pop();
@@ -1757,15 +1726,6 @@ const thePlugin = {
                 });
             }
         });
-    },
-    findFirstLineWithoutX(str, x) {
-        const lines = str.split("\n");
-        for (let i = 0; i < lines.length; i++) {
-            if (!lines[i].startsWith(x)) {
-                return i + 1; // Return line number (1-indexed)
-            }
-        }
-        return -1; // If no line is found, return -1
     },
     async addCustomPlugin(generatedPlugin) {
         /**
@@ -1979,13 +1939,6 @@ const thePlugin = {
                     final.authors[0].name = element.split("@author ")[1];
                 }
             }
-        }
-
-        function evalInContext(js, context) {
-            // Return the results of the in-line anonymous function we .call with the passed context
-            return function () {
-                return eval(js);
-            }.call(context);
         }
 
         /**

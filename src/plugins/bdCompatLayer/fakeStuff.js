@@ -16,6 +16,8 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { addLogger, evalInScope, findFirstLineWithoutX, simpleGET } from "./utils";
+
 export const FakeEventEmitter = class {
     constructor() {
         this.callbacks = {};
@@ -47,7 +49,7 @@ export const addDiscordModules = () => {
             return BdApi.Webpack;
         }
     };
-    const ModuleDataText = this.simpleGET(
+    const ModuleDataText = simpleGET(
         proxyUrl +
         "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
     ).responseText.replaceAll("\r", "");
@@ -63,7 +65,7 @@ export const addContextMenu = DiscordModules => {
     /**
      * @type {string}
      */
-    const ModuleDataText = this.simpleGET(
+    const ModuleDataText = simpleGET(
         proxyUrl +
         "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js"
     ).responseText.replaceAll("\r", "");
@@ -76,7 +78,7 @@ export const addContextMenu = DiscordModules => {
             return BdApi.Patcher;
         }
     };
-    const linesToRemove = this.findFirstLineWithoutX(
+    const linesToRemove = findFirstLineWithoutX(
         ModuleDataText,
         "import"
     );

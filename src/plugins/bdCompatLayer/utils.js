@@ -33,5 +33,54 @@ export function getDeferred() {
 // }
 export function evalInScope(js, contextAsScope) {
     // eslint-disable-next-line quotes
-    return new Function(["contextAsScope", "js"],"return (function() { with(this) { return eval(js); } }).call(contextAsScope)")(contextAsScope, js);
+    return new Function(["contextAsScope", "js"], "return (function() { with(this) { return eval(js); } }).call(contextAsScope)")(contextAsScope, js);
+}
+
+export function addLogger() {
+    return {
+        warn: function (...args) {
+            console.warn(...args);
+        },
+        info: function (...args) {
+            console.log(...args);
+        },
+        err: function (...args) {
+            console.error(...args);
+        },
+        stacktrace: function (...args) {
+            console.error(...args);
+        },
+        error: function (...args) {
+            console.error(...args);
+        },
+    };
+}
+
+export function simpleGET(url, headers) {
+    var httpRequest = new XMLHttpRequest();
+
+    httpRequest.open("GET", url, false);
+    if (headers)
+        for (var header in headers) {
+            httpRequest.setRequestHeader(header, headers[header]);
+        }
+    httpRequest.send();
+    return httpRequest;
+}
+
+export function findFirstLineWithoutX(str, x) {
+    const lines = str.split("\n");
+    for (let i = 0; i < lines.length; i++) {
+        if (!lines[i].startsWith(x)) {
+            return i + 1; // Return line number (1-indexed)
+        }
+    }
+    return -1; // If no line is found, return -1
+}
+
+export function evalInContext(js, context) {
+    // Return the results of the in-line anonymous function we .call with the passed context
+    return function () {
+        return eval(js);
+    }.call(context);
 }
