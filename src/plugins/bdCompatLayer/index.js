@@ -2035,6 +2035,50 @@ const thePlugin = {
             final.version = final.instance.getVersion();
         if (final.instance.getDescription)
             final.description = final.instance.getDescription();
+
+        if (!(final.name && final.version && final.description))
+            throw new Error("Incomplete plugin");
+
+        if (final.invite && typeof final.invite === "string") {
+            final.options = {
+                inviteLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => React.createElement(
+                        "div",
+                        {},
+                        // [
+                        //     React.createElement(
+                        //         Vencord.Webpack.Common.Forms.FormTitle,
+                        //         {
+                        //             tag: "h3",
+                        //         },
+                        //         "Test"
+                        //     ),
+                        //     React.createElement(
+                        //         Vencord.Webpack.Common.Forms.FormText,
+                        //         {},
+                        //         "Test"
+                        //     ),
+                        // ]
+                        React.createElement(
+                            Vencord.Webpack.Common.Forms.FormTitle,
+                            {
+                                tag: "h3",
+                            },
+                            [
+                                "Author's server:",
+                                React.createElement(
+                                    Vencord.Webpack.Common.Forms.FormText,
+                                    {},
+                                    final.invite,
+                                ),
+                            ]
+                        ),
+                    )
+                },
+                ...final.options,
+            };
+        }
         // if (final.instance.getAuthor)
         //     final.authors[0].id = final.instance.getAuthor();
         // eslint-disable-next-line eqeqeq
