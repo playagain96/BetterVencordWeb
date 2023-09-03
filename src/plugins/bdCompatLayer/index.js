@@ -25,6 +25,7 @@ import definePlugin, { OptionType } from "@utils/types";
 const { Plugin } = require("@utils/types");
 import { Settings } from "@api/settings";
 import ErrorBoundary from "@components/ErrorBoundary";
+import { Link } from "@components/Link";
 import { ModalRoot, openModal } from "@utils/modal";
 
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
@@ -2039,7 +2040,7 @@ const thePlugin = {
         if (!(final.name && final.version && final.description))
             throw new Error("Incomplete plugin");
 
-        const createTextForm = (field1, field2) => {
+        const createTextForm = (field1, field2, asLink = false, linkLabel = field2) => {
             return React.createElement(
                 "div",
                 {},
@@ -2053,13 +2054,22 @@ const thePlugin = {
                         React.createElement(
                             Vencord.Webpack.Common.Forms.FormText,
                             {},
-                            field2,
+                            asLink ? React.createElement(Link, { href: field2 }, linkLabel) : field2,
                         ),
                     ]
                 ),
             );
         };
 
+        if (final.author && typeof final.author === "string") {
+            final.options = {
+                inviteLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => createTextForm("Author:", final.author),
+                },
+                ...final.options,
+            };
+        }
         if (final.invite && typeof final.invite === "string") {
             final.options = {
                 inviteLabel: {
@@ -2073,7 +2083,43 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Plugin source:", final.source),
+                    component: () => createTextForm("Plugin source:", final.source, true),
+                },
+                ...final.options,
+            };
+        }
+        if (final.website && typeof final.website === "string") {
+            final.options = {
+                sourceLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => createTextForm("Plugin's website:", final.website, true),
+                },
+                ...final.options,
+            };
+        }
+        if (final.authorLink && typeof final.authorLink === "string") {
+            final.options = {
+                sourceLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => createTextForm("Author's website:", final.authorLink, true),
+                },
+                ...final.options,
+            };
+        }
+        if (final.donate && typeof final.donate === "string") {
+            final.options = {
+                sourceLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => createTextForm("Author's donation site:", final.donate, true),
+                },
+                ...final.options,
+            };
+        }
+        if (final.patreon && typeof final.patreon === "string") {
+            final.options = {
+                sourceLabel: {
+                    type: OptionType.COMPONENT,
+                    component: () => createTextForm("Author's Patreon:", final.patreon, true),
                 },
                 ...final.options,
             };
