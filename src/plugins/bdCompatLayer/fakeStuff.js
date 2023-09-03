@@ -43,7 +43,7 @@ export const FakeEventEmitter = class {
     }
 };
 
-export const addDiscordModules = () => {
+export const addDiscordModules = proxyUrl => {
     const context = {
         get WebpackModules() {
             return BdApi.Webpack;
@@ -61,7 +61,7 @@ export const addDiscordModules = () => {
     return { output: evalInScope(ev + "\n//# sourceURL=" + sourceBlobUrl, context), sourceBlobUrl };
 };
 
-export const addContextMenu = DiscordModules => {
+export const addContextMenu = (DiscordModules, proxyUrl) => {
     /**
      * @type {string}
      */
@@ -90,7 +90,7 @@ export const addContextMenu = DiscordModules => {
     const ModuleDataAssembly =
         "(()=>{" +
         addLogger.toString() +
-        ";const Logger = addLogger();const {React} = DiscordModules;" +
+        ";const Logger = " + addLogger.name + "();const {React} = DiscordModules;" +
         ModuleDataArr.join("\n") +
         "\nreturn ContextMenu;})();";
     const sourceBlob = new Blob([ModuleDataAssembly], {

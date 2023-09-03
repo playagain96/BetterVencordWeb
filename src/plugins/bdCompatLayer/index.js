@@ -1600,7 +1600,7 @@ const thePlugin = {
         window.require = RequireReimpl;
         window.BdApi.ReqImpl = ReImplementationObject;
 
-        const DiscordModulesInjectorOutput = addDiscordModules();
+        const DiscordModulesInjectorOutput = addDiscordModules(proxyUrl);
         const DiscordModules = DiscordModulesInjectorOutput.output;
         windowBdCompatLayer.discordModulesBlobUrl = DiscordModulesInjectorOutput.sourceBlobUrl;
         // const WebpackModules = (function () {
@@ -1639,7 +1639,7 @@ const thePlugin = {
 
         // const { inject, uninject } = summonInjector(this.simpleGET);
 
-        const ContextMenuInjectorOutput = addContextMenu();
+        const ContextMenuInjectorOutput = addContextMenu(DiscordModules, proxyUrl);
         const ContextMenu = ContextMenuInjectorOutput.output;
         windowBdCompatLayer.contextMenuBlobUrl = ContextMenuInjectorOutput.sourceBlobUrl;
         BdApiReimpl.ContextMenu = ContextMenu;
