@@ -2036,17 +2036,17 @@ const thePlugin = {
     async stop() {
         console.warn("Removing plugins...");
         await this.removeAllCustomPlugins();
-        console.warn("Removing compat layer...");
-        delete window.BdCompatLayer;
-        console.warn("Removing BdApi...");
-        delete window.BdApi;
         console.warn("Freeing blobs...");
         Object.values(window.GeneratedPluginsBlobs).forEach(x => {
             URL.revokeObjectURL(x);
             delete window.GeneratedPluginsBlobs[x];
         });
-        URL.revokeObjectURL(windowBdCompatLayer.contextMenuBlobUrl);
-        URL.revokeObjectURL(windowBdCompatLayer.discordModulesBlobUrl);
+        URL.revokeObjectURL(window.BdCompatLayer.contextMenuBlobUrl);
+        URL.revokeObjectURL(window.BdCompatLayer.discordModulesBlobUrl);
+        console.warn("Removing compat layer...");
+        delete window.BdCompatLayer;
+        console.warn("Removing BdApi...");
+        delete window.BdApi;
         if (window.zip) {
             console.warn("Removing ZIP...");
             delete window.zip;
