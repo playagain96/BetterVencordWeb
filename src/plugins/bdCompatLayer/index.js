@@ -1943,18 +1943,16 @@ const thePlugin = {
                 if (element.startsWith("@name")) {
                     final.name = element.split("@name")[1].trim();
                     final.id = final.name;
-                }
-                if (element.startsWith("@description")) {
+                } else if (element.startsWith("@description")) {
                     final.description = element.split("@description ")[1];
-                }
-                if (element.startsWith("@authorId")) {
+                } else if (element.startsWith("@authorId")) {
                     final.authors[0].id = Number(
                         element.split("@authorId ")[1] + "n"
                     );
-                }
-                if (element.startsWith("@author")) {
+                } else if (element.startsWith("@author")) {
                     final.authors[0].name = element.split("@author ")[1];
-                }
+                } else if (element != "" && element.length > 2)
+                    final[element.split("@")[1].split(" ")[0]] = element.substring(element.split("@")[1].split(" ")[0].length + 2);
             }
         }
 
@@ -2019,15 +2017,15 @@ const thePlugin = {
                 exports = exports[final.name];
             }
             final.instance = new exports();
-            const functions = Object.getOwnPropertyNames(exports.prototype);
+            // const functions = Object.getOwnPropertyNames(exports.prototype);
 
-            for (let i = 0; i < functions.length; i++) {
-                const element = functions[i];
-                // if (final.instance[element].bind)
-                //     final[element] = final.instance[element].bind(final.instance);
-                // else
-                final[element] = final.instance[element];
-            }
+            // for (let i = 0; i < functions.length; i++) {
+            //     const element = functions[i];
+            //     // if (final.instance[element].bind)
+            //     //     final[element] = final.instance[element].bind(final.instance);
+            //     // else
+            //     final[element] = final.instance[element];
+            // }
         }
 
         generateMeta(BetterDiscordPlugin);
