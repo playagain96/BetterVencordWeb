@@ -1894,7 +1894,7 @@ const thePlugin = {
                 component: () =>
                     React.createElement(
                         Vencord.Webpack.Common.Button,
-                        { onClick: openSettingsModal },
+                        { onClick: openSettingsModal, disabled: !(typeof final.instance.getSettingsPanel === "function") },
                         "Open settings"
                     ),
             },
