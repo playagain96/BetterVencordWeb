@@ -927,7 +927,7 @@ const thePlugin = {
         // }
 
         window.GeneratedPlugins = [];
-        const BdApiReimpl = {
+        const BdApiReImplementation = {
             // "Testogus": () => {
             //     console.log("test123");
             // },
@@ -994,7 +994,7 @@ const thePlugin = {
             },
             Components: {
                 get Tooltip() {
-                    return BdApiReimpl.Webpack.getModule(
+                    return BdApiReImplementation.Webpack.getModule(
                         x => x.prototype.renderTooltip,
                         { searchExports: true }
                     );
@@ -1286,10 +1286,10 @@ const thePlugin = {
             // },
             Data: {
                 load(...args) {
-                    return BdApiReimpl.getData(...args);
+                    return BdApiReImplementation.getData(...args);
                 },
                 save(...args) {
-                    return BdApiReimpl.setData(...args);
+                    return BdApiReImplementation.setData(...args);
                 },
             },
             pluginData: {},
@@ -1309,7 +1309,7 @@ const thePlugin = {
                     !window
                         .require("fs")
                         .existsSync(
-                            BdApiReimpl.Plugins.folder +
+                            BdApiReImplementation.Plugins.folder +
                             "/" +
                             key +
                             ".config.json"
@@ -1322,7 +1322,7 @@ const thePlugin = {
                     window
                         .require("fs")
                         .readFileSync(
-                            BdApiReimpl.Plugins.folder +
+                            BdApiReImplementation.Plugins.folder +
                             "/" +
                             key +
                             ".config.json"
@@ -1336,7 +1336,7 @@ const thePlugin = {
                 window
                     .require("fs")
                     .writeFileSync(
-                        BdApiReimpl.Plugins.folder + "/" + key + ".config.json",
+                        BdApiReImplementation.Plugins.folder + "/" + key + ".config.json",
                         JSON.stringify(this.pluginData[key], null, 4)
                     );
             },
@@ -1589,7 +1589,7 @@ const thePlugin = {
         const RequireReimpl = name => {
             return ReImplementationObject[name];
         };
-        window.BdApi = BdApiReimpl;
+        window.BdApi = BdApiReImplementation;
         // window.BdApi.UI = new UI();
         window.require = RequireReimpl;
         // window.BdApi.ReqImpl = ReImplementationObject;
@@ -1636,7 +1636,7 @@ const thePlugin = {
         const ContextMenuInjectorOutput = addContextMenu(DiscordModules, proxyUrl);
         const ContextMenu = ContextMenuInjectorOutput.output;
         windowBdCompatLayer.contextMenuBlobUrl = ContextMenuInjectorOutput.sourceBlobUrl;
-        BdApiReimpl.ContextMenu = ContextMenu;
+        BdApiReImplementation.ContextMenu = ContextMenu;
 
         const fakeLoading = document.createElement("span");
         fakeLoading.style.display = "none";
@@ -1669,10 +1669,10 @@ const thePlugin = {
             //     }
             // }
             const localFs = window.require("fs");
-            if (!localFs.existsSync(BdApiReimpl.Plugins.folder)) {
+            if (!localFs.existsSync(BdApiReImplementation.Plugins.folder)) {
                 // localFs.mkdirSync(BdApiReimpl.Plugins.rootFolder);
                 // localFs.mkdirSync(BdApiReimpl.Plugins.folder);
-                Utils.mkdirSyncRecursive(BdApiReimpl.Plugins.folder);
+                Utils.mkdirSyncRecursive(BdApiReImplementation.Plugins.folder);
             }
             for (const key in this.options) {
                 if (Object.hasOwnProperty.call(this.options, key)) {
@@ -1704,7 +1704,7 @@ const thePlugin = {
             }
 
             const pluginFolder = localFs
-                .readdirSync(BdApiReimpl.Plugins.folder)
+                .readdirSync(BdApiReImplementation.Plugins.folder)
                 .sort();
             const plugins = pluginFolder.filter(x =>
                 x.endsWith(".plugin.js")
@@ -1712,7 +1712,7 @@ const thePlugin = {
             for (let i = 0; i < plugins.length; i++) {
                 const element = plugins[i];
                 const pluginJS = localFs.readFileSync(
-                    BdApiReimpl.Plugins.folder + "/" + element,
+                    BdApiReImplementation.Plugins.folder + "/" + element,
                     "utf8"
                 );
                 this.convertPlugin(pluginJS, element).then(plugin => {
