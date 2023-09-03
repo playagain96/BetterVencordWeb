@@ -1240,6 +1240,29 @@ const thePlugin = {
                         {}
                     );
                 },
+                getByStringsOptimal(...strings) {
+                    return module => {
+                        if (!module?.toString || typeof(module?.toString) !== "function") return; // Not stringable
+                        let moduleString = "";
+                        try { moduleString = module?.toString([]); }
+                        catch (err) { moduleString = module?.toString(); }
+                        if (!moduleString) return false; // Could not create string
+                        for (const s of strings) {
+                            if (!moduleString.includes(s)) return false;
+                        }
+                        return true;
+                    };
+                },
+                getByStrings(...strings)
+                {
+                    return module => {
+                        const moduleString = module?.toString([]) || "";
+                        if (!moduleString) return false; // Could not create string
+
+                        return strings.every(s => moduleString.includes(s));
+                    };
+
+                },
                 findByUniqueProperties(props, first = true) {
                     return first
                         ? this.getByProps(...props)
