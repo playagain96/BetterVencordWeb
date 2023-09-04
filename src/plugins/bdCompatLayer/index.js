@@ -2061,20 +2061,23 @@ const thePlugin = {
             );
         };
 
+        // TODO: amogus
+
         if (final.authors[0].name && typeof final.authors[0].name === "string") {
             final.options = {
                 inviteLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author(s):", final.authors[0].name),
+                    component: () => createTextForm(final.authors.length > 0 ? "Authors" : "Author", final.authors.map(author => author.name).join(", ")),
                 },
                 ...final.options,
             };
         }
+
         if (final.invite && typeof final.invite === "string") {
             final.options = {
                 inviteLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author's server:", final.invite),
+                    component: () => createTextForm("Author's Server", "https://discord.gg/" + final.invite,true),
                 },
                 ...final.options,
             };
@@ -2083,7 +2086,7 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Plugin source:", final.source, true),
+                    component: () => createTextForm("Plugin Source", final.source, true),
                 },
                 ...final.options,
             };
@@ -2092,7 +2095,7 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Plugin's website:", final.website, true),
+                    component: () => createTextForm("Plugin's Website", final.website, true),
                 },
                 ...final.options,
             };
@@ -2101,7 +2104,7 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author's website:", final.authorLink, true),
+                    component: () => createTextForm("Author's Website", final.authorLink, true),
                 },
                 ...final.options,
             };
@@ -2110,7 +2113,7 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author's donation site:", final.donate, true),
+                    component: () => createTextForm("Author's Donation", final.donate, true),
                 },
                 ...final.options,
             };
@@ -2119,7 +2122,7 @@ const thePlugin = {
             final.options = {
                 sourceLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author's Patreon:", final.patreon, true),
+                    component: () => createTextForm("Author's Patreon", final.patreon, true),
                 },
                 ...final.options,
             };
