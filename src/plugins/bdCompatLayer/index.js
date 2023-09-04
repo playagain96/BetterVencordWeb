@@ -1395,12 +1395,7 @@ const thePlugin = {
                             returnValue: res,
                             cancelPatch: cancelPatch,
                             originalMethod: origMethod,
-                            callOriginalMethod: () =>
-                                (patchData.returnValue =
-                                patchData.originalMethod.apply(
-                                    patchData.thisObject,
-                                    patchData.methodArguments
-                                )),
+                            callOriginalMethod: () => (patchData.returnValue = patchData.originalMethod.apply(patchData.thisObject, patchData.methodArguments)),
                         };
 
                         try {
@@ -1444,12 +1439,7 @@ const thePlugin = {
                             returnValue: res,
                             cancelPatch: cancelPatch,
                             originalMethod: origMethod,
-                            callOriginalMethod: () =>
-                                (patchData.returnValue =
-                                patchData.originalMethod.apply(
-                                    patchData.thisObject,
-                                    patchData.methodArguments
-                                )),
+                            callOriginalMethod: () => (patchData.returnValue = patchData.originalMethod.apply(patchData.thisObject, patchData.methodArguments)),
                         };
 
                         try {
@@ -1514,11 +1504,7 @@ const thePlugin = {
                             methodArguments: arguments,
                             cancelPatch: cancel,
                             originalMethod: origMethod,
-                            callOriginalMethod: () =>
-                                (data.returnValue = data.originalMethod.apply(
-                                    data.thisObject,
-                                    data.methodArguments
-                                )),
+                            callOriginalMethod: () => (data.returnValue = data.originalMethod.apply(data.thisObject, data.methodArguments)),
                         };
                         const tempRet = BdApi.suppressErrors(
                             options.instead,
