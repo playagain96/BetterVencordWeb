@@ -31,7 +31,6 @@ import { ModalRoot, openModal } from "@utils/modal";
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
 import UI from "./UI";
 import { getDeferred, simpleGET } from "./utils";
-
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -1996,6 +1995,12 @@ const thePlugin = {
             // codeData = codeData.replaceAll("module.exports = ", "this.generatedClass = ");
             // window.GeneratedPlugins[final.name] = evalInContext(codeData, context);
             // const codeClass = evalInContext(codeData, context);
+            const Router = BdApi.findModuleByProps("listeners", "flushRoute");
+            Router.listeners.add(() =>
+                window.GeneratedPlugins.forEach(plugin =>
+                    typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
+                )
+            );
             const codeClass = eval.call(window, codeData);
             // const functions = Object.getOwnPropertyNames(codeClass.prototype);
 
