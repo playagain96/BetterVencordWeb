@@ -29,6 +29,7 @@ import { Link } from "@components/Link";
 import { ModalRoot, openModal } from "@utils/modal";
 
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
+import { injectSettingsTabs } from "./fileSystemViewer";
 import UI from "./UI";
 import { getDeferred, simpleGET } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
@@ -107,6 +108,7 @@ const thePlugin = {
     },
     // Delete these two below if you are only using code patches
     start() {
+        injectSettingsTabs();
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
         const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
