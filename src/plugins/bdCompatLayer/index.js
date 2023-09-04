@@ -1690,6 +1690,14 @@ const thePlugin = {
             //         }
             //     }
             // }
+
+            const Router = BdApiReImplementation.Webpack.getModule(x => x.listeners && x.flushRoute);
+            Router.listeners.add(() =>
+                window.GeneratedPlugins.forEach(plugin =>
+                    typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
+                )
+            );
+
             const localFs = window.require("fs");
             if (!localFs.existsSync(BdApiReImplementation.Plugins.folder)) {
                 // localFs.mkdirSync(BdApiReimpl.Plugins.rootFolder);
@@ -1995,12 +2003,6 @@ const thePlugin = {
             // codeData = codeData.replaceAll("module.exports = ", "this.generatedClass = ");
             // window.GeneratedPlugins[final.name] = evalInContext(codeData, context);
             // const codeClass = evalInContext(codeData, context);
-            const Router = BdApi.findModuleByProps("listeners", "flushRoute");
-            Router.listeners.add(() =>
-                window.GeneratedPlugins.forEach(plugin =>
-                    typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
-                )
-            );
             const codeClass = eval.call(window, codeData);
             // const functions = Object.getOwnPropertyNames(codeClass.prototype);
 
@@ -2082,7 +2084,7 @@ const thePlugin = {
             final.options = {
                 inviteLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm("Author's Server", "https://discord.gg/" + final.invite,true),
+                    component: () => createTextForm("Author's Server", "https://discord.gg/" + final.invite, true),
                 },
                 ...final.options,
             };
