@@ -2067,7 +2067,7 @@ const thePlugin = {
             final.options = {
                 inviteLabel: {
                     type: OptionType.COMPONENT,
-                    component: () => createTextForm(final.authors.length > 0 ? "Authors" : "Author", final.authors.map(author => author.name).join(", ")),
+                    component: () => createTextForm("Author", final.authors[0].name),
                 },
                 ...final.options,
             };
