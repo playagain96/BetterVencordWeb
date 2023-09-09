@@ -16,9 +16,12 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { Link } from "@components/Link";
+import { React } from "@webpack/common";
+
 export function getDeferred() {
-    let resolve = undefined;
-    let reject = undefined;
+    let resolve: undefined | ((arg: any) => void) = undefined;
+    let reject: undefined | ((e?: Error) => void) = undefined;
 
     const promise = new Promise((resolveCb, rejectCb) => {
         resolve = resolveCb;
@@ -31,7 +34,8 @@ export function getDeferred() {
 // export function evalInScope(js, contextAsScope) {
 //     return new Function(`with (this) { return (${js}); }`).call(contextAsScope);
 // }
-export function evalInScope(js, contextAsScope) {
+export function evalInScope(js: string, contextAsScope: any) {
+    // @ts-ignore
     // eslint-disable-next-line quotes
     return new Function(["contextAsScope", "js"], "return (function() { with(this) { return eval(js); } }).call(contextAsScope)")(contextAsScope, js);
 }
@@ -56,12 +60,12 @@ export function addLogger() {
     };
 }
 
-export function simpleGET(url, headers) {
+export function simpleGET(url: string, headers?: any) {
     var httpRequest = new XMLHttpRequest();
 
     httpRequest.open("GET", url, false);
     if (headers)
-        for (var header in headers) {
+        for (const header in headers) {
             httpRequest.setRequestHeader(header, headers[header]);
         }
     httpRequest.send();
