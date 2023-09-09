@@ -129,3 +129,42 @@ export function createTextForm(field1, field2, asLink = false, linkLabel = field
         ),
     );
 }
+
+export function objectToString(obj: any) {
+    if (typeof obj === "function") {
+        return obj.toString();
+    }
+
+    if (typeof obj !== "object" || obj === null) {
+        return String(obj);
+    }
+
+    let str = "{";
+    let isFirst = true;
+
+    for (const key in obj) {
+        // eslint-disable-next-line no-prototype-builtins
+        if (obj.hasOwnProperty(key)) {
+            const descriptor = Object.getOwnPropertyDescriptor(obj, key);
+
+            if (!isFirst) {
+                str += ", ";
+            }
+            isFirst = false;
+
+            if (!descriptor) {
+                // uhh how did we get here?
+                continue;
+            }
+
+            if (descriptor.get) {
+                str += `${String(descriptor.get)}`;
+            } else {
+                str += key + ": " + objectToString(obj[key]);
+            }
+        }
+    }
+
+    str += "}";
+    return str;
+}

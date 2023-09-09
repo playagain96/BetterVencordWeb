@@ -71,39 +71,6 @@ const thePlugin = {
             restartNeeded: true,
         },
     },
-    objectToString(obj) {
-        if (typeof obj === "function") {
-            return obj.toString();
-        }
-
-        if (typeof obj !== "object" || obj === null) {
-            return String(obj);
-        }
-
-        let str = "{";
-        let isFirst = true;
-
-        for (const key in obj) {
-            // eslint-disable-next-line no-prototype-builtins
-            if (obj.hasOwnProperty(key)) {
-                const descriptor = Object.getOwnPropertyDescriptor(obj, key);
-
-                if (!isFirst) {
-                    str += ", ";
-                }
-                isFirst = false;
-
-                if (descriptor.get) {
-                    str += `${String(descriptor.get)}`;
-                } else {
-                    str += key + ": " + this.objectToString(obj[key]);
-                }
-            }
-        }
-
-        str += "}";
-        return str;
-    },
     // Delete these two below if you are only using code patches
     start() {
         injectSettingsTabs();
