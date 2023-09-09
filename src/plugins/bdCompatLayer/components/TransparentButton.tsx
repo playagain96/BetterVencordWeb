@@ -21,7 +21,7 @@ import "./TransparentButton.css";
 import { React, useState } from "@webpack/common";
 import type { PropsWithChildren } from "react";
 
-export function TransparentButton({ children, onClick, clicked = false, clickTarget }: PropsWithChildren<{ onClick: Function, clicked?: boolean, clickTarget?: any; }>) {
+export function TransparentButton({ children, onClick, clicked = false, clickTarget, isToggle = true, onContextMenu = () => { } }: PropsWithChildren<{ onClick: Function, clicked?: boolean, clickTarget?: any; isToggle?: boolean, onContextMenu?: (event: any) => any; }>) {
     const [isHovered, setIsHovered] = useState(false);
     const [isClicked, setIsClicked] = useState(clicked);
 
@@ -34,7 +34,15 @@ export function TransparentButton({ children, onClick, clicked = false, clickTar
     };
 
     const handleClick = ev => {
-        setIsClicked(!isClicked);
+        if (isToggle)
+            setIsClicked(!isClicked);
+        else {
+            const current = isClicked;
+            setIsClicked(!current);
+            setTimeout(() => {
+                setIsClicked(current);
+            }, 200);
+        }
         onClick && onClick(clickTarget ?? ev);
     };
 
@@ -44,6 +52,7 @@ export function TransparentButton({ children, onClick, clicked = false, clickTar
             onMouseEnter={handleMouseEnter}
             onMouseLeave={handleMouseLeave}
             onClick={handleClick}
+            onContextMenu={onContextMenu}
         >
             {children}
         </button>

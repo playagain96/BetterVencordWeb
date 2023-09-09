@@ -34,6 +34,7 @@ interface TreeViewProps {
     data: TreeNode[];
     selectedNode: string;
     selectNode: Function;
+    onContextMenu: Function;
 }
 
 interface NodeState {
@@ -43,7 +44,7 @@ interface NodeState {
 
 export const nodeStateStore = {};
 
-const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode: Function; }> = ({ node, selectedNode, selectNode }) => {
+const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode: Function, onContextMenu: Function; }> = ({ node, selectedNode, selectNode, onContextMenu }) => {
     const [expanded, setExpanded] = useState(node.expanded);
     const [loading, setLoading] = useState(false);
 
@@ -81,7 +82,11 @@ const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode:
                     </Text>
             }
             {/* <TransparentButton clickTarget={node} clicked={selectedNode === node.id} onClick={selectNode}> */}
-            <TransparentButton onClick={() => { }}>
+            <TransparentButton isToggle={false} onClick={() => { }} onContextMenu={ev => {
+                { /* <TransparentButton clickTarget={node} clicked={selectedNode === node.id} onClick={selectNode} onContextMenu={ev => { */ }
+                selectNode(node);
+                onContextMenu(ev);
+            }}>
                 {/* <TransparentButton clickTarget={node} clicked={selectedNode === node.id} onClick={console.log}> */}
                 <Text style={{ marginLeft: "20px" }}>
                     {node.label}
@@ -91,7 +96,7 @@ const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode:
             {expanded && !loading && node.children && (
                 <div style={{ marginLeft: "20px" }}>
                     {node.children.map(childNode => (
-                        <TreeNodeItem key={childNode.id} node={childNode} selectedNode={selectedNode} selectNode={selectNode} />
+                        <TreeNodeItem key={childNode.id} node={childNode} selectedNode={selectedNode} selectNode={selectNode} onContextMenu={onContextMenu} />
                     ))}
                 </div>
             )}
@@ -99,11 +104,11 @@ const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode:
     );
 };
 
-const TreeView: React.FC<TreeViewProps> = ({ data, selectedNode, selectNode }) => {
+const TreeView: React.FC<TreeViewProps> = ({ data, selectedNode, selectNode, onContextMenu }) => {
     return (
         <div>
             {data.map(node => (
-                <TreeNodeItem key={node.id} node={node} selectedNode={selectedNode} selectNode={selectNode} />
+                <TreeNodeItem key={node.id} node={node} selectedNode={selectedNode} selectNode={selectNode} onContextMenu={onContextMenu} />
             ))}
         </div>
     );
@@ -111,5 +116,20 @@ const TreeView: React.FC<TreeViewProps> = ({ data, selectedNode, selectNode }) =
 
 export default TreeView;
 export {
-    TreeNode
+    TreeNode,
 };
+export function findInTree(root: TreeNode, filter: (x: TreeNode) => boolean): TreeNode | null {
+    if (!root) return null;
+
+    if (filter(root)) {
+        return root as TreeNode;
+    } else {
+        if (root.children)
+            for (const child of root.children) {
+                const result = findInTree(child, filter);
+                if (result) return result as TreeNode;
+            }
+    }
+
+    return null;
+}

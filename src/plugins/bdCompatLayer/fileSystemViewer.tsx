@@ -18,10 +18,11 @@
 
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { Plugin } from "@utils/types";
-import { useState } from "@webpack/common";
+import { Text, useRef } from "@webpack/common";
 
-import TreeView, { TreeNode } from "./treeView";
-import { readdirPromise } from "./utils.js";
+import { TransparentButton } from "./components/TransparentButton";
+import TreeView, { findInTree, TreeNode } from "./treeView";
+import { readdirPromise } from "./utils";
 
 type SettingsPlugin = Plugin & {
     customSections: ((ID: Record<string, unknown>) => any)[];
@@ -47,16 +48,37 @@ function makeTab() {
     //     console.log(selectedNode);
     //     setSelectedNode(node);
     // };
-    const [selectedNode, setSelectedNode] = useState<string>(baseNode.id);
+    // const [selectedNode, setSelectedNode] = useState<string>(baseNode.id);
+    const ref = useRef(baseNode.id);
 
     const handleNodeSelect = (node: TreeNode) => {
         console.log(node);
-        console.log(selectedNode);
-        setSelectedNode(node.id);
+        // console.log(selectedNode);
+        console.log(ref.current);
+        // setSelectedNode(node.id);
+        ref.current = node.id;
+    };
+
+    const contextMenuHandler = (event: MouseEvent) => {
+        // console.log(event);
+        const contextMenuBuild = () => {
+            return window.BdApi.ContextMenu.buildMenu([
+                { label: ref.current, disabled: true },
+                findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable && { label: "This is a dir" }
+            ].filter(Boolean));
+        };
+        window.BdApi.ContextMenu.open(event, contextMenuBuild(), {});
     };
 
     return <SettingsTab title={TabName}>
-        <TreeView selectedNode={selectedNode} selectNode={handleNodeSelect} data={
+        <TransparentButton isToggle={false} onClick={() => { }}>
+            <Text>Export everything as ZIP</Text>
+        </TransparentButton>
+        <TransparentButton isToggle={false} onClick={() => { }}>
+            <Text>Import filesystem from ZIP</Text>
+        </TransparentButton>
+        {/* <TreeView onContextMenu={contextMenuHandler} selectedNode={selectedNode} selectNode={handleNodeSelect} data={ */}
+        <TreeView onContextMenu={contextMenuHandler} selectedNode={ref.current} selectNode={handleNodeSelect} data={
             [
                 baseNode
             ]
