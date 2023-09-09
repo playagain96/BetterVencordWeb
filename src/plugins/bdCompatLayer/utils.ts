@@ -168,3 +168,243 @@ export function objectToString(obj: any) {
     str += "}";
     return str;
 }
+
+export function openFileSelect() {
+    return new Promise<File>((resolve, reject) => {
+        const input = document.createElement("input");
+        input.type = "file";
+        const timeout = setTimeout(() => {
+            reject();
+            // so we don't wait forever
+        }, 30 * 60 * 1000);
+        input.addEventListener("change", () => {
+            if (input.files && input.files.length > 0) {
+                clearTimeout(timeout);
+                resolve(input.files[0]);
+            } else {
+                clearTimeout(timeout);
+                reject("No file selected.");
+            }
+        });
+
+        input.click();
+    });
+}
+
+export const FSUtils = {
+    readDirectory(dirPath: string) {
+        const fs = window.require("fs");
+        const path = window.require("path");
+        const files = fs.readdirSync(dirPath);
+
+        const result = {};
+
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const filePath = path.join(dirPath, file);
+            const stat = fs.statSync(filePath);
+
+            if (stat.isDirectory()) {
+                result[file] = this.readDirectory(filePath);
+            } else if (stat.isFile()) {
+                result[file] = new ReadableStream({
+                    start(controller) {
+                        controller.enqueue(fs.readFileSync(filePath));
+                        controller.close();
+                    },
+                });
+            }
+        }
+
+        return result;
+    },
+    createPathFromTree(tree: {}, currentPath = "") {
+        let paths = {};
+
+        for (const key in tree) {
+            // eslint-disable-next-line no-prototype-builtins
+            if (tree.hasOwnProperty(key)) {
+                const newPath = currentPath
+                    ? currentPath + "/" + key
+                    : key;
+
+                if (
+                    typeof tree[key] === "object" &&
+                    tree[key] !== null &&
+                    !(tree[key] instanceof ReadableStream)
+                ) {
+                    const nestedPaths = this.createPathFromTree(
+                        tree[key],
+                        newPath
+                    );
+                    // paths = paths.concat(nestedPaths);
+                    paths = Object.assign({}, paths, nestedPaths);
+                } else {
+                    // paths.push(newPath);
+                    paths[newPath] = tree[key];
+                }
+            }
+        }
+
+        return paths;
+    },
+    completeFileSystem() {
+        return this.createPathFromTree(this.readDirectory("/"));
+    },
+    removeDirectoryRecursive(directoryPath) {
+        const fs = window.require("fs");
+        const path = window.require("path");
+        const files = fs.readdirSync(directoryPath);
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const currentPath = path.join(directoryPath, file);
+
+            if (fs.lstatSync(currentPath).isDirectory()) {
+                this.removeDirectoryRecursive(currentPath);
+            } else {
+                fs.unlinkSync(currentPath);
+            }
+        }
+        if (directoryPath === "/") return;
+        fs.rmdirSync(directoryPath);
+    },
+    formatFs() {
+        const filesystem = this.createPathFromTree(
+            this.readDirectory("/")
+        );
+        const fs = window.require("fs");
+        for (const key in filesystem) {
+            if (Object.hasOwnProperty.call(filesystem, key)) {
+                fs.unlinkSync("/" + key);
+            }
+        }
+        // const directories = fs.readdirSync("/");
+        // for (let i = 0; i < directories.length; i++) {
+        //     const element = directories[i];
+        //     fs.rmdirSync("/" + element);
+        // }
+        this.removeDirectoryRecursive("/");
+    },
+    mkdirSyncRecursive(directory: string) {
+        if (directory === "") return;
+        const fs = window.require("fs");
+        if (fs.existsSync(directory)) return;
+        const path = window.require("path");
+        const parentDir = path.dirname(directory);
+        if (!fs.existsSync(parentDir)) {
+            this.mkdirSyncRecursive(parentDir);
+        }
+        fs.mkdirSync(directory);
+    },
+    async importFile(targetPath: string) {
+        const file = await openFileSelect();
+        const fs = window.require("fs");
+        const path = window.require("path");
+        fs.writeFile(
+            targetPath,
+            window.BrowserFS.BFSRequire("buffer").Buffer.from(
+                await file.arrayBuffer()
+            ),
+            () => { }
+        );
+    }
+};
+
+export const ZIPUtils = {
+    async exportZip() {
+        if (!window.zip) {
+            injectZipToWindow();
+        }
+        const { BlobWriter, ZipWriter } = window.zip;
+        const zipFileWriter = new BlobWriter();
+        const zipWriter = new ZipWriter(zipFileWriter);
+        // await zipWriter.add("hello.txt", helloWorldReader);
+        const fileSystem = FSUtils.completeFileSystem();
+        for (const key in fileSystem) {
+            if (Object.hasOwnProperty.call(fileSystem, key)) {
+                const element = fileSystem[key];
+                await zipWriter.add(key, element);
+            }
+        }
+        const data = await zipWriter.close();
+        // console.log(data);
+        return data;
+    },
+    async importZip() {
+        if (!window.zip) {
+            injectZipToWindow();
+        }
+        const fs = window.require("fs");
+        const path = window.require("path");
+        const { BlobReader, ZipReader, BlobWriter } = window.zip;
+        const zipFileReader = new BlobReader(await this.uploadZip());
+        // await zipWriter.add("hello.txt", helloWorldReader);
+        const zipReader = new ZipReader(zipFileReader);
+        FSUtils.formatFs();
+        const entries = await zipReader.getEntries();
+        // debugger;
+        for (let i = 0; i < entries.length; i++) {
+            const element = entries[i];
+            const dir = element.directory
+                ? element.filename
+                : path.dirname(element.filename);
+            const modElement =
+                dir === element.filename
+                    ? dir.endsWith("/")
+                        ? dir.slice(0, 1)
+                        : dir
+                    : dir;
+            FSUtils.mkdirSyncRecursive("/" + modElement);
+            const writer = new BlobWriter();
+            const out = await element.getData(writer);
+            // console.log(out);
+            // debugger;
+            if (element.directory) continue;
+            fs.writeFile(
+                "/" + element.filename,
+                window.BrowserFS.BFSRequire("buffer").Buffer.from(
+                    await out.arrayBuffer()
+                ),
+                () => { }
+            );
+        }
+        const data = await zipReader.close();
+        // console.log(data);
+        return data;
+    },
+    uploadZip() {
+        return new Promise<Blob>((resolve, reject) => {
+            // return new Promise((resolve, reject) => {
+            //     const fileInput = document.createElement("input");
+            //     fileInput.type = "file";
+            //     fileInput.accept = "*";
+            //     fileInput.onchange = event => {
+            //         const file = event.target.files[0];
+            openFileSelect().then(file => {
+                // if (!file)
+                //     return null;
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const blob = new Blob([reader.result as BlobPart], {
+                        type: file.type,
+                    });
+                    resolve(blob);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+            //     };
+            //     fileInput.click();
+            // });
+        });
+    },
+    async downloadZip() {
+        const zipFile = await this.exportZip();
+        const blobUrl = URL.createObjectURL(zipFile);
+        const newA = document.createElement("a");
+        newA.href = blobUrl;
+        newA.download = "filesystem-dump.zip";
+        newA.click();
+        newA.remove();
+        URL.revokeObjectURL(blobUrl);
+    }
+};

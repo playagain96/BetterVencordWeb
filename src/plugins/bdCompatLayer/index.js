@@ -29,7 +29,7 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, Patcher } from "./
 import { injectSettingsTabs } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import UI from "./UI";
-import { getDeferred, injectZipToWindow, simpleGET } from "./utils";
+import { FSUtils, getDeferred, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -106,254 +106,25 @@ const thePlugin = {
                     }
                 );
             });
-        const Utils = {
-            readDirectory(dirPath) {
-                const fs = window.require("fs");
-                const path = window.require("path");
-                const files = fs.readdirSync(dirPath);
-
-                const result = {};
-
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const filePath = path.join(dirPath, file);
-                    const stat = fs.statSync(filePath);
-
-                    if (stat.isDirectory()) {
-                        result[file] = this.readDirectory(filePath);
-                    } else if (stat.isFile()) {
-                        result[file] = new ReadableStream({
-                            start(controller) {
-                                controller.enqueue(fs.readFileSync(filePath));
-                                controller.close();
-                            },
-                        });
-                    }
-                }
-
-                return result;
-            },
-            createPathFromTree(tree, currentPath = "") {
-                let paths = {};
-
-                for (const key in tree) {
-                    // eslint-disable-next-line no-prototype-builtins
-                    if (tree.hasOwnProperty(key)) {
-                        const newPath = currentPath
-                            ? currentPath + "/" + key
-                            : key;
-
-                        if (
-                            typeof tree[key] === "object" &&
-                            tree[key] !== null &&
-                            !(tree[key] instanceof ReadableStream)
-                        ) {
-                            const nestedPaths = this.createPathFromTree(
-                                tree[key],
-                                newPath
-                            );
-                            // paths = paths.concat(nestedPaths);
-                            paths = Object.assign({}, paths, nestedPaths);
-                        } else {
-                            // paths.push(newPath);
-                            paths[newPath] = tree[key];
-                        }
-                    }
-                }
-
-                return paths;
-            },
-            removeDirectoryRecursive(directoryPath) {
-                const fs = window.require("fs");
-                const path = window.require("path");
-                const files = fs.readdirSync(directoryPath);
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const currentPath = path.join(directoryPath, file);
-
-                    if (fs.lstatSync(currentPath).isDirectory()) {
-                        this.removeDirectoryRecursive(currentPath);
-                    } else {
-                        fs.unlinkSync(currentPath);
-                    }
-                }
-                if (directoryPath == "/") return;
-                fs.rmdirSync(directoryPath);
-            },
-            formatFs() {
-                const filesystem = this.createPathFromTree(
-                    this.readDirectory("/")
-                );
-                const fs = window.require("fs");
-                for (const key in filesystem) {
-                    if (Object.hasOwnProperty.call(filesystem, key)) {
-                        fs.unlinkSync("/" + key);
-                    }
-                }
-                // const directories = fs.readdirSync("/");
-                // for (let i = 0; i < directories.length; i++) {
-                //     const element = directories[i];
-                //     fs.rmdirSync("/" + element);
-                // }
-                this.removeDirectoryRecursive("/");
-            },
-            /**
-             * @returns {Promise<File>}
-             */
-            openFileSelect() {
-                return new Promise((resolve, reject) => {
-                    const input = document.createElement("input");
-                    input.type = "file";
-
-                    input.addEventListener("change", () => {
-                        if (input.files && input.files.length > 0) {
-                            resolve(input.files[0]);
-                        } else {
-                            reject("No file selected.");
-                        }
-                    });
-
-                    input.click();
-                });
-            },
-            uploadZip() {
-                return new Promise((resolve, reject) => {
-                    // return new Promise((resolve, reject) => {
-                    //     const fileInput = document.createElement("input");
-                    //     fileInput.type = "file";
-                    //     fileInput.accept = "*";
-                    //     fileInput.onchange = event => {
-                    //         const file = event.target.files[0];
-                    this.openFileSelect().then(file => {
-                        // if (!file)
-                        //     return null;
-                        const reader = new FileReader();
-                        reader.onload = () => {
-                            const blob = new Blob([reader.result], {
-                                type: file.type,
-                            });
-                            resolve(blob);
-                        };
-                        reader.readAsArrayBuffer(file);
-                    });
-                    //     };
-                    //     fileInput.click();
-                    // });
-                });
-            },
-            mkdirSyncRecursive(directory) {
-                if (directory == "") return;
-                const fs = window.require("fs");
-                if (fs.existsSync(directory)) return;
-                const path = window.require("path");
-                const parentDir = path.dirname(directory);
-                if (!fs.existsSync(parentDir)) {
-                    this.mkdirSyncRecursive(parentDir);
-                }
-                fs.mkdirSync(directory);
-            },
-            stream2buffer(stream) {
-                return new Promise((resolve, reject) => {
-                    const _buf = [];
-                    stream.on("data", chunk => _buf.push(chunk));
-                    stream.on("end", () => resolve(Buffer.concat(_buf)));
-                    stream.on("error", err => reject(err));
-                });
-            },
-        };
-        const exportZip = async () => {
-            if (!window.zip) {
-                injectZipToWindow();
-            }
-            const { BlobWriter, ZipWriter } = window.zip;
-            const zipFileWriter = new BlobWriter();
-            const zipWriter = new ZipWriter(zipFileWriter);
-            // await zipWriter.add("hello.txt", helloWorldReader);
-            const fileSystem = completeFileSystem();
-            for (const key in fileSystem) {
-                if (Object.hasOwnProperty.call(fileSystem, key)) {
-                    const element = fileSystem[key];
-                    await zipWriter.add(key, element);
-                }
-            }
-            const data = await zipWriter.close();
-            // console.log(data);
-            return data;
-        };
-        const importZip = async () => {
-            if (!window.zip) {
-                injectZipToWindow();
-            }
-            const fs = window.require("fs");
-            const path = window.require("path");
-            const { BlobReader, ZipReader, BlobWriter } = window.zip;
-            const zipFileReader = new BlobReader(await Utils.uploadZip());
-            // await zipWriter.add("hello.txt", helloWorldReader);
-            const zipReader = new ZipReader(zipFileReader);
-            Utils.formatFs();
-            const entries = await zipReader.getEntries();
-            // debugger;
-            for (let i = 0; i < entries.length; i++) {
-                const element = entries[i];
-                const dir = element.directory
-                    ? element.filename
-                    : path.dirname(element.filename);
-                const modElement =
-                    dir == element.filename
-                        ? dir.endsWith("/")
-                            ? dir.slice(0, 1)
-                            : dir
-                        : dir;
-                Utils.mkdirSyncRecursive("/" + modElement);
-                const writer = new BlobWriter();
-                const out = await element.getData(writer);
-                // console.log(out);
-                // debugger;
-                if (element.directory) continue;
-                fs.writeFile(
-                    "/" + element.filename,
-                    BrowserFS.BFSRequire("buffer").Buffer.from(
-                        await out.arrayBuffer()
-                    ),
-                    () => { }
-                );
-            }
-            const data = await zipReader.close();
-            // console.log(data);
-            return data;
-        };
-        const downloadZip = async () => {
-            const zipFile = await exportZip();
-            const blobUrl = URL.createObjectURL(zipFile);
-            const newA = document.createElement("a");
-            newA.href = blobUrl;
-            newA.download = "filesystem-dump.zip";
-            newA.click();
-            newA.remove();
-            URL.revokeObjectURL(blobUrl);
-        };
-        const completeFileSystem = () => {
-            return Utils.createPathFromTree(Utils.readDirectory("/"));
-        };
-        const importFile = async targetPath => {
-            const file = await Utils.openFileSelect();
-            const fs = window.require("fs");
-            const path = window.require("path");
-            fs.writeFile(
-                targetPath,
-                BrowserFS.BFSRequire("buffer").Buffer.from(
-                    await file.arrayBuffer()
-                ),
-                () => { }
-            );
-        };
+        // const Utils = {
+        //     stream2buffer(stream) {
+        //         return new Promise((resolve, reject) => {
+        //             const _buf = [];
+        //             stream.on("data", chunk => _buf.push(chunk));
+        //             stream.on("end", () => resolve(Buffer.concat(_buf)));
+        //             stream.on("error", err => reject(err));
+        //         });
+        //     },
+        // };
         const windowBdCompatLayer = {
-            Utils,
-            exportZip,
-            completeFileSystem,
-            downloadZip,
-            importZip,
-            importFile,
+            // Utils,
+            // exportZip,
+            // completeFileSystem,
+            // downloadZip,
+            // importZip,
+            // importFile,
+            FSUtils,
+            ZIPUtils,
             fsReadyPromise: getDeferred(),
         };
         window.BdCompatLayer = windowBdCompatLayer;
@@ -1031,7 +802,8 @@ const thePlugin = {
             if (!localFs.existsSync(BdApiReImplementation.Plugins.folder)) {
                 // localFs.mkdirSync(BdApiReimpl.Plugins.rootFolder);
                 // localFs.mkdirSync(BdApiReimpl.Plugins.folder);
-                Utils.mkdirSyncRecursive(BdApiReImplementation.Plugins.folder);
+                // Utils.mkdirSyncRecursive(BdApiReImplementation.Plugins.folder);
+                FSUtils.mkdirSyncRecursive(BdApiReImplementation.Plugins.folder);
             }
             for (const key in this.options) {
                 if (Object.hasOwnProperty.call(this.options, key)) {
