@@ -17,47 +17,48 @@
 */
 
 // eslint-disable-next-line semi
-export function helper() {
-    console.log("hi");
-}
+export const UI = class {
+    helper() {
+        console.log("hi");
+    }
+    alert() {
+        // Redoing
+    }
+    toast() {
+        BdApi.DOM.addStyle(
+            "bv-toasts",
+            `
+            @keyframes bv-toast-up {
+                from {
+                    transform: translateY(0);
+                    opacity: 0;
+                }
+            }
 
-export function alert() {
-    // Redoing
-}
+            .some-toast-shit {
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%) translateY(0);
+                animation: bv-toast-up 300ms ease;
+                background-color: var(--background-primary);
+                padding: 10px;
+                border-radius: 5px;
+                box-shadow: var(--elevation-medium), var(--elevation-stroke);
+                font-weight: 500;
+                color: var(--header-primary);
+                font-size: 14px;
+                opacity: 1;
+                pointer-events: none;
+                user-select: none;
+            }`
+        );
 
-export function toast() {
-    BdApi.DOM.addStyle(
-        "bv-toasts",
-        `
-        @keyframes bv-toast-up {
-          from {
-            transform: translateY(0);
-            opacity: 0;
-          }
-        }
+        // Create a toast element
+        const toast = document.createElement("div");
+        toast.classList.add("some-toast-shit");
+        document.body.appendChild(toast);
+    }
+};
 
-        .some-toast-shit {
-          position: fixed;
-          bottom: 20px;
-          left: 50%;
-          transform: translateX(-50%) translateY(0);
-          animation: bv-toast-up 300ms ease;
-          background-color: var(--background-primary);
-          padding: 10px;
-          border-radius: 5px;
-          box-shadow: var(--elevation-medium), var(--elevation-stroke);
-          font-weight: 500;
-          color: var(--header-primary);
-          font-size: 14px;
-          opacity: 1;
-          pointer-events: none;
-          user-select: none;
-        }
-      `
-    );
-
-    // Create a toast element
-    const toast = document.createElement("div");
-    toast.classList.add("some-toast-shit");
-    document.body.appendChild(toast);
-}
+export default UI;
