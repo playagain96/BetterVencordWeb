@@ -357,221 +357,15 @@ const thePlugin = {
             fsReadyPromise: getDeferred(),
         };
         window.BdCompatLayer = windowBdCompatLayer;
-        // const fsContext = {};
-        // const setupFiler = (() => function () { return eval(Filer.responseText); }.call(fsContext));
-        // setupFiler();
-        // console.log(fsContext);
-        // eval(Filer.responseText);
-        // const instance = window.webpackChunkdiscord_app;
-        // instance.push([[Symbol()], {}, require => {
-        //     require.d = (target, exports) => {
-        //         for (const key in exports) {
-        //             if (!Reflect.has(exports, key) || target[key]) continue;
-
-        //             Object.defineProperty(target, key, {
-        //                 get: () => exports[key](),
-        //                 set: v => { exports[key] = () => v; },
-        //                 enumerable: true,
-        //                 configurable: true
-        //             });
-        //         }
-        //     };
-        // }]);
-
-        // instance.pop();
-        // function patchAll() {
-        //     let modules = [];
-        //     window.webpackChunkdiscord_app.push([[""], {}, e => { for (const c in e.c) modules.push(e.c[c]); }]);
-        //     for (let i = 0; i < modules.length; i++) {
-        //         const { exports } = Object.assign({}, modules[i]);
-        //         if (typeof exports != "object")
-        //             continue;
-        //         for (const key in exports) {
-        //             if (!Reflect.has(exports, key) || modules[i][key]) continue;
-
-        //             Object.defineProperty(modules[i], key, {
-        //                 get: () => exports[key](),
-        //                 set: v => { exports[key] = () => v; },
-        //                 enumerable: true,
-        //                 configurable: true
-        //             });
-        //         }
-        //         delete modules[i].exports;
-        //         modules[i].exports = {};
-        //         for (const key in modules[i]) {
-        //             if (!Reflect.has(exports, key)) continue;
-
-        //             Object.defineProperty(modules[i].exports, key, {
-        //                 get: () => exports[key](),
-        //                 set: v => { exports[key] = () => v; },
-        //                 enumerable: true,
-        //                 configurable: true
-        //             });
-        //         }
-        //     }
-        //     modules = [];
-        // }
-        // // const originalPush = instance.push;
-        // const predefine = function (target, prop, effect) {
-        //     const value = target[prop];
-        //     Object.defineProperty(target, prop, {
-        //         get() { return value; },
-        //         set(newValue) {
-        //             Object.defineProperty(target, prop, {
-        //                 value: newValue,
-        //                 configurable: true,
-        //                 enumerable: true,
-        //                 writable: true
-        //             });
-
-        //             try {
-        //                 effect(newValue);
-        //             }
-        //             catch (error) {
-        //                 // eslint-disable-next-line no-console
-        //                 console.error(error);
-        //             }
-
-        //             // eslint-disable-next-line no-setter-return
-        //             return newValue;
-        //         },
-        //         configurable: true
-        //     });
-        // };
-        // predefine(instance, "push", () => {
-        //     patchAll();
-        // });
-        // predefine(instance, "push", () => {
-        //     instance.push([[Symbol()], {}, require => {
-        //         require.d = (target, exports) => {
-        //             for (const key in exports) {
-        //                 if (!Reflect.has(exports, key) || target[key]) continue;
-
-        //                 Object.defineProperty(target, key, {
-        //                     get: () => exports[key](),
-        //                     set: v => { exports[key] = () => v; },
-        //                     enumerable: true,
-        //                     configurable: true
-        //                 });
-        //             }
-        //         };
-        //     }]);
-
-        //     instance.pop();
-        // });
-
-        // console.log(process.env);
-        // readFileSync("");
-        // definePlugin();
-        // window.RegisterPlugin = data => {
-
-        // };
-
-        // class Patcher {
-        //     static get patches() { return this._patches || (this._patches = []); }
-
-        //     static getPatchesByCaller(name) {
-        //         if (!name) return [];
-        //         const patches = [];
-        //         for (const patch of this.patches) {
-        //             for (const childPatch of patch.children)
-        //                 if (childPatch.caller === name) patches.push(childPatch);
-        //         }
-        //         return patches;
-        //     }
-
-        //     static unpatchAll(patches) {
-        //         if (typeof patches === "string") patches = this.getPatchesByCaller(patches);
-        //         for (const patch of patches) patch.unpatch();
-        //     }
-
-        //     static resolveModule(module) {
-        //         if (!module || typeof module === "function" || (typeof module === "object" && !Array.isArray(module))) return module;
-        //         if (typeof module === "string") return DiscordModules[module];
-        //         if (Array.isArray(module)) return BdApi.findModuleByProps(...module);
-        //         return null;
-        //     }
-
-        //     static makePatch(module, functionName, name) {
-        //         const patch = {
-        //             name,
-        //             module,
-        //             functionName,
-        //             originalFunction: module[functionName],
-        //             revert: () => {
-        //                 for (const child of patch.children) child.unpatch?.();
-        //                 patch.children = [];
-        //             },
-        //             counter: 0,
-        //             children: []
-        //         };
-
-        //         this.patches.push(patch);
-        //         return patch;
-        //     }
-
-        //     static before(caller, module, functionName, callback, options = {}) {
-        //         return this.pushChildPatch(caller, module, functionName, callback, { ...options, type: "before" });
-        //     }
-
-        //     static instead(caller, module, functionName, callback, options = {}) {
-        //         return this.pushChildPatch(caller, module, functionName, callback, { ...options, type: "instead" });
-        //     }
-
-        //     static after(caller, module, functionName, callback, options = {}) {
-        //         return this.pushChildPatch(caller, module, functionName, callback, { ...options, type: "after" });
-        //     }
-
-        //     static pushChildPatch(caller, module, functionName, callback, options = {}) {
-        //         const { type = "after", forcePatch = true } = options;
-        //         const mdl = this.resolveModule(module);
-        //         if (!mdl) return null;
-        //         if (!mdl[functionName] && forcePatch) mdl[functionName] = function () { };
-        //         if (typeof mdl[functionName] !== "function") return null;
-
-        //         const displayName = options.displayName || module.displayName || module.name || module.constructor.displayName || module.constructor.name;
-
-        //         const patchId = `${displayName}.${functionName}`;
-        //         const patch = this.patches.find(p => p.module == module && p.functionName === functionName) || this.makePatch(module, functionName, patchId);
-
-        //         const child = {
-        //             caller,
-        //             type,
-        //             id: patch.counter,
-        //             callback,
-        //             unpatch: BdApi.monkeyPatch(mdl, functionName, {
-        //                 [type]: data => {
-        //                     const r = callback(data.thisObject, data.methodArguments, data.returnValue);
-        //                     if (r !== undefined) data.returnValue = r;
-        //                 }
-        //             })
-        //         };
-        //         patch.children.push(child);
-        //         patch.counter++;
-        //         return child.unpatch;
-        //     }
-        // }
 
         window.GeneratedPlugins = [];
         const BdApiReImplementation = {
-            // "Testogus": () => {
-            //     console.log("test123");
-            // },
-            // Patcher: {
-            // unpatchAll: () => { },
-            // },
             Patcher,
             UI: new UI(),
             Plugins: {
                 getAll: () => {
-                    // return Vencord.Plugins.plugins;
                     return GeneratedPlugins;
                 },
-                // "getAll": () => {
-                //     return [{
-                //         "id": ZeresPluginLibrary
-                //     }];
-                // },
                 isEnabled: name => {
                     return Vencord.Plugins.isPluginEnabled(name);
                 },
@@ -1185,33 +979,6 @@ const thePlugin = {
             },
         };
         const ReImplementationObject = {
-            /*  "fs": {
-                 "writeFile": () => Promise.resolve(),
-             }, */
-            // "path": {
-            //     dirname: function (path) {
-            //         // eslint-disable-next-line no-useless-escape
-            //         return path.replace(/\\/g, "/").replace(/\/[^\/]*$/, "");
-            //     },
-            //     basename: function (path) {
-            //         return path.replace(/\\/g, "/").replace(/^.*\//, "");
-            //     },
-            //     extname: function (path) {
-            //         // eslint-disable-next-line no-useless-escape
-            //         return path.replace(/^.*(\.[^\.]*)$/, "$1");
-            //     },
-            //     join: function () {
-            //         var args = Array.prototype.slice.call(arguments);
-            //         return args.join("/").replace(/\/{2,}/g, "/");
-            //     },
-            //     normalize: function (path) {
-            //         return path.replace(/\\/g, "/").replace(/\/{2,}/g, "/");
-            //     },
-            //     resolve: function () {
-            //         var args = Array.prototype.slice.call(arguments);
-            //         return path.normalize(args.join("/").replace(/\/{2,}/g, "/"));
-            //     }
-            // },
             request: (url, cb) => {
                 cb({ err: "err" }, undefined, undefined);
             },
@@ -1232,41 +999,6 @@ const thePlugin = {
         const DiscordModules = DiscordModulesInjectorOutput.output;
         Patcher.setup(DiscordModules);
         windowBdCompatLayer.discordModulesBlobUrl = DiscordModulesInjectorOutput.sourceBlobUrl;
-        // const WebpackModules = (function () {
-        //     return BdApi.Webpack;
-        // })();
-        // const ModuleDataText = this.simpleGET(
-        //     proxyUrl +
-        //     "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
-        // ).responseText.replaceAll("\r", "");
-        // // const ev = "(" + ModuleDataText.split("export default Utilities.memoizeObject(")[1].replaceAll("WebpackModules", "BdApi.Webpack");
-        // const ev =
-        //     "(" +
-        //     ModuleDataText.split("export default Utilities.memoizeObject(")[1];
-        // const sourceBlob = new Blob([ev], { type: "application/javascript" });
-        // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-        // DiscordModules = eval(ev + "\n//# sourceURL=" + sourceBlobUrl);
-        // function summonInjector(simpleGET) {
-        //     /**
-        //      * @type {string}
-        //      */
-        //     const ModuleDataText = simpleGET(
-        //         proxyUrl +
-        //         "https://github.com/powercord-org/powercord/raw/v2/src/fake_node_modules/powercord/injector/index.js"
-        //     ).responseText.replaceAll("\r", "");
-        //     const ModuleDataAssembly =
-        //         "(()=>{const module = { exports: {} };" +
-        //         ModuleDataText +
-        //         "\nreturn module;})();";
-        //     const sourceBlob = new Blob([ModuleDataAssembly], {
-        //         type: "application/javascript",
-        //     });
-        //     const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-        //     return eval(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl)
-        //         .exports;
-        // }
-
-        // const { inject, uninject } = summonInjector(this.simpleGET);
 
         const ContextMenuInjectorOutput = addContextMenu(DiscordModules, proxyUrl);
         const ContextMenu = ContextMenuInjectorOutput.output;
@@ -1287,23 +1019,6 @@ const thePlugin = {
         //         return;
         //     clearInterval(checkInterval);
         windowBdCompatLayer.fsReadyPromise.promise.then(() => {
-            // for (const key in this.options) {
-            //     if (Object.hasOwnProperty.call(this.options, key)) {
-            //         if (Settings.plugins[this.name][key]) {
-            //             try {
-            //                 const url = Settings.plugins[this.name][key];
-            //                 const filenameFromUrl = url.split("/").pop();
-            //                 // this.convertPlugin(this.simpleGET(proxyUrl + url).responseText, filenameFromUrl).then(plugin => {
-            //                 this.convertPlugin(this.simpleGET(proxyUrl + url).responseText, filenameFromUrl).then(plugin => {
-            //                     this.addCustomPlugin(plugin);
-            //                 });
-            //             } catch (error) {
-            //                 console.error(error, "\nWhile loading: " + Settings.plugins[this.name][key]);
-            //             }
-            //         }
-            //     }
-            // }
-
             const Router = BdApiReImplementation.Webpack.getModule(x => x.listeners && x.flushRoute);
             Router.listeners.add(() =>
                 window.GeneratedPlugins.forEach(plugin =>
