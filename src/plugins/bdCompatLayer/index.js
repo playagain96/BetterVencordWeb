@@ -27,7 +27,7 @@ import { Settings } from "@api/Settings";
 
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
 import { injectSettingsTabs } from "./fileSystemViewer";
-import { addCustomPlugin, convertPlugin } from "./pluginConstructor";
+import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import UI from "./UI";
 import { getDeferred, injectZipToWindow, simpleGET } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
@@ -1729,39 +1729,11 @@ const thePlugin = {
             }
         });
     },
-    async removeAllCustomPlugins() {
-        const arrayToObject = array => {
-            const object = array.reduce((obj, element, index) => {
-                obj[index] = element;
-                return obj;
-            }, {});
-            return object;
-        };
-
-        /**
-         * @type {{GeneratedPlugins: Array}}
-         */
-        const { GeneratedPlugins } = window;
-        const copyOfGeneratedPlugin = arrayToObject(GeneratedPlugins);
-        const removePlugin = generatedPlugin => {
-            const generated = generatedPlugin;
-            Vencord.Settings.plugins[generated.name].enabled = false;
-            Vencord.Plugins.stopPlugin(generated);
-            delete Vencord.Plugins.plugins[generated.name];
-            // copyOfGeneratedPlugin.splice(copyOfGeneratedPlugin.indexOf(generated), 1);
-            delete copyOfGeneratedPlugin[GeneratedPlugins.indexOf(generated)];
-        };
-        for (let i = 0; i < GeneratedPlugins.length; i++) {
-            const element = GeneratedPlugins[i];
-            removePlugin(element);
-        }
-        GeneratedPlugins.length = 0;
-    },
     async stop() {
         console.warn("UnPatching context menu...");
         BdApi.Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
-        await this.removeAllCustomPlugins();
+        await removeAllCustomPlugins();
         console.warn("Freeing blobs...");
         Object.values(window.GeneratedPluginsBlobs).forEach(x => {
             URL.revokeObjectURL(x);

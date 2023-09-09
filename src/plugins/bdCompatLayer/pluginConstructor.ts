@@ -381,3 +381,29 @@ export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlu
     Vencord.Plugins.startPlugin(generated as Plugin);
     GeneratedPlugins.push(generated);
 }
+
+export async function removeAllCustomPlugins() {
+    const arrayToObject = (array: any[]) => {
+        const object = array.reduce((obj, element, index) => {
+            obj[index] = element;
+            return obj;
+        }, {});
+        return object;
+    };
+
+    const { GeneratedPlugins } = window;
+    const copyOfGeneratedPlugin = arrayToObject(GeneratedPlugins);
+    const removePlugin = generatedPlugin => {
+        const generated = generatedPlugin;
+        Vencord.Settings.plugins[generated.name].enabled = false;
+        Vencord.Plugins.stopPlugin(generated);
+        delete Vencord.Plugins.plugins[generated.name];
+        // copyOfGeneratedPlugin.splice(copyOfGeneratedPlugin.indexOf(generated), 1);
+        delete copyOfGeneratedPlugin[GeneratedPlugins.indexOf(generated)];
+    };
+    for (let i = 0; i < GeneratedPlugins.length; i++) {
+        const element = GeneratedPlugins[i];
+        removePlugin(element);
+    }
+    GeneratedPlugins.length = 0;
+}
