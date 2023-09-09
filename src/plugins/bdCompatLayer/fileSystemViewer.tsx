@@ -34,9 +34,10 @@ function makeTab() {
         id: "fs-/",
         label: "/",
         children: [],
-        expanded: true,
+        // expanded: true,
+        expanded: false,
         fetchChildren: function () { return fetchDirContentForId(this.id); },
-        createExpanded: true,
+        // createExpanded: true,
     } as TreeNode;
 
     // const [selectedNode, setSelectedNode] = useState<TreeNode>(baseNode);
