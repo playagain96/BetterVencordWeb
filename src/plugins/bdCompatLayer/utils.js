@@ -84,3 +84,15 @@ export function evalInContext(js, context) {
         return eval(js);
     }.call(context);
 }
+
+export function readdirPromise(filename) {
+    const fs = window.require("fs");
+    return new Promise((resolve, reject) => {
+        fs.readdir(filename, (err, files) => {
+            if (err)
+                reject(err);
+            else
+                resolve(files);
+        });
+    });
+}

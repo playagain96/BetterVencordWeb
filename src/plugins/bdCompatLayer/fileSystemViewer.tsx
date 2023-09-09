@@ -18,8 +18,10 @@
 
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { Plugin } from "@utils/types";
+import { useState } from "@webpack/common";
 
-import TreeView from "./treeView";
+import TreeView, { TreeNode } from "./treeView";
+import { readdirPromise } from "./utils.js";
 
 type SettingsPlugin = Plugin & {
     customSections: ((ID: Record<string, unknown>) => any)[];
@@ -28,20 +30,54 @@ type SettingsPlugin = Plugin & {
 const TabName = "Virtual Filesystem";
 
 function makeTab() {
+    const baseNode = {
+        id: "fs-/",
+        label: "/",
+        children: [],
+        expanded: true,
+        fetchChildren: function () { return fetchDirContentForId(this.id); },
+        createExpanded: true,
+    } as TreeNode;
+
+    // const [selectedNode, setSelectedNode] = useState<TreeNode>(baseNode);
+
+    // const handleNodeSelect = (node: TreeNode) => {
+    //     console.log(node);
+    //     console.log(selectedNode);
+    //     setSelectedNode(node);
+    // };
+    const [selectedNode, setSelectedNode] = useState<string>(baseNode.id);
+
+    const handleNodeSelect = (node: TreeNode) => {
+        console.log(node);
+        console.log(selectedNode);
+        setSelectedNode(node.id);
+    };
+
     return <SettingsTab title={TabName}>
-        <TreeView data={[
-            {
-                id: "test",
-                label: "amogus",
-                children: [
-                    {
-                        id: "test2",
-                        label: "amogus2",
-                    }
-                ]
-            }
-        ]}></TreeView>
+        <TreeView selectedNode={selectedNode} selectNode={handleNodeSelect} data={
+            [
+                baseNode
+            ]
+        }></TreeView>
     </SettingsTab>;
+}
+
+async function fetchDirContentForId(id: string) {
+    const fs = window.require("fs");
+    const dirContents = await readdirPromise(id.split("fs-")[1]) as string[];
+    return dirContents.map(x => {
+        return {
+            id: "fs-" + id.split("fs-")[1] + "/" + x,
+            label: x,
+            children: [],
+            fetchChildren: function () { return fetchDirContentForId(this.id); },
+            // expanded: nodeStateStore["fs-" + id.split("fs-")[1] + "/" + x]?.expanded ?? false,
+            expanded: false,
+            expandable: !fs.statSync(id.split("fs-")[1] + "/" + x).isFile(),
+            // createExpanded: nodeStateStore["fs-" + id.split("fs-")[1] + "/" + x]?.expanded ?? false,
+        } as TreeNode;
+    });
 }
 
 function createFilesSystemViewTab(ID: Record<string, unknown>) {
