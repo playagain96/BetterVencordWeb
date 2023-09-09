@@ -30,6 +30,7 @@ import { ModalRoot, openModal } from "@utils/modal";
 
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
 import { injectSettingsTabs } from "./fileSystemViewer";
+import { addCustomPlugin, convertPlugin } from "./pluginConstructor";
 import UI from "./UI";
 import { getDeferred, injectZipToWindow, simpleGET } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
@@ -1725,8 +1726,8 @@ const thePlugin = {
                     BdApiReImplementation.Plugins.folder + "/" + element,
                     "utf8"
                 );
-                this.convertPlugin(pluginJS, element).then(plugin => {
-                    this.addCustomPlugin(plugin);
+                convertPlugin(pluginJS, element).then(plugin => {
+                    addCustomPlugin(plugin);
                 });
             }
         });

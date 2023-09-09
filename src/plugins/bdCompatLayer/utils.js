@@ -104,3 +104,24 @@ export function injectZipToWindow() {
         ).responseText
     );
 }
+
+export function createTextForm(field1, field2, asLink = false, linkLabel = field2) {
+    return React.createElement(
+        "div",
+        {},
+        React.createElement(
+            Vencord.Webpack.Common.Forms.FormTitle,
+            {
+                tag: "h3",
+            },
+            [
+                field1,
+                React.createElement(
+                    Vencord.Webpack.Common.Forms.FormText,
+                    {},
+                    asLink ? React.createElement(Link, { href: field2 }, linkLabel) : field2,
+                ),
+            ]
+        ),
+    );
+}
