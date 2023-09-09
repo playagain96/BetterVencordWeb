@@ -25,7 +25,7 @@ export const UI = class {
         // Redoing
     }
     toast() {
-        BdApi.DOM.addStyle(
+        window.BdApi.DOM.addStyle(
             "bv-toasts",
             `
             @keyframes bv-toast-up {
