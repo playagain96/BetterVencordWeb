@@ -292,7 +292,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
 
     if (final.authors[0].name && typeof final.authors[0].name === "string") {
         final.options = {
-            inviteLabel: {
+            authorsLabel: {
                 type: OptionType.COMPONENT,
                 component: () => createTextForm("Author", final.authors[0].name),
             },
@@ -320,7 +320,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     }
     if (final.website && typeof final.website === "string") {
         final.options = {
-            sourceLabel: {
+            websiteLabel: {
                 type: OptionType.COMPONENT,
                 component: () => createTextForm("Plugin's Website", final.website, true),
             },
@@ -329,7 +329,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     }
     if (final.authorLink && typeof final.authorLink === "string") {
         final.options = {
-            sourceLabel: {
+            authorLabel: {
                 type: OptionType.COMPONENT,
                 component: () => createTextForm("Author's Website", final.authorLink, true),
             },
@@ -338,7 +338,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     }
     if (final.donate && typeof final.donate === "string") {
         final.options = {
-            sourceLabel: {
+            donateLabel: {
                 type: OptionType.COMPONENT,
                 component: () => createTextForm("Author's Donation", final.donate, true),
             },
@@ -347,7 +347,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     }
     if (final.patreon && typeof final.patreon === "string") {
         final.options = {
-            sourceLabel: {
+            patreonLabel: {
                 type: OptionType.COMPONENT,
                 component: () => createTextForm("Author's Patreon", final.patreon, true),
             },
