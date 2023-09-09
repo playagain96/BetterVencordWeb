@@ -23,7 +23,7 @@ import definePlugin, { OptionType } from "@utils/types";
 // const process = require("~process");
 
 const { Plugin } = require("@utils/types");
-import { Settings } from "@api/settings";
+import { Settings } from "@api/Settings";
 import ErrorBoundary from "@components/ErrorBoundary";
 import { Link } from "@components/Link";
 import { ModalRoot, openModal } from "@utils/modal";
@@ -31,7 +31,7 @@ import { ModalRoot, openModal } from "@utils/modal";
 import { addContextMenu, addDiscordModules, FakeEventEmitter } from "./fakeStuff";
 import { injectSettingsTabs } from "./fileSystemViewer";
 import UI from "./UI";
-import { getDeferred, simpleGET } from "./utils";
+import { getDeferred, injectZipToWindow, simpleGET } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -298,11 +298,7 @@ const thePlugin = {
         };
         const exportZip = async () => {
             if (!window.zip) {
-                eval(
-                    simpleGET(
-                        "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
-                    ).responseText
-                );
+                injectZipToWindow();
             }
             const { BlobWriter, ZipWriter } = window.zip;
             const zipFileWriter = new BlobWriter();
@@ -321,11 +317,7 @@ const thePlugin = {
         };
         const importZip = async () => {
             if (!window.zip) {
-                eval(
-                    simpleGET(
-                        "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
-                    ).responseText
-                );
+                injectZipToWindow();
             }
             const fs = window.require("fs");
             const path = window.require("path");

@@ -81,7 +81,7 @@ export function findFirstLineWithoutX(str, x) {
 export function evalInContext(js, context) {
     // Return the results of the in-line anonymous function we .call with the passed context
     return function () {
-        return eval(js);
+        return window.eval(js);
     }.call(context);
 }
 
@@ -95,4 +95,12 @@ export function readdirPromise(filename) {
                 resolve(files);
         });
     });
+}
+
+export function injectZipToWindow() {
+    window.eval(
+        simpleGET(
+            "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
+        ).responseText
+    );
 }
