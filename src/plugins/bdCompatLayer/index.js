@@ -702,9 +702,10 @@ const thePlugin = {
                     const result = {};
 
                     for (const key in cache) {
-                        // eslint-disable-next-line no-prototype-builtins
                         if (
+                            // eslint-disable-next-line no-prototype-builtins
                             cache.hasOwnProperty(key) &&
+                            // eslint-disable-next-line no-prototype-builtins
                             cache[key].hasOwnProperty("exports")
                         ) {
                             result[key] = cache[key].exports;
