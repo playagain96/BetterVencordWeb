@@ -17,7 +17,7 @@
 */
 
 // eslint-disable-next-line semi
-class UI {
+export const UI = class {
     helper() {
         console.log("hi");
     }
@@ -34,11 +34,11 @@ class UI {
                     opacity: 0;
                 }
             }
-            
+
             .some-toast-shit {
                 position: fixed;
-                bottom: 20px; 
-                left: 50%; 
+                bottom: 20px;
+                left: 50%;
                 transform: translateX(-50%) translateY(0);
                 animation: bv-toast-up 300ms ease;
                 background-color: var(--background-primary);
@@ -59,6 +59,6 @@ class UI {
         toast.classList.add("some-toast-shit");
         document.body.appendChild(toast);
     }
-}
+};
 
 export default UI;
