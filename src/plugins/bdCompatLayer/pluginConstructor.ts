@@ -269,7 +269,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         if (typeof exports === "object") {
             exports = exports[final.name];
         }
-        final.instance = new exports();
+        final.instance = exports.prototype ? new exports() : exports();
         // const functions = Object.getOwnPropertyNames(exports.prototype);
 
         // for (let i = 0; i < functions.length; i++) {
