@@ -4,6 +4,10 @@
 
 A Forceful Blend of Discord Awesomeness! 🌌🚀🤖
 
+## Note for plugin devs
+Don't fork this repo to make plugins for Vencord.
+We will pull changes from upstream, so if you want to make a plugin for Vencord but have it in BV, just wait for us to pull from upstream.
+
 ## Features
 
 -   Super easy to install (Download Installer, open, click install button, done)
