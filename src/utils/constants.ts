@@ -46,6 +46,16 @@ export const Devs = /* #__PURE__*/ Object.freeze({
         name: "Vendicated",
         id: 343383572805058560n
     },
+    Davvy:
+    {
+        name: "Amongus",
+        id: 568109529884000260n
+    },
+    WhoIsThis:
+    {
+        name: "OwO??",
+        id: 917630027477159986n
+    },
     Arjix: {
         name: "ArjixWasTaken",
         id: 674710789138939916n
