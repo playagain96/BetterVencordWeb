@@ -22,7 +22,7 @@ import { Text, useRef } from "@webpack/common";
 
 import { TransparentButton } from "./components/TransparentButton";
 import TreeView, { findInTree, TreeNode } from "./treeView";
-import { readdirPromise } from "./utils";
+import { FSUtils, readdirPromise } from "./utils";
 
 type SettingsPlugin = Plugin & {
     customSections: ((ID: Record<string, unknown>) => any)[];
@@ -64,7 +64,26 @@ function makeTab() {
         const contextMenuBuild = () => {
             return window.BdApi.ContextMenu.buildMenu([
                 { label: ref.current, disabled: true },
-                findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable && { label: "This is a dir" }
+                findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable && {
+                    label: "Import a file here",
+                    action: async () => {
+                        await FSUtils.importFile(ref.current.split("fs-")[1], true);
+                        findInTree(baseNode, x => x.id === ref.current)?.fetchChildren();
+                    },
+                },
+                (!findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable) && {
+                    label: "Export file",
+                    action: async () => {
+                        await FSUtils.exportFile(ref.current.split("fs-")[1]);
+                    },
+                },
+                (!findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable) && {
+                    label: "Delete file",
+                    color: "danger",
+                    action: () => {
+                        window.require("fs").unlink(ref.current.split("fs-")[1]);
+                    },
+                },
             ].filter(Boolean));
         };
         window.BdApi.ContextMenu.open(event, contextMenuBuild(), {});

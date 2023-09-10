@@ -296,10 +296,15 @@ export const FSUtils = {
         }
         fs.mkdirSync(directory);
     },
-    async importFile(targetPath: string) {
+    async importFile(targetPath: string, autoGuessName: boolean = false) {
         const file = await openFileSelect();
         const fs = window.require("fs");
         const path = window.require("path");
+        if (autoGuessName) {
+            if (!targetPath.endsWith("/"))
+                targetPath += "/";
+            targetPath += file.name;
+        }
         fs.writeFile(
             targetPath,
             window.BrowserFS.BFSRequire("buffer").Buffer.from(
@@ -307,6 +312,29 @@ export const FSUtils = {
             ),
             () => { }
         );
+    },
+    exportFile(targetPath: string) {
+        return new Promise((resolve, reject) => {
+            const fs = window.require("fs");
+            const path = window.require("path");
+            fs.readFile(
+                targetPath,
+                (err: Error, data: string | Uint8Array) => {
+                    if (err) {
+                        reject(err);
+                        return;
+                    }
+                    const file = new Blob([data]);
+                    const blobUrl = URL.createObjectURL(file);
+                    const newA = document.createElement("a");
+                    newA.href = blobUrl;
+                    newA.download = path.parse(targetPath).base;
+                    newA.click();
+                    newA.remove();
+                    URL.revokeObjectURL(blobUrl);
+                },
+            );
+        });
     }
 };
 
