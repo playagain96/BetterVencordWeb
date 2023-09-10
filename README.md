@@ -18,7 +18,14 @@ The cutest Discord client mod
 -   Privacy friendly, blocks Discord analytics & crash reporting out of the box and has no telemetry
 -   Maintained very actively, broken plugins are usually fixed within 12 hours
 -   Settings sync: Keep your plugins and their settings synchronised between devices / apps (optional)
+-   BdApi Compatibility : Allows (most) BetterDiscord plugins to be ran as if it was normal BetterDiscord!
 
+***
+> [!NOTE]
+> External Sources were used.
+> - BrowserFS: https://github.com/jvilk/BrowserFS
+> - ZIP.js: https://github.com/gildas-lormeau/zip.js
+> - Some of BetterDiscord's code: https://github.com/Davilarek/Vencord/blob/main/src/plugins/bdCompatLayer/stuffFromBD.js
 
 ## Installing / Uninstalling
 
