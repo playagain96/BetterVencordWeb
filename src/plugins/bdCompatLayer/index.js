@@ -26,7 +26,7 @@ const { Plugin } = require("@utils/types");
 import { Settings } from "@api/Settings";
 
 import { addContextMenu, addDiscordModules, FakeEventEmitter, Patcher } from "./fakeStuff";
-import { injectSettingsTabs } from "./fileSystemViewer";
+import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import UI from "./UI";
 import { FSUtils, getDeferred, simpleGET, ZIPUtils } from "./utils";
@@ -857,6 +857,8 @@ const thePlugin = {
         BdApi.Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
         await removeAllCustomPlugins();
+        console.warn("Removing settings tab...");
+        unInjectSettingsTab();
         console.warn("Freeing blobs...");
         Object.values(window.GeneratedPluginsBlobs).forEach(x => {
             URL.revokeObjectURL(x);

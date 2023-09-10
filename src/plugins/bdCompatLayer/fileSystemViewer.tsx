@@ -119,3 +119,9 @@ export function injectSettingsTabs() {
     // }
     customSections.push(createFilesSystemViewTab);
 }
+
+export function unInjectSettingsTab() {
+    const settingsPlugin = Vencord.Plugins.plugins.Settings as SettingsPlugin;
+    const { customSections } = settingsPlugin;
+    customSections.splice(customSections.findIndex(x => x({}).className === createFilesSystemViewTab({}).className), 1);
+}
