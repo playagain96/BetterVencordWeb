@@ -310,6 +310,14 @@ export const FSUtils = {
     }
 };
 
+export function arrayToObject<T>(array: T[]) {
+    const object: { [key: number]: T; } = array.reduce((obj, element, index) => {
+        obj[index] = element;
+        return obj;
+    }, {});
+    return object;
+}
+
 export const ZIPUtils = {
     async exportZip() {
         if (!window.zip) {

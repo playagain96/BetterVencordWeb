@@ -20,7 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalRoot, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 
-import { createTextForm } from "./utils.js";
+import { arrayToObject, createTextForm } from "./utils.js";
 
 type AssembledBetterDiscordPlugin = {
     started: boolean;
@@ -40,6 +40,68 @@ type AssembledBetterDiscordPlugin = {
     website: string;
     authorLink: string;
     donate: string;
+};
+
+const modal = (props, name: string, child) => {
+    const { React } = Vencord.Webpack.Common;
+    const mc = window.BdApi.Webpack.getByProps("Header", "Footer");
+    const TextElement = window.BdApi.Webpack.getModule(
+        m => m?.Sizes?.SIZE_32 && m.Colors
+    );
+    const Buttons = window.BdApi.Webpack.getModule(
+        m => m.BorderColors,
+        { searchExports: true }
+    );
+    return React.createElement(
+        ErrorBoundary,
+        {},
+        React.createElement(
+            ModalRoot,
+            Object.assign(
+                {
+                    size: mc.Sizes.MEDIUM,
+                    className:
+                        "bd-addon-modal" +
+                        " " +
+                        mc.Sizes.MEDIUM,
+                },
+                props
+            ),
+            React.createElement(
+                mc.Header,
+                {
+                    separator: false,
+                    className: "bd-addon-modal-header",
+                },
+                React.createElement(
+                    TextElement,
+                    {
+                        tag: "h1",
+                        size: TextElement.Sizes.SIZE_20,
+                        strong: true,
+                    },
+                    `${name} Settings`
+                )
+            ),
+            React.createElement(
+                mc.Content,
+                { className: "bd-addon-modal-settings" },
+                React.createElement(ErrorBoundary, {}, child)
+            ),
+            React.createElement(
+                mc.Footer,
+                { className: "bd-addon-modal-footer" },
+                React.createElement(
+                    Buttons,
+                    {
+                        onClick: props.onClose,
+                        className: "bd-button",
+                    },
+                    "Close"
+                )
+            )
+        )
+    );
 };
 
 export async function convertPlugin(BetterDiscordPlugin: string, filename: string) {
@@ -104,67 +166,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             if (typeof child === "function")
                 child = React.createElement(child);
 
-            const modal = props => {
-                const mc = window.BdApi.Webpack.getByProps("Header", "Footer");
-                const TextElement = window.BdApi.Webpack.getModule(
-                    m => m?.Sizes?.SIZE_32 && m.Colors
-                );
-                const Buttons = window.BdApi.Webpack.getModule(
-                    m => m.BorderColors,
-                    { searchExports: true }
-                );
-                return React.createElement(
-                    ErrorBoundary,
-                    {},
-                    React.createElement(
-                        ModalRoot,
-                        Object.assign(
-                            {
-                                size: mc.Sizes.MEDIUM,
-                                className:
-                                    "bd-addon-modal" +
-                                    " " +
-                                    mc.Sizes.MEDIUM,
-                            },
-                            props
-                        ),
-                        React.createElement(
-                            mc.Header,
-                            {
-                                separator: false,
-                                className: "bd-addon-modal-header",
-                            },
-                            React.createElement(
-                                TextElement,
-                                {
-                                    tag: "h1",
-                                    size: TextElement.Sizes.SIZE_20,
-                                    strong: true,
-                                },
-                                `${final.name} Settings`
-                            )
-                        ),
-                        React.createElement(
-                            mc.Content,
-                            { className: "bd-addon-modal-settings" },
-                            React.createElement(ErrorBoundary, {}, child)
-                        ),
-                        React.createElement(
-                            mc.Footer,
-                            { className: "bd-addon-modal-footer" },
-                            React.createElement(
-                                Buttons,
-                                {
-                                    onClick: props.onClose,
-                                    className: "bd-button",
-                                },
-                                "Close"
-                            )
-                        )
-                    )
-                );
-            };
-            return modal(props);
+            return modal(props, final.name, child);
         });
     };
     final.options = {
@@ -384,20 +386,12 @@ export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlu
 }
 
 export async function removeAllCustomPlugins() {
-    const arrayToObject = (array: any[]) => {
-        const object = array.reduce((obj, element, index) => {
-            obj[index] = element;
-            return obj;
-        }, {});
-        return object;
-    };
-
-    const { GeneratedPlugins } = window;
+    const { GeneratedPlugins } = window as Window & typeof globalThis & { GeneratedPlugins: AssembledBetterDiscordPlugin[]; };
     const copyOfGeneratedPlugin = arrayToObject(GeneratedPlugins);
-    const removePlugin = generatedPlugin => {
+    const removePlugin = (generatedPlugin: AssembledBetterDiscordPlugin) => {
         const generated = generatedPlugin;
         Vencord.Settings.plugins[generated.name].enabled = false;
-        Vencord.Plugins.stopPlugin(generated);
+        Vencord.Plugins.stopPlugin(generated as Plugin);
         delete Vencord.Plugins.plugins[generated.name];
         // copyOfGeneratedPlugin.splice(copyOfGeneratedPlugin.indexOf(generated), 1);
         delete copyOfGeneratedPlugin[GeneratedPlugins.indexOf(generated)];
