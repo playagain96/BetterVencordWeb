@@ -224,7 +224,7 @@ const thePlugin = {
                 },
                 getByDisplayName(name) {
                     return this.getModule(
-                        BdApi.Webpack.Filters.byDisplayName(name)
+                        this.Filters.byDisplayName(name)
                     );
                 },
                 getAllByProps(...props) {
@@ -453,7 +453,7 @@ const thePlugin = {
                             // this.convertPlugin(this.simpleGET(proxyUrl + url).responseText, filenameFromUrl).then(plugin => {
 
                             localFs.writeFileSync(
-                                window.BdApi.Plugins.folder +
+                                BdApiReImplementation.Plugins.folder +
                                 "/" +
                                 filenameFromUrl,
                                 response.responseText
