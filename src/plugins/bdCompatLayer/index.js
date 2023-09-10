@@ -555,7 +555,7 @@ const thePlugin = {
                     );
             },
             findModuleByProps(...props) {
-                return BdApi.findModule(module =>
+                return this.findModule(module =>
                     props.every(prop => typeof module[prop] !== "undefined")
                 );
             },
