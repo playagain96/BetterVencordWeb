@@ -432,7 +432,7 @@ const thePlugin = {
                     typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
                 )
             );
-
+            const observer = new MutationObserver(mutations => mutations.forEach(m => window.GeneratedPlugins.forEach(p => p.instance.observe?.(m))));
             const localFs = window.require("fs");
             if (!localFs.existsSync(BdApiReImplementation.Plugins.folder)) {
                 // localFs.mkdirSync(BdApiReimpl.Plugins.rootFolder);

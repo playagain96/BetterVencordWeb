@@ -88,7 +88,16 @@ const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode:
                 onContextMenu(ev);
             }}>
                 {/* <TransparentButton clickTarget={node} clicked={selectedNode === node.id} onClick={console.log}> */}
-                <Text style={{ marginLeft: "20px" }}>
+                <Text style={{
+                    marginLeft: "20px",
+                    fontSize: "1rem",
+                    color: "#333",
+                    fontWeight: "bold",
+                    padding: "5px",
+                    borderRadius: "4px",
+                    backgroundColor: "#f0f0f0",
+                    cursor: "pointer",
+                }}>
                     {node.label}
                 </Text>
             </TransparentButton>
