@@ -238,14 +238,15 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             // eslint-disable-next-line no-constant-condition
             (true ? debugLine : codeData) +
             "\nreturn module;})();\n";
-        const sourceBlob = new Blob([codeData], {
-            type: "application/javascript",
-        });
-        const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-        codeData += "\n//# sourceURL=" + sourceBlobUrl;
+        // const sourceBlob = new Blob([codeData], {
+        //     type: "application/javascript",
+        // });
+        // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
+        // codeData += "\n//# sourceURL=" + sourceBlobUrl;
+        codeData += "\n//# sourceURL=" + "betterDiscord://plugins/" + filename;
         if (!window.GeneratedPluginsBlobs)
             window.GeneratedPluginsBlobs = {};
-        window.GeneratedPluginsBlobs[final.name] = sourceBlobUrl;
+        // window.GeneratedPluginsBlobs[final.name] = sourceBlobUrl;
         // codeData = codeData.replaceAll("module.exports = ", "this.generatedClass = ");
         // window.GeneratedPlugins[final.name] = evalInContext(codeData, context);
         // const codeClass = evalInContext(codeData, context);

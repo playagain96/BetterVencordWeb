@@ -405,11 +405,11 @@ const thePlugin = {
         const DiscordModulesInjectorOutput = addDiscordModules(proxyUrl);
         const DiscordModules = DiscordModulesInjectorOutput.output;
         Patcher.setup(DiscordModules);
-        windowBdCompatLayer.discordModulesBlobUrl = DiscordModulesInjectorOutput.sourceBlobUrl;
+        // windowBdCompatLayer.discordModulesBlobUrl = DiscordModulesInjectorOutput.sourceBlobUrl;
 
         const ContextMenuInjectorOutput = addContextMenu(DiscordModules, proxyUrl);
         const ContextMenu = ContextMenuInjectorOutput.output;
-        windowBdCompatLayer.contextMenuBlobUrl = ContextMenuInjectorOutput.sourceBlobUrl;
+        // windowBdCompatLayer.contextMenuBlobUrl = ContextMenuInjectorOutput.sourceBlobUrl;
         BdApiReImplementation.ContextMenu = ContextMenu;
 
         const fakeLoading = document.createElement("span");
@@ -494,13 +494,13 @@ const thePlugin = {
         await removeAllCustomPlugins();
         console.warn("Removing settings tab...");
         unInjectSettingsTab();
-        console.warn("Freeing blobs...");
-        Object.values(window.GeneratedPluginsBlobs).forEach(x => {
-            URL.revokeObjectURL(x);
-            delete window.GeneratedPluginsBlobs[x];
-        });
-        URL.revokeObjectURL(window.BdCompatLayer.contextMenuBlobUrl);
-        URL.revokeObjectURL(window.BdCompatLayer.discordModulesBlobUrl);
+        // console.warn("Freeing blobs...");
+        // Object.values(window.GeneratedPluginsBlobs).forEach(x => {
+        //     URL.revokeObjectURL(x);
+        //     delete window.GeneratedPluginsBlobs[x];
+        // });
+        // URL.revokeObjectURL(window.BdCompatLayer.contextMenuBlobUrl);
+        // URL.revokeObjectURL(window.BdCompatLayer.discordModulesBlobUrl);
         console.warn("Removing compat layer...");
         delete window.BdCompatLayer;
         console.warn("Removing BdApi...");

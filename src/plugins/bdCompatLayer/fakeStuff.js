@@ -56,9 +56,10 @@ export const addDiscordModules = proxyUrl => {
     const ev =
         "(" +
         ModuleDataText.split("export default Utilities.memoizeObject(")[1];
-    const sourceBlob = new Blob([ev], { type: "application/javascript" });
-    const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-    return { output: evalInScope(ev + "\n//# sourceURL=" + sourceBlobUrl, context), sourceBlobUrl };
+    // const sourceBlob = new Blob([ev], { type: "application/javascript" });
+    // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
+    // return { output: evalInScope(ev + "\n//# sourceURL=" + sourceBlobUrl, context), sourceBlobUrl };
+    return { output: evalInScope(ev + "\n//# sourceURL=" + "betterDiscord://internal/DiscordModules.js", context), sourceBlobUrl: undefined };
 };
 
 export const addContextMenu = (DiscordModules, proxyUrl) => {
@@ -99,12 +100,14 @@ export const addContextMenu = (DiscordModules, proxyUrl) => {
         ";const Logger = " + addLogger.name + "();const {React} = DiscordModules;" +
         ModuleDataArr.join("\n") +
         "\nreturn ContextMenu;})();";
-    const sourceBlob = new Blob([ModuleDataAssembly], {
-        type: "application/javascript",
-    });
-    const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-    const evaluatedContextMenu = evalInScope(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl, context);
-    return { output: new evaluatedContextMenu(), sourceBlobUrl };
+    // const sourceBlob = new Blob([ModuleDataAssembly], {
+    //     type: "application/javascript",
+    // });
+    // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
+    // const evaluatedContextMenu = evalInScope(ModuleDataAssembly + "\n//# sourceURL=" + sourceBlobUrl, context);
+    const evaluatedContextMenu = evalInScope(ModuleDataAssembly + "\n//# sourceURL=" + "betterDiscord://internal/ContextMenu.js", context);
+    // return { output: new evaluatedContextMenu(), sourceBlobUrl };
+    return { output: new evaluatedContextMenu(), sourceBlobUrl: undefined };
 };
 
 export { Patcher } from "./stuffFromBD";
