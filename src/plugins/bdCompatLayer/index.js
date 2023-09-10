@@ -18,6 +18,7 @@
 
 "use strict";
 /* eslint-disable eqeqeq */
+import { Devs } from "@utils/constants";
 import definePlugin, { OptionType } from "@utils/types";
 // import { readFileSync } from "fs";
 // const process = require("~process");
@@ -40,10 +41,8 @@ const thePlugin = {
     name: "BD Compatibility Layer",
     description: "Converts BD plugins to run in Vencord",
     authors: [
-        {
-            id: 568109529884000260n,
-            name: "Davilarek",
-        },
+        Devs.Davvy,
+        Devs.WhoIsThis,
     ],
     // patches: [],
     options: {
