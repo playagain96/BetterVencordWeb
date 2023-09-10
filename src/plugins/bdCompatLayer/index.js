@@ -429,10 +429,15 @@ const thePlugin = {
             const Router = BdApiReImplementation.Webpack.getModule(x => x.listeners && x.flushRoute);
             Router.listeners.add(() =>
                 window.GeneratedPlugins.forEach(plugin =>
-                    typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
+                    BdApiReImplementation.Plugins.isEnabled(plugin.name) && typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
                 )
             );
-            const observer = new MutationObserver(mutations => mutations.forEach(m => window.GeneratedPlugins.forEach(p => p.instance.observe?.(m))));
+            const observer = new MutationObserver(mutations => mutations.forEach(m => window.GeneratedPlugins.forEach(p => BdApiReImplementation.Plugins.isEnabled(p.name) && p.instance.observer?.(m))));
+            observer.observe(document, {
+                childList: true,
+                subtree: true
+            });
+            windowBdCompatLayer.mainObserver = observer;
             const localFs = window.require("fs");
             if (!localFs.existsSync(BdApiReImplementation.Plugins.folder)) {
                 // localFs.mkdirSync(BdApiReimpl.Plugins.rootFolder);
@@ -488,6 +493,8 @@ const thePlugin = {
         });
     },
     async stop() {
+        console.warn("Disabling observer...");
+        window.BdCompatLayer.mainObserver.disconnect();
         console.warn("UnPatching context menu...");
         BdApi.Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
