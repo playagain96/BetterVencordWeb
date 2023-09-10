@@ -28,6 +28,7 @@ import { Settings } from "@api/Settings";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
+import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch } from "./stuffFromBD";
 import UI from "./UI";
 import { FSUtils, getDeferred, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
@@ -213,196 +214,7 @@ const thePlugin = {
                         };
                     },
                 },
-                /**
-                 * @param {function} filter
-                 * @param {*} options
-                 * @returns
-                 */
-                getModule(filter, options) {
-                    // if (typeof options === "undefined")
-                    //     options = {
-                    //         first: true,
-                    //     };
-                    if (typeof options === "undefined") options = {};
-                    // return options.first === false ? Vencord.Webpack.findAll(filter) : Vencord.Webpack.find(filter);
-                    // return;
-                    // if (typeof options.first === "undefined")
-                    //     options.first = true;
-
-                    // if (filter.toString().includes("?.displayName")) {
-
-                    // }
-                    // // console.log("Options:", options);
-                    // // if ()
-                    // try {
-                    //     if (!options.first)
-                    //         return Vencord.Webpack.findAll(filter);
-                    //     else
-                    //         return Vencord.Webpack.find(filter);
-                    // } catch (error) {
-                    //     console.log("Options:", options);
-                    //     console.warn("Module not found: " + filter.toString());
-                    //     return undefined;
-                    // }
-                    const wrapFilter =
-                        filter => (exports, module, moduleId) => {
-                            try {
-                                if (
-                                    exports?.default?.remove &&
-                                    exports?.default?.set &&
-                                    exports?.default?.clear &&
-                                    exports?.default?.get &&
-                                    !exports?.default?.sort
-                                )
-                                    return false;
-                                if (
-                                    exports.remove &&
-                                    exports.set &&
-                                    exports.clear &&
-                                    exports.get &&
-                                    !exports.sort
-                                )
-                                    return false;
-                                if (
-                                    exports?.default?.getToken ||
-                                    exports?.default?.getEmail ||
-                                    exports?.default?.showToken
-                                )
-                                    return false;
-                                if (
-                                    exports.getToken ||
-                                    exports.getEmail ||
-                                    exports.showToken
-                                )
-                                    return false;
-                                return filter(exports, module, moduleId);
-                            } catch (err) {
-                                return false;
-                            }
-                        };
-
-                    const {
-                        first = true,
-                        defaultExport = true,
-                        searchExports = false,
-                    } = options;
-                    const wrappedFilter = wrapFilter(filter);
-
-                    const modules = Vencord.Webpack.cache;
-                    /*
-                    const rm = [];
-                    const indices = Object.keys(modules);
-                    for (let i = 0; i < indices.length; i++) {
-                        const index = indices[i];
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (!modules.hasOwnProperty(index)) continue;
-                        const module = modules[index];
-                        const { exports } = module;
-                        if (!exports || exports === window || exports === document.documentElement) continue;
-
-                        if (typeof (exports) === "object" && searchExports) {
-                            for (const key in exports) {
-                                let foundModule = null;
-                                const wrappedExport = exports[key];
-                                if (!wrappedExport) continue;
-                                if (wrappedFilter(wrappedExport, module, index)) foundModule = wrappedExport;
-                                if (!foundModule) continue;
-                                if (first) return foundModule;
-                                rm.push(foundModule);
-                            }
-                        }
-                        else {
-                            let foundModule = null;
-                            if (exports.Z && wrappedFilter(exports.Z, module, index)) foundModule = defaultExport ? exports.Z : exports;
-                            if (exports.ZP && wrappedFilter(exports.ZP, module, index)) foundModule = defaultExport ? exports.ZP : exports;
-                            if (exports.__esModule && exports.default && wrappedFilter(exports.default, module, index)) foundModule = defaultExport ? exports.default : exports;
-                            if (wrappedFilter(exports, module, index)) foundModule = exports;
-                            if (!foundModule) continue;
-                            if (first) return foundModule;
-                            rm.push(foundModule);
-                        }
-                    }
-
-                    // eslint-disable-next-line eqeqeq
-                    return first || rm.length == 0 ? undefined : rm;
-                    */
-                    const rm = [];
-                    const indices = Object.keys(modules);
-                    for (let i = 0; i < indices.length; i++) {
-                        const index = indices[i];
-                        // eslint-disable-next-line no-prototype-builtins
-                        if (!modules.hasOwnProperty(index)) continue;
-
-                        let module = null;
-                        try {
-                            module = modules[index];
-                        } catch {
-                            continue;
-                        }
-
-                        const { exports } = module;
-                        if (
-                            !exports ||
-                            exports === window ||
-                            exports === document.documentElement ||
-                            exports[Symbol.toStringTag] === "DOMTokenList"
-                        )
-                            continue;
-
-                        if (
-                            typeof exports === "object" &&
-                            searchExports &&
-                            !exports.TypedArray
-                        ) {
-                            for (const key in exports) {
-                                let foundModule = null;
-                                let wrappedExport = null;
-                                try {
-                                    wrappedExport = exports[key];
-                                } catch {
-                                    continue;
-                                }
-
-                                if (!wrappedExport) continue;
-                                if (wrappedFilter(wrappedExport, module, index))
-                                    foundModule = wrappedExport;
-                                if (!foundModule) continue;
-                                if (first) return foundModule;
-                                rm.push(foundModule);
-                            }
-                        } else {
-                            let foundModule = null;
-                            if (
-                                exports.Z &&
-                                wrappedFilter(exports.Z, module, index)
-                            )
-                                foundModule = defaultExport
-                                    ? exports.Z
-                                    : exports;
-                            if (
-                                exports.ZP &&
-                                wrappedFilter(exports.ZP, module, index)
-                            )
-                                foundModule = defaultExport
-                                    ? exports.ZP
-                                    : exports;
-                            if (
-                                exports.__esModule &&
-                                exports.default &&
-                                wrappedFilter(exports.default, module, index)
-                            )
-                                foundModule = defaultExport
-                                    ? exports.default
-                                    : exports;
-                            if (wrappedFilter(exports, module, index))
-                                foundModule = exports;
-                            if (!foundModule) continue;
-                            if (first) return foundModule;
-                            rm.push(foundModule);
-                        }
-                    }
-                    return first || rm.length == 0 ? undefined : rm;
-                },
+                getModule: BdApi_getModule,
                 waitForModule(filter) {
                     return new Promise((resolve, reject) => {
                         Vencord.Webpack.waitFor(filter, module => {
@@ -571,6 +383,7 @@ const thePlugin = {
                     }
                 };
             },
+            monkeyPatch: BdApi_monkeyPatch,
         };
         const ReImplementationObject = {
             request: (url, cb) => {
