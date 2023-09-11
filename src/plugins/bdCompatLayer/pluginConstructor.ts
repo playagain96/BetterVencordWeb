@@ -367,9 +367,15 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     //     final.stop = final.instance.onStop.bind(final.instance);
     // }
     const startFunction = function (this: AssembledBetterDiscordPlugin) {
+        const compatLayerSettings = Vencord.Settings.plugins["BD Compatibility Layer"]; // TODO: don't hardcode this
+        compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
+        compatLayerSettings.pluginsStatus[this.name] = true;
         this.instance.start();
     };
     const stopFunction = function (this: AssembledBetterDiscordPlugin) {
+        const compatLayerSettings = Vencord.Settings.plugins["BD Compatibility Layer"]; // TODO: don't hardcode this
+        compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
+        compatLayerSettings.pluginsStatus[this.name] = false;
         this.instance.stop();
     };
     final.start = startFunction.bind(final);
@@ -382,8 +388,18 @@ export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlu
     const { GeneratedPlugins } = window;
     const generated = generatedPlugin;
     Vencord.Plugins.plugins[generated.name] = generated as Plugin;
-    Vencord.Settings.plugins[generated.name].enabled = true;
-    Vencord.Plugins.startPlugin(generated as Plugin);
+    Vencord.Settings.plugins[generated.name].enabled = false;
+
+    const compatLayerSettings = Vencord.Settings.plugins["BD Compatibility Layer"]; // TODO: don't hardcode this
+    compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
+    if (generatedPlugin.name in compatLayerSettings.pluginsStatus) {
+        const thePluginStatus = compatLayerSettings.pluginsStatus[generatedPlugin.name];
+        Vencord.Settings.plugins[generated.name].enabled = thePluginStatus;
+        if (thePluginStatus === true)
+            Vencord.Plugins.startPlugin(generated as Plugin);
+    }
+    // Vencord.Settings.plugins[generated.name].enabled = true;
+    // Vencord.Plugins.startPlugin(generated as Plugin);
     GeneratedPlugins.push(generated);
 }
 
@@ -393,7 +409,12 @@ export async function removeAllCustomPlugins() {
     const removePlugin = (generatedPlugin: AssembledBetterDiscordPlugin) => {
         const generated = generatedPlugin;
         Vencord.Settings.plugins[generated.name].enabled = false;
-        Vencord.Plugins.stopPlugin(generated as Plugin);
+        if (generated.started === true) {
+            const currentStatus = Vencord.Settings.plugins["BD Compatibility Layer"].pluginsStatus[generated.name]; // TODO: don't hardcode this
+            Vencord.Plugins.stopPlugin(generated as Plugin);
+            if (currentStatus === true)
+                Vencord.Settings.plugins["BD Compatibility Layer"].pluginsStatus[generated.name] = currentStatus; // TODO: don't hardcode this
+        }
         delete Vencord.Plugins.plugins[generated.name];
         // copyOfGeneratedPlugin.splice(copyOfGeneratedPlugin.indexOf(generated), 1);
         delete copyOfGeneratedPlugin[GeneratedPlugins.indexOf(generated)];
