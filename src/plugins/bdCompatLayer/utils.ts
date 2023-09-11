@@ -19,6 +19,8 @@
 import { Link } from "@components/Link";
 import { React } from "@webpack/common";
 
+import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
+
 export function getDeferred() {
     let resolve: undefined | ((arg: any) => void) = undefined;
     let reject: undefined | ((e?: Error) => void) = undefined;
@@ -189,6 +191,29 @@ export function openFileSelect() {
 
         input.click();
     });
+}
+
+export async function reloadCompatLayer() {
+    console.warn("Removing plugins...");
+    await removeAllCustomPlugins();
+    await new Promise((resolve, reject) => setTimeout(resolve, 500));
+    const localFs = window.require("fs");
+    const pluginFolder = localFs
+        .readdirSync(window.BdApi.Plugins.folder)
+        .sort();
+    const plugins = pluginFolder.filter(x =>
+        x.endsWith(".plugin.js")
+    );
+    for (let i = 0; i < plugins.length; i++) {
+        const element = plugins[i];
+        const pluginJS = localFs.readFileSync(
+            window.BdApi.Plugins.folder + "/" + element,
+            "utf8"
+        );
+        convertPlugin(pluginJS, element).then(plugin => {
+            addCustomPlugin(plugin);
+        });
+    }
 }
 
 export const FSUtils = {

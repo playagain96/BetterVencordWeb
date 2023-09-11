@@ -31,7 +31,7 @@ import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch } from "./stuffFromBD";
 import UI from "./UI";
-import { FSUtils, getDeferred, simpleGET, ZIPUtils } from "./utils";
+import { FSUtils, getDeferred, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -125,6 +125,7 @@ const thePlugin = {
             // importFile,
             FSUtils,
             ZIPUtils,
+            reloadCompatLayer,
             fsReadyPromise: getDeferred(),
         };
         window.BdCompatLayer = windowBdCompatLayer;
