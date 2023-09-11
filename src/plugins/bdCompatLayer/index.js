@@ -385,8 +385,18 @@ const thePlugin = {
             monkeyPatch: BdApi_monkeyPatch,
         };
         const ReImplementationObject = {
-            request: (url, cb) => {
-                cb({ err: "err" }, undefined, undefined);
+            // request: (url, cb) => {
+            //     cb({ err: "err" }, undefined, undefined);
+            // },
+            get request() {
+                const fakeRequest = function (url, cb = () => { }, headers = {}) {
+                    if (typeof headers === "function") {
+                        cb = headers;
+                    }
+                    cb({ err: "err" }, undefined, undefined);
+                };
+                // fakeRequest.stuffHere = function () {}
+                return fakeRequest;
             },
             events: {
                 EventEmitter: FakeEventEmitter,
