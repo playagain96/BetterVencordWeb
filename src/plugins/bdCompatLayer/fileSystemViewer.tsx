@@ -90,11 +90,14 @@ function makeTab() {
     };
 
     return <SettingsTab title={TabName}>
-        <TransparentButton isToggle={false} onClick={() => { }}>
+        <TransparentButton isToggle={false} onClick={() => window.BdCompatLayer.ZIPUtils.downloadZip()}>
             <Text>Export everything as ZIP</Text>
         </TransparentButton>
-        <TransparentButton isToggle={false} onClick={() => { }}>
+        <TransparentButton isToggle={false} onClick={() => window.BdCompatLayer.ZIPUtils.uploadZip()}>
             <Text>Import filesystem from ZIP</Text>
+        </TransparentButton>
+        <TransparentButton isToggle={false} onClick={() => window.BdCompatLayer.reloadCompatLayer()}>
+            <Text>Reload BD plugins</Text>
         </TransparentButton>
         {/* <TreeView onContextMenu={contextMenuHandler} selectedNode={selectedNode} selectNode={handleNodeSelect} data={ */}
         <TreeView onContextMenu={contextMenuHandler} selectedNode={ref.current} selectNode={handleNodeSelect} data={
