@@ -227,6 +227,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         const additionalCode = [
             "const module = { exports: {} };",
             "const global = window;",
+            // "const Buffer = window.BrowserFS.BFSRequire('buffer').Buffer;",
             "const __filename=BdApi.Plugins.folder+`/" + filename + "`;",
             "const __dirname=BdApi.Plugins.folder;",
             "const DiscordNative={clipboard:{}};",

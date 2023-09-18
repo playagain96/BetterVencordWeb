@@ -310,16 +310,16 @@ export const FSUtils = {
         // }
         this.removeDirectoryRecursive("/");
     },
-    mkdirSyncRecursive(directory: string) {
+    mkdirSyncRecursive(directory: string, mode: any = undefined) {
         if (directory === "") return;
         const fs = window.require("fs");
         if (fs.existsSync(directory)) return;
         const path = window.require("path");
         const parentDir = path.dirname(directory);
         if (!fs.existsSync(parentDir)) {
-            this.mkdirSyncRecursive(parentDir);
+            this.mkdirSyncRecursive(parentDir, mode);
         }
-        fs.mkdirSync(directory);
+        fs.mkdirSync(directory, mode);
     },
     async importFile(targetPath: string, autoGuessName: boolean = false) {
         const file = await openFileSelect();
@@ -469,3 +469,26 @@ export const ZIPUtils = {
         URL.revokeObjectURL(blobUrl);
     }
 };
+
+export function patchMkdirSync(fs) {
+    const orig_mkdirSync = fs.mkdirSync;
+
+    fs.mkdirSync = function mkdirSync(path: string, options: any = {}) {
+        if (typeof options === "object" && options.recursive) {
+            return FSUtils.mkdirSyncRecursive(path, options.mode);
+        }
+        return orig_mkdirSync(path, typeof options === "object" ? options.mode : options);
+    };
+    return fs;
+}
+
+export function patchReadFileSync(fs) {
+    const orig_readFileSync = fs.readFileSync;
+
+    fs.readFileSync = function readFileSync(path: string, optionsOrEncoding: any) {
+        if (optionsOrEncoding === "")
+            optionsOrEncoding = { encoding: null };
+        return orig_readFileSync(path, optionsOrEncoding);
+    };
+    return fs;
+}

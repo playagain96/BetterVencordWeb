@@ -26,12 +26,12 @@ import definePlugin, { OptionType } from "@utils/types";
 const { Plugin } = require("@utils/types");
 import { Settings } from "@api/Settings";
 
-import { addContextMenu, addDiscordModules, FakeEventEmitter, Patcher } from "./fakeStuff";
+import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch } from "./stuffFromBD";
 import UI from "./UI";
-import { FSUtils, getDeferred, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -100,7 +100,8 @@ const thePlugin = {
                     () => {
                         // window.BdApi.ReqImpl.fs = temp.require("fs");
                         // window.BdApi.ReqImpl.path = temp.require("path");
-                        ReImplementationObject.fs = temp.require("fs");
+                        // ReImplementationObject.fs = temp.require("fs");
+                        ReImplementationObject.fs = patchReadFileSync(patchMkdirSync(temp.require("fs")));
                         ReImplementationObject.path = temp.require("path");
                         windowBdCompatLayer.fsReadyPromise.resolve();
                     }
@@ -389,12 +390,46 @@ const thePlugin = {
             // request: (url, cb) => {
             //     cb({ err: "err" }, undefined, undefined);
             // },
+            https: {
+                get_(url, options, cb) {
+                    const ev = new ReImplementationObject.events.EventEmitter();
+                    fetchWithCorsProxyFallback(url, { ...options, method: "get" }, proxyUrl).then(async x => {
+                        const reader = x.body.getReader();
+                        let result = await reader.read();
+                        while (!result.done) {
+                            ev.emit("data", result.value);
+                            result = await reader.read();
+                        }
+                        ev.emit("end", Object.assign({}, x, {
+                            statusCode: x.status,
+                        }));
+                    });
+                    cb(ev);
+                },
+                get get() {
+                    return this.get_;
+                }
+            },
             get request() {
                 const fakeRequest = function (url, cb = () => { }, headers = {}) {
+                    const stuff = { theCallback: cb };
                     if (typeof headers === "function") {
                         cb = headers;
+                        headers = stuff.theCallback;
                     }
-                    cb({ err: "err" }, undefined, undefined);
+                    delete stuff.theCallback;
+                    // cb({ err: "err" }, undefined, undefined);
+                    const fetchOut = fetchWithCorsProxyFallback(url, { ...headers, method: "get" }, proxyUrl);
+                    // uh did somebody say "compatibility"? no? I didn't hear that either.
+                    fetchOut.then(async x => {
+                        // cb(undefined, x, await x.text());
+                        cb(undefined, Object.assign({}, x, {
+                            statusCode: x.status,
+                        }), await x.text());
+                    });
+                    fetchOut.catch(x => {
+                        cb(x, undefined, undefined);
+                    });
                 };
                 // fakeRequest.stuffHere = function () {}
                 return fakeRequest;
@@ -410,6 +445,8 @@ const thePlugin = {
         window.BdApi = BdApiReImplementation;
         // window.BdApi.UI = new UI();
         window.require = RequireReimpl;
+        this.originalBuffer = window.Buffer;
+        window.Buffer = BdApiReImplementation.Webpack.getModule(x => x.INSPECT_MAX_BYTES)?.Buffer;
         // window.BdApi.ReqImpl = ReImplementationObject;
 
         const DiscordModulesInjectorOutput = addDiscordModules(proxyUrl);
@@ -457,7 +494,7 @@ const thePlugin = {
             }
             for (const key in this.options) {
                 if (Object.hasOwnProperty.call(this.options, key)) {
-                    if (Settings.plugins[this.name][key]) {
+                    if (Settings.plugins[this.name][key] && key.startsWith("pluginUrl")) {
                         try {
                             const url = Settings.plugins[this.name][key];
                             // const filenameFromUrl = url.split("/").pop();
@@ -528,6 +565,8 @@ const thePlugin = {
         }
         console.warn("Removing FileSystem...");
         delete window.BrowserFS;
+        console.warn("Restoring buffer...");
+        window.Buffer = this.originalBuffer;
     },
 };
 

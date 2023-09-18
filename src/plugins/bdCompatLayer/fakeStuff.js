@@ -110,4 +110,14 @@ export const addContextMenu = (DiscordModules, proxyUrl) => {
     return { output: new evaluatedContextMenu(), sourceBlobUrl: undefined };
 };
 
+export async function fetchWithCorsProxyFallback(url, options = {}, corsProxy) {
+    try {
+        return await fetch(url, options);
+    } catch (error) {
+        if (options.method === undefined || options.method === "get")
+            return await fetch(`${corsProxy}${url}`, options);
+        throw error;
+    }
+}
+
 export { Patcher } from "./stuffFromBD";
