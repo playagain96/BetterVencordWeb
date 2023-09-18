@@ -46,6 +46,18 @@ const thePlugin = {
     ],
     // patches: [],
     options: {
+        enableExperimentalRequestPolyfills: {
+            description: "Enables request polyfills that first try to request using normal fetch, then using a cors proxy when the normal one fails",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: false,
+        },
+        corsProxyUrl: {
+            description: "CORS proxy used to bypass CORS",
+            type: OptionType.STRING,
+            default: "https://cors-get-proxy.sirjosh.workers.dev/?url=",
+            restartNeeded: true,
+        },
         pluginUrl1: {
             description: "Plugin url 1",
             type: OptionType.STRING,
@@ -75,7 +87,8 @@ const thePlugin = {
     start() {
         injectSettingsTabs();
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
-        const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
+        // const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
+        const proxyUrl = Settings.plugins[this.name].corsProxyUrl ?? this.options.corsProxyUrl.default;
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
         fetch(
             proxyUrl +
@@ -407,7 +420,9 @@ const thePlugin = {
                     cb(ev);
                 },
                 get get() {
-                    return this.get_;
+                    if (Settings.plugins[thePlugin.name].enableExperimentalRequestPolyfills === true)
+                        return this.get_;
+                    return undefined;
                 }
             },
             get request() {
@@ -432,7 +447,9 @@ const thePlugin = {
                     });
                 };
                 // fakeRequest.stuffHere = function () {}
-                return fakeRequest;
+                if (Settings.plugins[thePlugin.name].enableExperimentalRequestPolyfills === true)
+                    return fakeRequest;
+                return undefined;
             },
             events: {
                 EventEmitter: FakeEventEmitter,
