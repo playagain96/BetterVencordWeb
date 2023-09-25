@@ -30,7 +30,6 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxy
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch } from "./stuffFromBD";
-import UI from "./UI";
 import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -147,7 +146,6 @@ const thePlugin = {
         window.GeneratedPlugins = [];
         const BdApiReImplementation = {
             Patcher,
-            UI: new UI(),
             Plugins: {
                 getAll: () => {
                     return GeneratedPlugins;
@@ -209,7 +207,6 @@ const thePlugin = {
             get React() {
                 return Vencord.Webpack.Common.React;
             },
-            getInternalInstance(node) { return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null; },
             Webpack: {
                 Filters: {
                     byDisplayName: name => {
@@ -399,6 +396,54 @@ const thePlugin = {
                 };
             },
             monkeyPatch: BdApi_monkeyPatch,
+            ReactUtils:
+            {
+                getInternalInstance(node) { return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null; },
+            },
+            UI: {
+                helper() {
+                    console.info("hi");
+                },
+                alert() {
+                    // Redoing
+                },
+                showToast(message, toastType = 1) {
+                    const { createToast, showToast } = BdApiReImplementation.Webpack.getModule(x => x.createToast);
+                    showToast(createToast(message || "Success !", [1, 2, 3].includes(toastType) ? toastType : 1));
+                },
+                showConfirmationModal(title, content, options = {}) {
+                    const ColorDanger = BdApiReImplementation.findModuleByProps(
+                        "colorDanger",
+                        "colorPremium"
+                    ).colorDanger; // Stole from AssignBadgesRewrite. my beloved davvy
+                    const ConfirmationModal = BdApiReImplementation.Webpack.getModule(m => m?.toString?.()?.includes(".confirmButtonColor"), { searchExports: true });
+                    const { openModal } = BdApiReImplementation.findModuleByProps("openModal");
+
+                    const {
+                        confirmText = options.confirmText || "Confirm",
+                        cancelText = options.cancelText || "Cancel",
+                        onConfirm = options.onConfirm || (() => { }),
+                        onCancel = options.onCancel || (() => { }),
+                    } = options;
+
+                    const whiteTextStyle = {
+                        color: "white",
+                    };
+
+                    const whiteTextContent = BdApiReImplementation.React.createElement("div", { style: whiteTextStyle }, content);
+
+                    openModal(props => BdApiReImplementation.React.createElement(ConfirmationModal, Object.assign({
+                        header: title,
+                        confirmButtonColor: ColorDanger,
+                        confirmText: confirmText,
+                        cancelText: cancelText,
+                        onConfirm: onConfirm,
+                        onCancel: onCancel,
+                        children: whiteTextContent,
+                        ...props
+                    })));
+                }
+            },
         };
         const ReImplementationObject = {
             // request: (url, cb) => {
