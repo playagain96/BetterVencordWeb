@@ -209,6 +209,7 @@ const thePlugin = {
             get React() {
                 return Vencord.Webpack.Common.React;
             },
+            getInternalInstance(node) { return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null; },
             Webpack: {
                 Filters: {
                     byDisplayName: name => {
