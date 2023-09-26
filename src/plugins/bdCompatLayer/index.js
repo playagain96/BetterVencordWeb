@@ -422,13 +422,40 @@ const thePlugin = {
                         cancelText = settings.cancelText || "Cancel",
                         onConfirm = settings.onConfirm || (() => { }),
                         onCancel = settings.onCancel || (() => { }),
+                        extraReact = settings.extraReact || [],
                     } = settings;
+
+                    const moreReact = [];
 
                     const whiteTextStyle = {
                         color: "white",
                     };
 
                     const whiteTextContent = BdApiReImplementation.React.createElement("div", { style: whiteTextStyle }, content);
+
+                    moreReact.push(whiteTextContent);
+                    // moreReact.push(...extraReact) // IM ADDING MORE DIV POSSIBILITESS !!!!
+
+                    // I dont know how anyone would find this useful but screw it yeah?
+                    // Someone will find it useful one day
+                    /*
+                    USAGE:::
+                    const extra1 = BdApi.React.createElement("div", {}, "Extra 1");
+                    const extra2 = BdApi.React.createElement("div", {}, "Extra 2");
+
+                    const extraReact = [extra1, extra2];
+
+                    BdApi.UI.showConfirmationModal(
+                    "Modal title",
+                    "Modal content",
+                    {
+                        extraReact: extraReact
+                    }
+                    );
+                    */
+                    extraReact.forEach(reactElement => {
+                        moreReact.push(reactElement);
+                    });
 
                     openModal(props => BdApiReImplementation.React.createElement(ConfirmationModal, Object.assign({
                         header: title,
@@ -437,7 +464,7 @@ const thePlugin = {
                         cancelText: cancelText,
                         onConfirm: onConfirm,
                         onCancel: onCancel,
-                        children: whiteTextContent,
+                        children: moreReact,
                         ...props
                     })));
                 },
