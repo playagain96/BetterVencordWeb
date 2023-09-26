@@ -225,6 +225,9 @@ const thePlugin = {
                             );
                         };
                     },
+                    get byStrings() {
+                        return BdApiReImplementation.Webpack.getByStrings;
+                    }
                 },
                 getModule: BdApi_getModule,
                 waitForModule(filter) {
