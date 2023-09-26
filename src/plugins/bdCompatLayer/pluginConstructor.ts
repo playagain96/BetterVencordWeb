@@ -360,6 +360,13 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             ...final.options,
         };
     }
+    final.options = {
+        authorsLabel: {
+            type: OptionType.COMPONENT,
+            component: () => createTextForm("Version", final.version),
+        },
+        ...final.options,
+    };
     // if (final.instance.getAuthor)
     //     final.authors[0].id = final.instance.getAuthor();
     // eslint-disable-next-line eqeqeq
