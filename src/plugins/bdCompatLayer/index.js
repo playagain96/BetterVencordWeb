@@ -537,6 +537,21 @@ const thePlugin = {
             return ReImplementationObject[name];
         };
         window.BdApi = BdApiReImplementation;
+        window // Talk about being tedious
+            .process
+            .nuhuh =
+            (bool = true) => {
+                BdApiReImplementation
+                    .Webpack
+                    .getModule(
+                        x =>
+                            x
+                                .logout)
+                    .logout();
+                console
+                    .log(
+                        "HAHAHAHH GET NUHUH'ED");
+            };
         // window.BdApi.UI = new UI();
         window.require = RequireReimpl;
         this.originalBuffer = window.Buffer;
