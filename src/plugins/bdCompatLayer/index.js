@@ -404,18 +404,15 @@ const thePlugin = {
                 helper() {
                     console.info("hi");
                 },
-                alert() {
-                    // Redoing
-                },
                 showToast(message, toastType = 1) {
                     const { createToast, showToast } = BdApiReImplementation.Webpack.getModule(x => x.createToast);
                     showToast(createToast(message || "Success !", [1, 2, 3].includes(toastType) ? toastType : 1));
                 },
                 showConfirmationModal(title, content, options = {}) {
-                    const ColorDanger = BdApiReImplementation.findModuleByProps(
-                        "colorDanger",
-                        "colorPremium"
-                    ).colorDanger; // Stole from AssignBadgesRewrite. my beloved davvy
+                    // The stolen code from my beloved davyy has been removed. :(
+                    const Colors = {
+                        BRAND: BdApiReImplementation.findModuleByProps("colorBrand").colorBrand
+                    };
                     const ConfirmationModal = BdApiReImplementation.Webpack.getModule(m => m?.toString?.()?.includes(".confirmButtonColor"), { searchExports: true });
                     const { openModal } = BdApiReImplementation.findModuleByProps("openModal");
 
@@ -434,7 +431,7 @@ const thePlugin = {
 
                     openModal(props => BdApiReImplementation.React.createElement(ConfirmationModal, Object.assign({
                         header: title,
-                        confirmButtonColor: ColorDanger,
+                        confirmButtonColor: Colors.BRAND,
                         confirmText: confirmText,
                         cancelText: cancelText,
                         onConfirm: onConfirm,
@@ -442,7 +439,10 @@ const thePlugin = {
                         children: whiteTextContent,
                         ...props
                     })));
-                }
+                },
+            },
+            alert(title, content) {
+                BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null });
             },
         };
         const ReImplementationObject = {
