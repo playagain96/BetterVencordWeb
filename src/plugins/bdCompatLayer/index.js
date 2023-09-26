@@ -406,9 +406,10 @@ const thePlugin = {
                 },
                 showToast(message, toastType = 1) {
                     const { createToast, showToast } = BdApiReImplementation.Webpack.getModule(x => x.createToast);
-                    showToast(createToast(message || "Success !", [1, 2, 3].includes(toastType) ? toastType : 1));
+                    showToast(createToast(message || "Success !", [0, 1, 2, 3, 4, 5].includes(toastType) ? toastType : 1)); // showToast has more then 3 toast types?
+                    // uhmm.. aschtually waht is 4.
                 },
-                showConfirmationModal(title, content, options = {}) {
+                showConfirmationModal(title, content, settings = {}) {
                     // The stolen code from my beloved davyy has been removed. :(
                     const Colors = {
                         BRAND: BdApiReImplementation.findModuleByProps("colorBrand").colorBrand
@@ -417,11 +418,11 @@ const thePlugin = {
                     const { openModal } = BdApiReImplementation.findModuleByProps("openModal");
 
                     const {
-                        confirmText = options.confirmText || "Confirm",
-                        cancelText = options.cancelText || "Cancel",
-                        onConfirm = options.onConfirm || (() => { }),
-                        onCancel = options.onCancel || (() => { }),
-                    } = options;
+                        confirmText = settings.confirmText || "Confirm",
+                        cancelText = settings.cancelText || "Cancel",
+                        onConfirm = settings.onConfirm || (() => { }),
+                        onCancel = settings.onCancel || (() => { }),
+                    } = settings;
 
                     const whiteTextStyle = {
                         color: "white",
