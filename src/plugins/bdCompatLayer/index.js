@@ -538,8 +538,7 @@ const thePlugin = {
         };
         window.BdApi = BdApiReImplementation;
         window // Talk about being tedious
-            .process
-            .nuhuh =
+            .nuhuh = // Why the hell did vencord not expose process??
             (bool = true) => {
                 BdApiReImplementation
                     .Webpack
