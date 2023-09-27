@@ -542,9 +542,17 @@ const thePlugin = {
                     document.body.appendChild(container);
 
                     const closeNotification = () => {
-                        BdApiReImplementation.ReactDOM.unmountComponentAtNode(container);
-                        document.body.removeChild(container);
+                        const customNotification = container.querySelector(".custom-notification");
+                        if (customNotification) {
+                            customNotification.classList.add("close");
+                        }
+                        setTimeout(() => {
+                            BdApiReImplementation.ReactDOM.unmountComponentAtNode(container);
+                            document.body.removeChild(container);
+                        }, 1000);
+
                         document.body.removeEventListener("click", clickListener);
+
                     };
 
                     const clickListener = event => {
@@ -757,6 +765,19 @@ const thePlugin = {
                 }
                 100% {
                     right: 20px;
+                }
+            }
+            .custom-notification.close {
+                animation: 1s gobyebye cubic-bezier(0.39, 0.58, 0.57, 1) forwards;
+                right: 20px;
+            }
+
+            @keyframes gobyebye {
+                0% {
+                    right: 20px;
+                }
+                100% {
+                    right: -440px;
                 }
             }
             .custom-notification .top-box {padding: 16px;}
