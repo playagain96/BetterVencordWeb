@@ -562,8 +562,8 @@ const thePlugin = {
             alert(title, content) {
                 BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null });
             },
-            showNotice(title, content, yesornotextlol) {
-                BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null, confirmText: yesornotextlol || "Okay" });
+            showNotice(title, content, settings = {}) {
+                BdApiReImplementation.UI.showNotice(title, content, settings);
             },
             get ReactDOM() { return BdApiReImplementation.findModuleByProps("render", "findDOMNode"); },
         };
@@ -749,6 +749,15 @@ const thePlugin = {
                 color: white;
                 border-radius: 5px;
                 box-shadow: var(--legacy-elevation-border),var(--legacy-elevation-high);
+                animation: 1s slide cubic-bezier(0.39, 0.58, 0.57, 1);
+            }
+            @keyframes slide {
+                0% {
+                    right: -440px;
+                }
+                100% {
+                    right: 20px;
+                }
             }
             .custom-notification .top-box {padding: 16px;}
             .custom-notification .notification-title {font-size: 20px; font-weight: bold;}
