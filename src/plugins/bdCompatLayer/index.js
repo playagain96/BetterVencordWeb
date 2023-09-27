@@ -471,10 +471,101 @@ const thePlugin = {
                         ...props
                     })));
                 },
+                showNotice(title, content, settings = {}) {
+                    const {
+                        confirmText = settings.confirmText || "Confirm",
+                        cancelText = settings.cancelText || "Cancel",
+                        onConfirm = settings.onConfirm || (() => { }),
+                        onCancel = settings.onCancel || (() => { }),
+                        extraReact = settings.extraReact || [],
+                    } = settings;
+
+                    const whiteTextStyle = {
+                        color: "white",
+                    };
+
+                    const whiteTextContent = BdApiReImplementation.React.createElement(
+                        "div",
+                        { style: whiteTextStyle, className: "content" },
+                        content
+                    );
+
+                    const moreReact = extraReact.map((reactElement, index) =>
+                        BdApiReImplementation.React.createElement("div", { key: index }, reactElement)
+                    );
+
+                    const customNotification = BdApiReImplementation.React.createElement(
+                        "div",
+                        {
+                            className: "custom-notification",
+                        },
+                        [
+                            BdApiReImplementation.React.createElement("div", {
+                                className: "top-box"
+                            }, BdApiReImplementation.React.createElement("h2", { className: "notification-title" }, title),),
+                            whiteTextContent,
+                            ...moreReact,
+                            BdApiReImplementation.React.createElement("div", {
+                                className: "bottom-box"
+                            }, [
+                                BdApiReImplementation.React.createElement(
+                                    "button",
+                                    {
+                                        className: "cancel-button",
+                                        onClick: () => {
+                                            onCancel();
+                                            closeNotification();
+                                        },
+                                    },
+                                    cancelText
+                                ),
+                                BdApiReImplementation.React.createElement(
+                                    "button",
+                                    {
+                                        className: "confirm-button",
+                                        onClick: () => {
+                                            onConfirm();
+                                            closeNotification();
+                                        },
+                                    },
+                                    confirmText
+                                )
+                            ]),
+                        ]
+                    );
+
+
+                    const container = document.createElement("div");
+
+                    BdApiReImplementation.ReactDOM.render(customNotification, container);
+
+                    document.body.appendChild(container);
+
+                    const closeNotification = () => {
+                        BdApiReImplementation.ReactDOM.unmountComponentAtNode(container);
+                        document.body.removeChild(container);
+                        document.body.removeEventListener("click", clickListener);
+                    };
+
+                    const clickListener = event => {
+                        if (!container.contains(event.target)) {
+                            closeNotification();
+                        }
+                    };
+
+                    document.body.addEventListener("click", clickListener);
+
+                    return () => { };
+                }
+
             },
             alert(title, content) {
                 BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null });
             },
+            showNotice(title, content, yesornotextlol) {
+                BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null, confirmText: yesornotextlol || "Okay" });
+            },
+            get ReactDOM() { return BdApiReImplementation.findModuleByProps("render", "findDOMNode"); },
         };
         const ReImplementationObject = {
             // request: (url, cb) => {
@@ -646,6 +737,47 @@ const thePlugin = {
                 });
             }
         });
+        BdApiReImplementation.DOM.addStyle("OwOStylesOwO", `
+            .custom-notification {
+                display: flex;
+                flex-direction: column;
+                position: absolute;
+                bottom: 20px; right: 20px;
+                width: 440px; height: 200px;
+                overflow: hidden;
+                background-color: var(--modal-background);
+                color: white;
+                border-radius: 5px;
+                box-shadow: var(--legacy-elevation-border),var(--legacy-elevation-high);
+            }
+            .custom-notification .top-box {padding: 16px;}
+            .custom-notification .notification-title {font-size: 20px; font-weight: bold;}
+            .custom-notification .content {
+                padding: 0 16px 20px;
+                flex: 1 1 auto;
+            }
+            .custom-notification .bottom-box {
+                background-color: var(--modal-footer-background);
+                padding: 16px;
+                display: flex;
+                justify-content: flex-end;
+                align-items: center;
+            }
+            .custom-notification .confirm-button {
+                background-color: #007bff;
+                color: white;
+                border-radius: 5px;
+                padding: 5px 10px;
+                margin: 0 5px;
+            }
+            .custom-notification .cancel-button {
+                background-color: red;
+                color: white;
+                border-radius: 5px;
+                padding: 5px 10px;
+                margin: 0 5px;
+            }
+    `);
     },
     async stop() {
         console.warn("Disabling observer...");
