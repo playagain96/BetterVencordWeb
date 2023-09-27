@@ -471,6 +471,8 @@ const thePlugin = {
                         ...props
                     })));
                 },
+                notificationQueue: [],
+                isQueueProcessing: false,
                 showNotice(title, content, settings = {}) {
                     const {
                         confirmText = settings.confirmText || "Confirm",
@@ -555,6 +557,144 @@ const thePlugin = {
 
                     };
 
+                    /* const clickListener = event => {
+                        if (!container.contains(event.target)) {
+                            closeNotification();
+                        }
+                    };
+
+                    document.body.addEventListener("click", clickListener);*/
+
+                    return () => { };
+                }
+
+                /* showNotice(title, content, settings = {}) {
+                    BdApiReImplementation.UI.notificationQueue.push({ title, content, settings });
+
+                    if (!BdApiReImplementation.UI.isQueueProcessing) {
+                        processQueue();
+                    }
+
+                    function processQueue() {
+                        if (BdApiReImplementation.UI.notificationQueue.length === 0) {
+                            BdApiReImplementation.UI.isQueueProcessing = false;
+                            return;
+                        }
+
+                        BdApiReImplementation.UI.isQueueProcessing = true;
+                        const notificationData = BdApiReImplementation.UI.notificationQueue.shift();
+                        const {
+                            title: notificationTitle,
+                            content: notificationContent,
+                            settings: notificationSettings,
+                        } = notificationData;
+
+                        const container = document.createElement("div");
+
+                        // Call createCustomNotification and store the return value (customNotification)
+                        const customNotification = BdApiReImplementation.UI.createCustomNotification(container, notificationTitle, notificationContent, notificationSettings);
+
+                        document.body.appendChild(container);
+
+                        const notificationHeight = 220;
+                        const top = BdApiReImplementation.UI.notificationQueue.length * notificationHeight + 20;
+
+                        if (customNotification) {
+                            customNotification.style.top = `${top}px`;
+                        }
+
+                        const closeNotification = () => {
+                            const index = BdApiReImplementation.UI.notificationQueue.indexOf(notificationData);
+                            if (index !== -1) {
+                                BdApiReImplementation.UI.notificationQueue.splice(index, 1);
+                            }
+
+                            processQueue();
+                        };
+
+                        document.body.appendChild(container);
+                    }
+                },
+
+                createCustomNotification(container, title, content, settings) {
+                    const {
+                        confirmText = settings.confirmText || "Confirm",
+                        cancelText = settings.cancelText || "Cancel",
+                        onConfirm = settings.onConfirm || (() => { }),
+                        onCancel = settings.onCancel || (() => { }),
+                        extraReact = settings.extraReact || [],
+                    } = settings;
+
+                    const whiteTextStyle = {
+                        color: "white",
+                    };
+
+                    const whiteTextContent = BdApiReImplementation.React.createElement(
+                        "div",
+                        { style: whiteTextStyle, className: "content" },
+                        content
+                    );
+
+                    const moreReact = extraReact.map((reactElement, index) =>
+                        BdApiReImplementation.React.createElement("div", { key: index }, reactElement)
+                    );
+
+                    const customNotification = BdApiReImplementation.React.createElement(
+                        "div",
+                        {
+                            className: "custom-notification",
+                        },
+                        [
+                            BdApiReImplementation.React.createElement("div", {
+                                className: "top-box"
+                            }, BdApiReImplementation.React.createElement("h2", { className: "notification-title" }, title),),
+                            whiteTextContent,
+                            ...moreReact,
+                            BdApiReImplementation.React.createElement("div", {
+                                className: "bottom-box"
+                            }, [
+                                BdApiReImplementation.React.createElement(
+                                    "button",
+                                    {
+                                        className: "cancel-button",
+                                        onClick: () => {
+                                            onCancel();
+                                            closeNotification();
+                                        },
+                                    },
+                                    cancelText
+                                ),
+                                BdApiReImplementation.React.createElement(
+                                    "button",
+                                    {
+                                        className: "confirm-button",
+                                        onClick: () => {
+                                            onConfirm();
+                                            closeNotification();
+                                        },
+                                    },
+                                    confirmText
+                                )
+                            ]),
+                        ]
+                    );
+
+                    BdApiReImplementation.ReactDOM.render(customNotification, container);
+
+                    const closeNotification = () => {
+                        const customNotification = container.querySelector(".custom-notification");
+                        if (customNotification) {
+                            customNotification.classList.add("close");
+                        }
+                        setTimeout(() => {
+                            BdApiReImplementation.ReactDOM.unmountComponentAtNode(container);
+                            document.body.removeChild(container);
+                        }, 1000);
+
+                        document.body.removeEventListener("click", clickListener);
+
+                    };
+
                     const clickListener = event => {
                         if (!container.contains(event.target)) {
                             closeNotification();
@@ -563,8 +703,8 @@ const thePlugin = {
 
                     document.body.addEventListener("click", clickListener);
 
-                    return () => { };
-                }
+                    return customNotification;
+                }*/
 
             },
             alert(title, content) {
