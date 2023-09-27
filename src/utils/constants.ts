@@ -48,7 +48,7 @@ export const Devs = /* #__PURE__*/ Object.freeze({
     },
     Davvy:
     {
-        name: "Amongus",
+        name: "Amogus",
         id: 568109529884000260n
     },
     WhoIsThis:
