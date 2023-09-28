@@ -216,6 +216,16 @@ export async function reloadCompatLayer() {
     }
 }
 
+export function docCreateElement(tag: string, props = {}, ch: Node[] = [], attrs = {}) {
+    return ch.reduce(
+        (e, c) => (e.appendChild(c), e),
+        Object.entries(attrs).reduce(
+            (e, [k, v]) => (e.setAttribute(k, v as any), e),
+            Object.assign(document.createElement(tag), props)
+        )
+    );
+};
+
 export const FSUtils = {
     readDirectory(dirPath: string) {
         const fs = window.require("fs");

@@ -30,7 +30,7 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxy
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch } from "./stuffFromBD";
-import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { docCreateElement, FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -471,8 +471,8 @@ const thePlugin = {
                         ...props
                     })));
                 },
-                showNotice(title, content, options = {}) {
-                    const { React, ReactDOM } = BdApiReImplementation;
+                showNotice_(title, content, options = {}) {
+                    // const { React, ReactDOM } = BdApiReImplementation;
                     const container = document.createElement("div");
                     container.className = "custom-notification-container";
 
@@ -481,7 +481,7 @@ const thePlugin = {
                         if (customNotification) {
                             customNotification.classList.add("close");
                             setTimeout(() => {
-                                ReactDOM.unmountComponentAtNode(container);
+                                // ReactDOM.unmountComponentAtNode(container);
                                 document.body.removeChild(container);
                             }, 1000);
                         }
@@ -495,59 +495,88 @@ const thePlugin = {
                             closeNotification();
                         };
 
-                        return React.createElement(
-                            "button",
-                            { key: index, className: "confirm-button", onClick: onClickHandler },
-                            button.label
-                        );
+                        // return React.createElement(
+                        //     "button",
+                        //     { key: index, className: "confirm-button", onClick: onClickHandler },
+                        //     button.label
+                        // );
+                        // const t = document.createElement("button");
+                        // t.setAttribute("key", index);
+                        // t.className = "confirm-button";
+                        // t.onclick = onClickHandler;
+                        // // t.onClick = t.onclick;
+                        // t.append(button.label);
+                        // return t;
+                        return docCreateElement("button", { className: "confirm-button", onclick: onClickHandler }, [typeof button.label === "string" ? docCreateElement("span", { innerText: button.label }) : button.label]);
                     });
-                    const xButton = React.createElement(
-                        "button",
-                        { onClick: closeNotification, className: "button-with-svg" },
-                        React.createElement(
-                            "svg",
-                            { width: "24", height: "24", className: "xxx" },
-                            React.createElement("path", {
-                                d:
-                                    "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z",
+                    // const xButton = React.createElement(
+                    //     "button",
+                    //     { onClick: closeNotification, className: "button-with-svg" },
+                    //     React.createElement(
+                    //         "svg",
+                    //         { width: "24", height: "24", className: "xxx" },
+                    //         React.createElement("path", {
+                    //             d:
+                    //                 "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z",
+                    //             stroke: "white",
+                    //             strokeWidth: "2",
+                    //             fill: "none",
+                    //         })
+                    //     )
+                    // );
+                    const xButton = docCreateElement("button", { onclick: closeNotification, className: "button-with-svg" }, [
+                        docCreateElement("svg", { className: "xxx" }, [
+                            docCreateElement("path", undefined, undefined, {
                                 stroke: "white",
                                 strokeWidth: "2",
                                 fill: "none",
-                            })
-                        )
-                    );
-                    const titleComponent = typeof title === "string" ? (
-                        React.createElement("div", { className: "notification-title" }, title, xButton)
-                    ) : (
-                        React.createElement(
-                            title.tagName.toLowerCase(),
-                            { className: "notification-title" },
-                            title.textContent || " ",
-                            xButton
-                        )
-                    );
-                    const contentComponent = typeof content === "string" ? (
-                        React.createElement("div", { className: "content" }, content)
-                    ) : (
-                        React.isValidElement(content) ? content : React.createElement("div", { className: "content" }, " ") // Very nice looking fallback. I dont know why I dont optimize code along the way.
-                    );
+                                d:
+                                    "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z",
+                            }),
+                        ], { style: `width: 24px; height: 24px;` }),
+                    ]);
+                    // const titleComponent = typeof title === "string" ? (
+                    //     React.createElement("div", { className: "notification-title" }, title, xButton)
+                    // ) : (
+                    //     React.createElement(
+                    //         title.tagName.toLowerCase(),
+                    //         { className: "notification-title" },
+                    //         title.textContent || " ",
+                    //         xButton
+                    //     )
+                    // );
+                    const titleComponent = docCreateElement("span", { className: "notification-title" }, [typeof title === "string" ? docCreateElement("span", { innerText: title }) : title, xButton]);
+                    // const contentComponent = typeof content === "string" ? (
+                    //     React.createElement("div", { className: "content" }, content)
+                    // ) : (
+                    //     React.isValidElement(content) ? content : React.createElement("div", { className: "content" }, " ") // Very nice looking fallback. I dont know why I dont optimize code along the way.
+                    // );
+                    const contentComponent = docCreateElement("div", { className: "content" }, [typeof content === "string" ? docCreateElement("span", { innerText: title }) : content]);
 
-                    const customNotification = React.createElement(
-                        "div",
-                        { className: `custom-notification ${type}` },
-                        React.createElement("div", { className: "top-box" }, titleComponent),
+                    // const customNotification = React.createElement(
+                    //     "div",
+                    //     { className: `custom-notification ${type}` },
+                    //     React.createElement("div", { className: "top-box" }, titleComponent),
+                    //     contentComponent,
+                    //     React.createElement("div", { className: "bottom-box" }, buttonElements)
+                    // );
+                    const customNotification = docCreateElement("div", { className: `custom-notification ${type}` }, [
+                        docCreateElement("div", { className: "top-box" }, [titleComponent]),
                         contentComponent,
-                        React.createElement("div", { className: "bottom-box" }, buttonElements)
-                    );
+                        docCreateElement("div", { className: "bottom-box" }, buttonElements),
+                    ]);
 
-                    ReactDOM.render(customNotification, container);
+                    // ReactDOM.render(customNotification, container);
+                    container.appendChild(customNotification);
                     document.body.appendChild(container);
 
                     if (timeout > 0) {
                         setTimeout(closeNotification, timeout);
                     }
-                }
-
+                },
+                showNotice(content, options) {
+                    return this.showNotice_("Notice", content, options);
+                },
             },
             alert(title, content) {
                 BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null });
