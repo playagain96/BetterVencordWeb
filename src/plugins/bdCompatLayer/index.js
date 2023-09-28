@@ -472,16 +472,22 @@ const thePlugin = {
                     })));
                 },
                 showNotice(title, content, options = {}) {
-                    const {
-                        type = "info",
-                        buttons = [],
-                        timeout = 10000,
-                    } = options;
-
-                    const whiteTextStyle = {
-                        color: "white",
-                    };
                     const { React, ReactDOM } = BdApiReImplementation;
+                    const container = document.createElement("div");
+                    container.className = "custom-notification-container";
+
+                    const closeNotification = () => {
+                        const customNotification = container.querySelector(".custom-notification");
+                        if (customNotification) {
+                            customNotification.classList.add("close");
+                            setTimeout(() => {
+                                ReactDOM.unmountComponentAtNode(container);
+                                document.body.removeChild(container);
+                            }, 1000);
+                        }
+                    };
+
+                    const { buttons = [], timeout = 0, type = "default" } = options;
 
                     const buttonElements = buttons.map((button, index) => {
                         const onClickHandler = () => {
@@ -491,60 +497,54 @@ const thePlugin = {
 
                         return React.createElement(
                             "button",
-                            {
-                                key: index,
-                                className: "confirm-button",
-                                onClick: onClickHandler,
-                            },
+                            { key: index, className: "confirm-button", onClick: onClickHandler },
                             button.label
                         );
                     });
-
-                    const container = document.createElement("div");
-
-                    let titleComponent;
-                    let isTitleHTML = false;
-
-                    if (typeof title === "string") {
-                        titleComponent = React.createElement("div", { className: "notification-title" }, title);
-                    } else {
-                        titleComponent = React.createElement(
+                    const xButton = React.createElement(
+                        "button",
+                        { onClick: closeNotification, className: "button-with-svg" },
+                        React.createElement(
+                            "svg",
+                            { width: "24", height: "24", className: "xxx" },
+                            React.createElement("path", {
+                                d:
+                                    "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z",
+                                stroke: "white",
+                                strokeWidth: "2",
+                                fill: "none",
+                            })
+                        )
+                    );
+                    const titleComponent = typeof title === "string" ? (
+                        React.createElement("div", { className: "notification-title" }, title, xButton)
+                    ) : (
+                        React.createElement(
                             title.tagName.toLowerCase(),
-                            { className: "notification-title" }, title.textContent // ik you told me not to but this was my last resort.
-                        );
-                        isTitleHTML = true;
-                    }
-                    console.log(titleComponent);
-                    const realTitle = React.createElement("div", { className: "top-box" }, titleComponent);
-                    const contentComponent = React.createElement("div", { style: whiteTextStyle, className: "content" }, content ?? "Placeholder");
-                    console.log(realTitle);
+                            { className: "notification-title" },
+                            title.textContent || " ",
+                            xButton
+                        )
+                    );
+                    const contentComponent = typeof content === "string" ? (
+                        React.createElement("div", { className: "content" }, content)
+                    ) : (
+                        React.isValidElement(content) ? content : React.createElement("div", { className: "content" }, " ") // Very nice looking fallback. I dont know why I dont optimize code along the way.
+                    );
+
                     const customNotification = React.createElement(
                         "div",
                         { className: `custom-notification ${type}` },
-                        realTitle,
+                        React.createElement("div", { className: "top-box" }, titleComponent),
                         contentComponent,
                         React.createElement("div", { className: "bottom-box" }, buttonElements)
                     );
 
                     ReactDOM.render(customNotification, container);
-
                     document.body.appendChild(container);
 
-                    const closeNotification = () => {
-                        const customNotification = container.querySelector(".custom-notification");
-                        if (customNotification) {
-                            customNotification.classList.add("close");
-                        }
-                        setTimeout(() => {
-                            ReactDOM.unmountComponentAtNode(container);
-                            document.body.removeChild(container);
-                        }, 1000);
-                    };
-
                     if (timeout > 0) {
-                        setTimeout(() => {
-                            closeNotification();
-                        }, timeout);
+                        setTimeout(closeNotification, timeout);
                     }
                 }
 
@@ -788,6 +788,11 @@ const thePlugin = {
                 border-radius: 5px;
                 padding: 5px 10px;
                 margin: 0 5px;
+            }
+            .xxx
+            {
+                position: absolute;
+                right: 15px;
             }
     `);
     },
