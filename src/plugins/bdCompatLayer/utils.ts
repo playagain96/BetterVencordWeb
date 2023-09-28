@@ -216,15 +216,25 @@ export async function reloadCompatLayer() {
     }
 }
 
-export function docCreateElement(tag: string, props = {}, ch: Node[] = [], attrs = {}) {
-    return ch.reduce(
-        (e, c) => (e.appendChild(c), e),
-        Object.entries(attrs).reduce(
-            (e, [k, v]) => (e.setAttribute(k, v as any), e),
-            Object.assign(document.createElement(tag), props)
-        )
-    );
-};
+export function docCreateElement(tag: string, props: Record<string, any> = {}, childNodes: Node[] = [], attrs: Record<string, string> = {}) {
+    const element = document.createElement(tag);
+
+    for (const [key, value] of Object.entries<string | any>(props)) {
+        element[key] = value;
+    }
+
+    for (const node of childNodes) {
+        if (node instanceof Node) {
+            element.appendChild(node);
+        }
+    }
+
+    for (const [key, value] of Object.entries<string>(attrs)) {
+        element.setAttribute(key, value);
+    }
+
+    return element;
+}
 
 export const FSUtils = {
     readDirectory(dirPath: string) {
