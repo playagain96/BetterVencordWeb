@@ -789,10 +789,11 @@ const thePlugin = {
                 padding: 5px 10px;
                 margin: 0 5px;
             }
-            .xxx
-            {
+            .button-with-svg {
                 position: absolute;
                 right: 15px;
+                margin-top: -0px !important;
+                background: transparent;
             }
     `);
     },
