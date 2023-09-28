@@ -127,7 +127,7 @@ async function fetchDirContentForId(id: string) {
 
 function createFilesSystemViewTab(ID: Record<string, unknown>) {
     return {
-        section: "BDCompatFS",
+        section: "VencordBDCompatFS", // workaround
         label: TabName,
         element: wrapTab(makeTab, TabName),
         className: "bv-fs-view",
