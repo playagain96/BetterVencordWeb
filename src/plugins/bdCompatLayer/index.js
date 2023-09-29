@@ -602,6 +602,7 @@ const thePlugin = {
                         }
                         ev.emit("end", Object.assign({}, x, {
                             statusCode: x.status,
+			    headers: Object.fromEntries(x.headers.entries()),
                         }));
                     });
                     cb(ev);
@@ -627,6 +628,7 @@ const thePlugin = {
                         // cb(undefined, x, await x.text());
                         cb(undefined, Object.assign({}, x, {
                             statusCode: x.status,
+			    headers: Object.fromEntries(x.headers.entries()),
                         }), await x.text());
                     });
                     fetchOut.catch(x => {
