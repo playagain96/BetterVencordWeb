@@ -293,8 +293,36 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     if (final.instance.getDescription)
         final.description = final.instance.getDescription();
 
-    if (!(final.name && final.version && final.description))
+    /* if (!(final.name && final.version && final.description)) {
+        const DavilGiveMorePluginErrorDetails = final ? final.name : final;
+        throw new Error(`Had issues compiling BD Plugin: ${DavilGiveMorePluginErrorDetails}`);
+    }*/
+
+    const neededMeta = ["name", "version", "description"];
+    const whatsMissingDavil = neededMeta.filter(prop => !final || !final[prop]);
+
+    // I literally made this cause there was a plugin not being able to be compiled and its cause you required version AND GAVE NO DATA ON WHAT PLUGIN
+    // 😺 You're welcome 😺
+    if (whatsMissingDavil.length > 0) {
+        const ThisShouldGiveUsWhatIsMissingInThePlugin = whatsMissingDavil.join(", ");
+        // throw new Error(`The BD Plugin ${final.name || final.id} is missing: ${ThisShouldGiveUsWhatIsMissingInThePlugin}`); Screw this. I am using our noticesystem
+        // LITERALLY WHAT ITS MADE FOR BUDDY OL' PAL
+        const TextElement = document.createElement("div");
+        TextElement.innerHTML = `The BD Plugin ${final.name || final.id} is missing:<br><br>
+        <strong>${ThisShouldGiveUsWhatIsMissingInThePlugin.toUpperCase()}</strong><br><br>
+        If you press 'Fix' It will reload every plugin with the version fix.`;
+
+        window.BdApi.showNotice(TextElement, {
+            timeout: 0,
+            buttons: [
+                {
+                    label: "Didn't ask ;-)",
+                    onClick: () => { console.log("Didn't have to be so mean about it .·´¯`(>▂<)´¯`· \nI'll go away"); },
+                }
+            ]
+        });
         throw new Error("Incomplete plugin");
+    }
 
     if (final.authors[0].name && typeof final.authors[0].name === "string") {
         final.options = {
