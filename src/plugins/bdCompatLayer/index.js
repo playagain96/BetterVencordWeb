@@ -533,7 +533,7 @@ const thePlugin = {
                                 d:
                                     "M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z",
                             }),
-                        ], { style: `width: 24px; height: 24px;` }),
+                        ], { style: "width: 24px; height: 24px;" }),
                     ]);
                     // const titleComponent = typeof title === "string" ? (
                     //     React.createElement("div", { className: "notification-title" }, title, xButton)
@@ -602,7 +602,7 @@ const thePlugin = {
                         }
                         ev.emit("end", Object.assign({}, x, {
                             statusCode: x.status,
-			    headers: Object.fromEntries(x.headers.entries()),
+                            headers: Object.fromEntries(x.headers.entries()),
                         }));
                     });
                     cb(ev);
@@ -628,7 +628,7 @@ const thePlugin = {
                         // cb(undefined, x, await x.text());
                         cb(undefined, Object.assign({}, x, {
                             statusCode: x.status,
-			    headers: Object.fromEntries(x.headers.entries()),
+                            headers: Object.fromEntries(x.headers.entries()),
                         }), await x.text());
                     });
                     fetchOut.catch(x => {
