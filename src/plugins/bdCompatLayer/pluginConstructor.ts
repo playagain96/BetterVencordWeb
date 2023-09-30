@@ -310,7 +310,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         const TextElement = document.createElement("div");
         TextElement.innerHTML = `The BD Plugin ${final.name || final.id} is missing:<br><br>
         <strong>${ThisShouldGiveUsWhatIsMissingInThePlugin.toUpperCase()}</strong><br><br>
-        If you press 'Fix' It will reload every plugin with the version fix.`;
+        .`; // not a fix yet. still thinking of a way to do this without overriding file.
 
         window.BdApi.showNotice(TextElement, {
             timeout: 0,
