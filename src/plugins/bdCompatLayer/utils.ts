@@ -170,12 +170,13 @@ export function objectToString(obj: any) {
     str += "}";
     return str;
 }
-export function openFileSelectBulk() {
-    return new Promise<File[]>((resolve, reject) => {
+
+export function openFileSelect(filter = "*", bulk = false) {
+    return new Promise<File | File[]>((resolve, reject) => {
         const input = document.createElement("input");
         input.type = "file";
-        input.multiple = true; // bauzzzzzz asked for this so I added it.
-        input.accept = ".js";
+        input.multiple = bulk;
+        input.accept = filter;
         const timeout = setTimeout(() => {
             reject();
             // so we don't wait forever
@@ -183,30 +184,7 @@ export function openFileSelectBulk() {
         input.addEventListener("change", () => {
             if (input.files && input.files.length > 0) {
                 clearTimeout(timeout);
-                resolve(Array.from(input.files));
-            } else {
-                clearTimeout(timeout);
-                reject("No files selected.");
-            }
-        });
-
-        input.click();
-    });
-}
-
-export function openFileSelect() {
-    return new Promise<File>((resolve, reject) => {
-        const input = document.createElement("input");
-        input.type = "file";
-        input.accept = ".js";
-        const timeout = setTimeout(() => {
-            reject();
-            // so we don't wait forever
-        }, 30 * 60 * 1000);
-        input.addEventListener("change", () => {
-            if (input.files && input.files.length > 0) {
-                clearTimeout(timeout);
-                resolve(input.files[0]);
+                resolve(bulk ? Array.from(input.files) : input.files[0]);
             } else {
                 clearTimeout(timeout);
                 reject("No file selected.");
@@ -365,11 +343,11 @@ export const FSUtils = {
         }
         fs.mkdirSync(directory, mode);
     },
-    async importFileBulk(targetPath: string, autoGuessName: boolean = false) {
-        const files = await openFileSelectBulk();
+    async importFile(targetPath: string, autoGuessName: boolean = false, bulk = false, filter = undefined) {
+        const fileOrFiles = await openFileSelect(filter, bulk);
+        const files = fileOrFiles.length ? (fileOrFiles as File[]) : [fileOrFiles as File];
         const fs = window.require("fs");
         const path = window.require("path");
-
         for (const file of files) {
             let filePath = targetPath;
             if (autoGuessName) {
@@ -378,38 +356,14 @@ export const FSUtils = {
                 }
                 filePath += file.name;
             }
-
-            const fileArrayBuffer = await new Promise<ArrayBuffer>(resolve => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                    resolve(reader.result as ArrayBuffer);
-                };
-                reader.readAsArrayBuffer(file);
-            });
-
             fs.writeFile(
                 filePath,
-                window.BrowserFS.BFSRequire("buffer").Buffer.from(fileArrayBuffer),
+                window.BrowserFS.BFSRequire("buffer").Buffer.from(
+                    await file.arrayBuffer()
+                ),
                 () => { }
             );
         }
-    },
-    async importFile(targetPath: string, autoGuessName: boolean = false) {
-        const file = await openFileSelect();
-        const fs = window.require("fs");
-        const path = window.require("path");
-        if (autoGuessName) {
-            if (!targetPath.endsWith("/"))
-                targetPath += "/";
-            targetPath += file.name;
-        }
-        fs.writeFile(
-            targetPath,
-            window.BrowserFS.BFSRequire("buffer").Buffer.from(
-                await file.arrayBuffer()
-            ),
-            () => { }
-        );
     },
     exportFile(targetPath: string) {
         return new Promise((resolve, reject) => {

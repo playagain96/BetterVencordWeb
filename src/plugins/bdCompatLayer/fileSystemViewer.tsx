@@ -107,7 +107,7 @@ function makeTab() {
                     <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true)}>
                         Import BD Plugin
                     </Button>
-                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFileBulk("//BD/plugins", true)}>
+                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true, true)}>
                         Import Bulk Plugins
                     </Button>
                 </React.Fragment>
