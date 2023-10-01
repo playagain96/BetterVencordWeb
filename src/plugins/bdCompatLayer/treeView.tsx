@@ -91,11 +91,11 @@ const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode:
                 <Text style={{
                     marginLeft: "20px",
                     fontSize: "1rem",
-                    color: "#333",
+                    color: "white",
                     fontWeight: "bold",
                     padding: "5px",
                     borderRadius: "4px",
-                    backgroundColor: "#f0f0f0",
+                    outline: "3px solid #f0f0f0",
                     cursor: "pointer",
                 }}>
                     {node.label}
