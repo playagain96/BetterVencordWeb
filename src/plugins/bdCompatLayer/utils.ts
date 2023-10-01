@@ -468,7 +468,7 @@ export const ZIPUtils = {
             //     fileInput.accept = "*";
             //     fileInput.onchange = event => {
             //         const file = event.target.files[0];
-            openFileSelect().then(file => {
+            (openFileSelect() as Promise<File>).then(file => {
                 // if (!file)
                 //     return null;
                 const reader = new FileReader();
