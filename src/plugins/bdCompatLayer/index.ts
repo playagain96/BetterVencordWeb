@@ -19,7 +19,7 @@
 "use strict";
 /* eslint-disable eqeqeq */
 import { Devs } from "@utils/constants";
-import definePlugin, { OptionType } from "@utils/types";
+import definePlugin, { OptionType, PluginDef } from "@utils/types";
 // import { readFileSync } from "fs";
 // const process = require("~process");
 
@@ -82,7 +82,7 @@ const thePlugin = {
             restartNeeded: true,
         },
     },
-    // Delete these two below if you are only using code patches
+    originalBuffer: {},
     start() {
         injectSettingsTabs();
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
@@ -102,9 +102,9 @@ const thePlugin = {
                         ".Vencord.Util.localStorage"
                     )
                 );
-                const temp = {};
-                BrowserFS.install(temp);
-                BrowserFS.configure(
+                const temp: any = {};
+                window.BrowserFS.install(temp);
+                window.BrowserFS.configure(
                     {
                         // fs: "InMemory"
                         fs: "LocalStorage",
@@ -115,6 +115,7 @@ const thePlugin = {
                         // ReImplementationObject.fs = temp.require("fs");
                         ReImplementationObject.fs = patchReadFileSync(patchMkdirSync(temp.require("fs")));
                         ReImplementationObject.path = temp.require("path");
+                        // @ts-ignore
                         windowBdCompatLayer.fsReadyPromise.resolve();
                     }
                 );
@@ -140,15 +141,17 @@ const thePlugin = {
             ZIPUtils,
             reloadCompatLayer,
             fsReadyPromise: getDeferred(),
+            mainObserver: {},
         };
         window.BdCompatLayer = windowBdCompatLayer;
 
         window.GeneratedPlugins = [];
         const BdApiReImplementation = {
+            ContextMenu: {},
             Patcher,
             Plugins: {
                 getAll: () => {
-                    return GeneratedPlugins;
+                    return window.GeneratedPlugins;
                 },
                 isEnabled: name => {
                     return Vencord.Plugins.isPluginEnabled(name);
@@ -171,22 +174,22 @@ const thePlugin = {
             DOM: {
                 addStyle(id, css) {
                     id = id.replace(/^[^a-z]+|[^\w-]+/gi, "-");
-                    const style =
+                    const style: HTMLElement =
                         document
                             .querySelector("bd-styles")
-                            .querySelector(`#${id}`) ||
+                            ?.querySelector(`#${id}`) ||
                         this.createElement("style", { id });
                     style.textContent = css;
-                    document.querySelector("bd-styles").append(style);
+                    document.querySelector("bd-styles")?.append(style);
                 },
                 removeStyle(id) {
                     id = id.replace(/^[^a-z]+|[^\w-]+/gi, "-");
                     const exists = document
                         .querySelector("bd-styles")
-                        .querySelector(`#${id}`);
+                        ?.querySelector(`#${id}`);
                     if (exists) exists.remove();
                 },
-                createElement(tag, options = {}, child = null) {
+                createElement(tag, options: any = {}, child = null) {
                     const { className, id, target } = options;
                     const element = document.createElement(tag);
                     if (className) element.className = className;
@@ -326,12 +329,18 @@ const thePlugin = {
             //     Vencord.Settings.plugins[pluginName][key] = value;
             // },
             Data: {
-                load(...args) {
-                    return BdApiReImplementation.getData(...args);
+                // load(...args) {
+                //     return BdApiReImplementation.getData(...args);
+                // },
+                // save(...args) {
+                //     return BdApiReImplementation.setData(...args);
+                // },
+                get load() {
+                    return BdApiReImplementation.getData.bind(BdApiReImplementation);
                 },
-                save(...args) {
-                    return BdApiReImplementation.setData(...args);
-                },
+                get save() {
+                    return BdApiReImplementation.setData.bind(BdApiReImplementation);
+                }
             },
             pluginData: {},
             getData(key, value) {
@@ -401,7 +410,7 @@ const thePlugin = {
             monkeyPatch: BdApi_monkeyPatch,
             ReactUtils:
             {
-                getInternalInstance(node) { return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber"))] || null; },
+                getInternalInstance(node: Node & any) { return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber")) as string] || null; },
             },
             UI: {
                 helper() {
@@ -412,7 +421,7 @@ const thePlugin = {
                     showToast(createToast(message || "Success !", [0, 1, 2, 3, 4, 5].includes(toastType) ? toastType : 1)); // showToast has more then 3 toast types?
                     // uhmm.. aschtually waht is 4.
                 },
-                showConfirmationModal(title, content, settings = {}) {
+                showConfirmationModal(title: string, content: any, settings: any = {}) {
                     // The stolen code from my beloved davyy has been removed. :(
                     const Colors = {
                         BRAND: BdApiReImplementation.findModuleByProps("colorBrand").colorBrand
@@ -428,7 +437,7 @@ const thePlugin = {
                         extraReact = settings.extraReact || [],
                     } = settings;
 
-                    const moreReact = [];
+                    const moreReact: React.ReactElement[] = [];
 
                     const whiteTextStyle = {
                         color: "white",
@@ -471,7 +480,7 @@ const thePlugin = {
                         ...props
                     })));
                 },
-                showNotice_(title, content, options = {}) {
+                showNotice_(title, content, options: any = {}) {
                     // const { React, ReactDOM } = BdApiReImplementation;
                     const container = document.createElement("div");
                     container.className = "custom-notification-container";
@@ -581,8 +590,8 @@ const thePlugin = {
             alert(title, content) {
                 BdApiReImplementation.UI.showConfirmationModal(title, content, { cancelText: null });
             },
-            showNotice(title, content, settings = {}) {
-                BdApiReImplementation.UI.showNotice(title, content, settings);
+            showNotice(content, settings = {}) {
+                BdApiReImplementation.UI.showNotice(content, settings);
             },
             get ReactDOM() { return BdApiReImplementation.findModuleByProps("render", "findDOMNode"); },
         };
@@ -590,15 +599,19 @@ const thePlugin = {
             // request: (url, cb) => {
             //     cb({ err: "err" }, undefined, undefined);
             // },
+            fs: {},
+            path: {},
             https: {
                 get_(url, options, cb) {
                     const ev = new ReImplementationObject.events.EventEmitter();
                     fetchWithCorsProxyFallback(url, { ...options, method: "get" }, proxyUrl).then(async x => {
-                        const reader = x.body.getReader();
-                        let result = await reader.read();
-                        while (!result.done) {
-                            ev.emit("data", result.value);
-                            result = await reader.read();
+                        if (x.body) {
+                            const reader = x.body.getReader();
+                            let result = await reader.read();
+                            while (!result.done) {
+                                ev.emit("data", result.value);
+                                result = await reader.read();
+                            }
                         }
                         ev.emit("end", Object.assign({}, x, {
                             statusCode: x.status,
@@ -614,12 +627,14 @@ const thePlugin = {
                 }
             },
             get request() {
-                const fakeRequest = function (url, cb = () => { }, headers = {}) {
+                const fakeRequest = function (url, cb = (...args) => { }, headers = {}) {
                     const stuff = { theCallback: cb };
                     if (typeof headers === "function") {
+                        // @ts-ignore
                         cb = headers;
                         headers = stuff.theCallback;
                     }
+                    // @ts-ignore
                     delete stuff.theCallback;
                     // cb({ err: "err" }, undefined, undefined);
                     const fetchOut = fetchWithCorsProxyFallback(url, { ...headers, method: "get" }, proxyUrl);
@@ -664,6 +679,7 @@ const thePlugin = {
                         "HAHAHAHH GET NUHUH'ED");
             };
         // window.BdApi.UI = new UI();
+        // @ts-ignore
         window.require = RequireReimpl;
         this.originalBuffer = window.Buffer;
         window.Buffer = BdApiReImplementation.Webpack.getModule(x => x.INSPECT_MAX_BYTES)?.Buffer;
@@ -833,7 +849,7 @@ const thePlugin = {
         console.warn("Disabling observer...");
         window.BdCompatLayer.mainObserver.disconnect();
         console.warn("UnPatching context menu...");
-        BdApi.Patcher.unpatchAll("ContextMenuPatcher");
+        window.BdApi.Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
         await removeAllCustomPlugins();
         console.warn("Removing settings tab...");
@@ -856,8 +872,8 @@ const thePlugin = {
         console.warn("Removing FileSystem...");
         delete window.BrowserFS;
         console.warn("Restoring buffer...");
-        window.Buffer = this.originalBuffer;
+        window.Buffer = this.originalBuffer as BufferConstructor;
     },
 };
 
-export default definePlugin(thePlugin);
+export default definePlugin(thePlugin as PluginDef);

@@ -19,6 +19,7 @@
 import { addLogger, evalInScope, findFirstLineWithoutX, simpleGET } from "./utils";
 
 export const FakeEventEmitter = class {
+    callbacks: any;
     constructor() {
         this.callbacks = {};
     }
@@ -46,7 +47,7 @@ export const FakeEventEmitter = class {
 export const addDiscordModules = proxyUrl => {
     const context = {
         get WebpackModules() {
-            return BdApi.Webpack;
+            return window.BdApi.Webpack;
         }
     };
     const ModuleDataText = simpleGET(
@@ -72,11 +73,11 @@ export const addContextMenu = (DiscordModules, proxyUrl) => {
     ).responseText.replaceAll("\r", "");
     const context = {
         get WebpackModules() {
-            return BdApi.Webpack;
+            return window.BdApi.Webpack;
         },
         DiscordModules,
         get Patcher() {
-            return BdApi.Patcher;
+            return window.BdApi.Patcher;
         }
     };
     const linesToRemove = findFirstLineWithoutX(
@@ -110,7 +111,7 @@ export const addContextMenu = (DiscordModules, proxyUrl) => {
     return { output: new evaluatedContextMenu(), sourceBlobUrl: undefined };
 };
 
-export async function fetchWithCorsProxyFallback(url, options = {}, corsProxy) {
+export async function fetchWithCorsProxyFallback(url: string, options: any = {}, corsProxy: string) {
     try {
         return await fetch(url, options);
     } catch (error) {
