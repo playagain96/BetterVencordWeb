@@ -343,7 +343,7 @@ export const FSUtils = {
         }
         fs.mkdirSync(directory, mode);
     },
-    async importFile(targetPath: string, autoGuessName: boolean = false, bulk = false, filter = undefined) {
+    async importFile(targetPath: string, autoGuessName: boolean = false, bulk = false, filter: string | undefined = undefined) {
         const fileOrFiles = await openFileSelect(filter, bulk);
         const files = fileOrFiles.length ? (fileOrFiles as File[]) : [fileOrFiles as File];
         const fs = window.require("fs");

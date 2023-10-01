@@ -22,7 +22,7 @@ import { Plugin } from "@utils/types";
 import { Button, Card, Forms, React, useRef } from "@webpack/common";
 
 import TreeView, { findInTree, TreeNode } from "./treeView";
-import { FSUtils, readdirPromise } from "./utils";
+import { FSUtils, ZIPUtils, readdirPromise, reloadCompatLayer } from "./utils";
 
 type SettingsPlugin = Plugin & {
     customSections: ((ID: Record<string, unknown>) => any)[];
@@ -95,19 +95,19 @@ function makeTab() {
         <Forms.FormSection title="File System Actions">
             <Card className={cl("quick-actions-card")}>
                 <React.Fragment>
-                    <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.ZIPUtils.downloadZip()}>
+                    <Button size={Button.Sizes.SMALL} onClick={() => ZIPUtils.downloadZip()}>
                         Export Filesystem as ZIP
                     </Button>
-                    <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.ZIPUtils.uploadZip()}>
+                    <Button size={Button.Sizes.SMALL} onClick={() => ZIPUtils.uploadZip()}>
                         Import Filesystem From ZIP
                     </Button>
-                    <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.reloadCompatLayer()}>
+                    <Button size={Button.Sizes.SMALL} onClick={() => reloadCompatLayer()}>
                         Reload BD Plugins
                     </Button>
-                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true)}>
+                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true, false, ".js")}>
                         Import BD Plugin
                     </Button>
-                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true, true)}>
+                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true, true, ".js")}>
                         Import Bulk Plugins
                     </Button>
                 </React.Fragment>
