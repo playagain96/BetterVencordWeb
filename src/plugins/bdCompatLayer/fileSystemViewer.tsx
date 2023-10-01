@@ -96,7 +96,7 @@ function makeTab() {
             <Card className={cl("quick-actions-card")}>
                 <React.Fragment>
                     <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.ZIPUtils.downloadZip()}>
-                        Export All Plugins
+                        Export All Files
                     </Button>
                     <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.ZIPUtils.uploadZip()}>
                         Import From ZIP

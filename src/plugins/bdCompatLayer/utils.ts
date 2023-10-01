@@ -175,6 +175,7 @@ export function openFileSelectBulk() {
         const input = document.createElement("input");
         input.type = "file";
         input.multiple = true; // bauzzzzzz asked for this so I added it.
+        input.accept = ".js";
         const timeout = setTimeout(() => {
             reject();
             // so we don't wait forever
@@ -197,6 +198,7 @@ export function openFileSelect() {
     return new Promise<File>((resolve, reject) => {
         const input = document.createElement("input");
         input.type = "file";
+        input.accept = ".js";
         const timeout = setTimeout(() => {
             reject();
             // so we don't wait forever
