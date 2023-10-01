@@ -289,7 +289,8 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     generateFunctions();
     if (final.instance.getName) final.name = final.instance.getName();
     if (final.instance.getVersion)
-        final.version = final.instance.getVersion();
+        final.version = final.instance.getVersion() || "6.6.6";
+    console.log(final.instance);
     if (final.instance.getDescription)
         final.description = final.instance.getDescription();
 
@@ -317,7 +318,9 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             buttons: [
                 {
                     label: "Didn't ask ;-)",
-                    onClick: () => { console.log("Didn't have to be so mean about it .·´¯`(>▂<)´¯`· \nI'll go away"); },
+                    onClick: () => {
+                        console.log("Didn't have to be so mean about it .·´¯`(>▂<)´¯`· \nI'll go away");
+                    },
                 }
             ]
         });
