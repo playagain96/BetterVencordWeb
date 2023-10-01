@@ -22,7 +22,7 @@ import { Plugin } from "@utils/types";
 import { Button, Card, Forms, React, useRef } from "@webpack/common";
 
 import TreeView, { findInTree, TreeNode } from "./treeView";
-import { FSUtils, ZIPUtils, readdirPromise, reloadCompatLayer } from "./utils";
+import { FSUtils, readdirPromise, reloadCompatLayer, ZIPUtils } from "./utils";
 
 type SettingsPlugin = Plugin & {
     customSections: ((ID: Record<string, unknown>) => any)[];
