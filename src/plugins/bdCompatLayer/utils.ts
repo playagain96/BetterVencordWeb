@@ -170,6 +170,28 @@ export function objectToString(obj: any) {
     str += "}";
     return str;
 }
+export function openFileSelectBulk() {
+    return new Promise<File[]>((resolve, reject) => {
+        const input = document.createElement("input");
+        input.type = "file";
+        input.multiple = true; // bauzzzzzz asked for this so I added it.
+        const timeout = setTimeout(() => {
+            reject();
+            // so we don't wait forever
+        }, 30 * 60 * 1000);
+        input.addEventListener("change", () => {
+            if (input.files && input.files.length > 0) {
+                clearTimeout(timeout);
+                resolve(Array.from(input.files));
+            } else {
+                clearTimeout(timeout);
+                reject("No files selected.");
+            }
+        });
+
+        input.click();
+    });
+}
 
 export function openFileSelect() {
     return new Promise<File>((resolve, reject) => {
@@ -340,6 +362,35 @@ export const FSUtils = {
             this.mkdirSyncRecursive(parentDir, mode);
         }
         fs.mkdirSync(directory, mode);
+    },
+    async importFileBulk(targetPath: string, autoGuessName: boolean = false) {
+        const files = await openFileSelectBulk();
+        const fs = window.require("fs");
+        const path = window.require("path");
+
+        for (const file of files) {
+            let filePath = targetPath;
+            if (autoGuessName) {
+                if (!targetPath.endsWith("/")) {
+                    filePath += "/";
+                }
+                filePath += file.name;
+            }
+
+            const fileArrayBuffer = await new Promise<ArrayBuffer>(resolve => {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    resolve(reader.result as ArrayBuffer);
+                };
+                reader.readAsArrayBuffer(file);
+            });
+
+            fs.writeFile(
+                filePath,
+                window.BrowserFS.BFSRequire("buffer").Buffer.from(fileArrayBuffer),
+                () => { }
+            );
+        }
     },
     async importFile(targetPath: string, autoGuessName: boolean = false) {
         const file = await openFileSelect();

@@ -16,11 +16,11 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
+import { classNameFactory } from "@api/Styles";
 import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { Plugin } from "@utils/types";
-import { Text, useRef } from "@webpack/common";
+import { Button, Card, Forms, React, useRef } from "@webpack/common";
 
-import { TransparentButton } from "./components/TransparentButton";
 import TreeView, { findInTree, TreeNode } from "./treeView";
 import { FSUtils, readdirPromise } from "./utils";
 
@@ -29,6 +29,7 @@ type SettingsPlugin = Plugin & {
 };
 
 const TabName = "Virtual Filesystem";
+const cl = classNameFactory("vc-settings-");
 
 function makeTab() {
     const baseNode = {
@@ -68,6 +69,7 @@ function makeTab() {
                     label: "Import a file here",
                     action: async () => {
                         await FSUtils.importFile(ref.current.split("fs-")[1], true);
+                        // console.log(ref.current.split("fs-")[1]);
                         findInTree(baseNode, x => x.id === ref.current)?.fetchChildren();
                     },
                 },
@@ -90,22 +92,34 @@ function makeTab() {
     };
 
     return <SettingsTab title={TabName}>
-        <TransparentButton isToggle={false} onClick={() => window.BdCompatLayer.ZIPUtils.downloadZip()}>
-            <Text>Export everything as ZIP</Text>
-        </TransparentButton>
-        <TransparentButton isToggle={false} onClick={() => window.BdCompatLayer.ZIPUtils.uploadZip()}>
-            <Text>Import filesystem from ZIP</Text>
-        </TransparentButton>
-        <TransparentButton isToggle={false} onClick={() => window.BdCompatLayer.reloadCompatLayer()}>
-            <Text>Reload BD plugins</Text>
-        </TransparentButton>
+        <Forms.FormSection title="File System Actions">
+            <Card className={cl("quick-actions-card")}>
+                <React.Fragment>
+                    <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.ZIPUtils.downloadZip()}>
+                        Export All Plugins
+                    </Button>
+                    <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.ZIPUtils.uploadZip()}>
+                        Import From ZIP
+                    </Button>
+                    <Button size={Button.Sizes.SMALL} onClick={() => window.BdCompatLayer.reloadCompatLayer()}>
+                        Reload BD Plugins
+                    </Button>
+                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true)}>
+                        Import BD Plugin
+                    </Button>;
+                    <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFileBulk("//BD/plugins", true)}>
+                        Import Bulk Plugins
+                    </Button>;
+                </React.Fragment>
+            </Card>
+        </Forms.FormSection>
         {/* <TreeView onContextMenu={contextMenuHandler} selectedNode={selectedNode} selectNode={handleNodeSelect} data={ */}
         <TreeView onContextMenu={contextMenuHandler} selectedNode={ref.current} selectNode={handleNodeSelect} data={
             [
                 baseNode
             ]
         }></TreeView>
-    </SettingsTab>;
+    </SettingsTab >;
 }
 
 async function fetchDirContentForId(id: string) {

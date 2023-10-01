@@ -798,6 +798,7 @@ const thePlugin = {
             .custom-notification .content {
                 padding: 0 16px 20px;
                 flex: 1 1 auto;
+                overflow: hidden;
             }
             .custom-notification .bottom-box {
                 background-color: var(--modal-footer-background);
