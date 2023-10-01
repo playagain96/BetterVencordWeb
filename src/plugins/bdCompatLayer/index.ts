@@ -496,7 +496,11 @@ const thePlugin = {
                         }
                     };
 
-                    const { buttons = [], timeout = 0, type = "default" } = options;
+                    const { timeout = 0, type = "default" } = options;
+                    const buttons = [
+                        { label: "Close", onClick: () => { } },
+                        ...options.buttons || []
+                    ];
 
                     const buttonElements = buttons.map((button, index) => {
                         const onClickHandler = () => {
@@ -554,7 +558,8 @@ const thePlugin = {
                     //         xButton
                     //     )
                     // );
-                    const titleComponent = docCreateElement("span", { className: "notification-title" }, [typeof title === "string" ? docCreateElement("span", { innerText: title }) : title, xButton]);
+                    // const titleComponent = docCreateElement("span", { className: "notification-title" }, [typeof title === "string" ? docCreateElement("span", { innerText: title }) : title, xButton]);
+                    const titleComponent = docCreateElement("span", { className: "notification-title" }, [typeof title === "string" ? docCreateElement("span", { innerText: title }) : title]);
                     // const contentComponent = typeof content === "string" ? (
                     //     React.createElement("div", { className: "content" }, content)
                     // ) : (
