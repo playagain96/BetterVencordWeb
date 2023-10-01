@@ -308,9 +308,9 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         // throw new Error(`The BD Plugin ${final.name || final.id} is missing: ${ThisShouldGiveUsWhatIsMissingInThePlugin}`); Screw this. I am using our noticesystem
         // LITERALLY WHAT ITS MADE FOR BUDDY OL' PAL
         const TextElement = document.createElement("div");
-        TextElement.innerHTML = `The BD Plugin ${final.name || final.id} is missing:<br><br>
+        TextElement.innerHTML = `The BD Plugin ${final.name || final.id} is missing the following metadata below<br><br>
         <strong>${ThisShouldGiveUsWhatIsMissingInThePlugin.toUpperCase()}</strong><br><br>
-        .`; // not a fix yet. still thinking of a way to do this without overriding file.
+        The plugin could not be started, Please fix.`;
 
         window.BdApi.showNotice(TextElement, {
             timeout: 0,

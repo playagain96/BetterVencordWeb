@@ -764,7 +764,7 @@ const thePlugin = {
                 flex-direction: column;
                 position: absolute;
                 bottom: 20px; right: 20px;
-                width: 500px; height: 200px;
+                width: 440px; height: 270px;
                 overflow: hidden;
                 background-color: var(--modal-background);
                 color: white;
