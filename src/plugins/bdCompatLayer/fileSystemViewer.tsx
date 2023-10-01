@@ -106,10 +106,10 @@ function makeTab() {
                     </Button>
                     <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true)}>
                         Import BD Plugin
-                    </Button>;
+                    </Button>
                     <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFileBulk("//BD/plugins", true)}>
                         Import Bulk Plugins
-                    </Button>;
+                    </Button>
                 </React.Fragment>
             </Card>
         </Forms.FormSection>
