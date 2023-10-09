@@ -26,6 +26,7 @@ type AssembledBetterDiscordPlugin = {
     started: boolean;
     authors: any[];
     name: string;
+    format: "jsdoc";
     internals: any;
     description: string;
     id: string;
@@ -114,6 +115,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         },
     ];
     final.name = "";
+    final.format = "jsdoc";
     final.internals = {};
     final.description = "";
     final.id = "";
@@ -198,7 +200,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             const element = metadata[i].trim();
             if (element.startsWith("@name")) {
                 final.name = element.split("@name")[1].trim();
-                final.id = final.name;
+                final.id = final.name || window.require("path").basename(filename); // what?
             } else if (element.startsWith("@description")) {
                 final.description = element.split("@description ")[1];
             } else if (element.startsWith("@authorId")) {
