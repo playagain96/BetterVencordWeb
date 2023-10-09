@@ -272,6 +272,8 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         }
         final.instance = exports.prototype ? new exports(final) : exports(final);
         // passing the plugin object directly as "meta". what could go wrong??!?!?
+        if (typeof final.instance.load == "function")
+            final.instance.load(); // we might crash here but nahhh
 
         // const functions = Object.getOwnPropertyNames(exports.prototype);
 
