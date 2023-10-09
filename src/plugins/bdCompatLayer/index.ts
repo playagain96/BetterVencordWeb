@@ -598,7 +598,28 @@ const thePlugin = {
             showNotice(content, settings = {}) {
                 BdApiReImplementation.UI.showNotice(content, settings);
             },
+            showConfirmationModal() {
+
+            },
             get ReactDOM() { return BdApiReImplementation.findModuleByProps("render", "findDOMNode"); },
+            Utils: {
+                findInTree(tree, searchFilter, { walkable = null, ignore = [] } = {}) {
+                    if (typeof searchFilter === "string") {
+                        return tree?.[searchFilter];
+                    } else if (searchFilter(tree)) {
+                        return tree;
+                    }
+
+                    if (!tree || typeof tree !== "object") return undefined;
+
+                    return Array.isArray(tree)
+                        ? tree.find(value => BdApiReImplementation.Utils.findInTree(value, searchFilter, { walkable, ignore }) !== undefined)
+                        : Object.keys(tree).find(
+                            key => !ignore.includes(key) && BdApiReImplementation.Utils.findInTree(tree[key], searchFilter, { walkable, ignore }) !== undefined
+                        );
+                }
+
+            }
         };
         const ReImplementationObject = {
             // request: (url, cb) => {
