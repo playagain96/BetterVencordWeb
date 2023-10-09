@@ -598,8 +598,8 @@ const thePlugin = {
             showNotice(content, settings = {}) {
                 BdApiReImplementation.UI.showNotice(content, settings);
             },
-            showConfirmationModal() {
-
+            showConfirmationModal(title, content, settings = {}) {
+                BdApiReImplementation.UI.showConfirmationModal(title, content, settings);
             },
             get ReactDOM() { return BdApiReImplementation.findModuleByProps("render", "findDOMNode"); },
             Utils: {
