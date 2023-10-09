@@ -390,6 +390,12 @@ const thePlugin = {
                         JSON.stringify(this.pluginData[key], null, 4)
                     );
             },
+            get loadData() {
+                return BdApiReImplementation.getData.bind(BdApiReImplementation);
+            },
+            get saveData() {
+                return BdApiReImplementation.setData.bind(BdApiReImplementation);
+            },
             findModuleByProps(...props) {
                 return this.findModule(module =>
                     props.every(prop => typeof module[prop] !== "undefined")
