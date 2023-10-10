@@ -466,5 +466,7 @@ export async function removeAllCustomPlugins() {
         const element = GeneratedPlugins[i];
         removePlugin(element);
     }
+    if (window["BDFDB_Global"]) // workaround... again
+        delete window["BDFDB_Global"];
     GeneratedPlugins.length = 0;
 }
