@@ -26,6 +26,7 @@ type AssembledBetterDiscordPlugin = {
     started: boolean;
     authors: any[];
     name: string;
+    originalName: string;
     format: "jsdoc";
     internals: any;
     description: string;
@@ -105,7 +106,7 @@ const modal = (props, name: string, child) => {
     );
 };
 
-export async function convertPlugin(BetterDiscordPlugin: string, filename: string) {
+export async function convertPlugin(BetterDiscordPlugin: string, filename: string, detectDuplicateName: boolean = false) {
     const final = {} as AssembledBetterDiscordPlugin;
     final.started = false;
     // final.patches = [];
@@ -297,6 +298,12 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     console.log(final.instance);
     if (final.instance.getDescription)
         final.description = final.instance.getDescription();
+    final.originalName = final.name;
+    if (detectDuplicateName) {
+        if (Vencord.Plugins.plugins[final.name] && !Vencord.Plugins.plugins[final.name]["instance"]) {
+            final.name = final.name + "-BD";
+        }
+    }
 
     /* if (!(final.name && final.version && final.description)) {
         const DavilGiveMorePluginErrorDetails = final ? final.name : final;
