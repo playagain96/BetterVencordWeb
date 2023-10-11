@@ -217,6 +217,9 @@ const thePlugin = {
                             return module && module.displayName === name;
                         };
                     },
+                    get byKeys() {
+                        return this.byProps.bind(BdApiReImplementation.Webpack.Filters); // just in case
+                    },
                     byProps: (...props) => {
                         return Vencord.Webpack.filters.byProps(...props);
                     },
