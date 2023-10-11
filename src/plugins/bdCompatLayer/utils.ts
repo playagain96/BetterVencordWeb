@@ -212,7 +212,7 @@ export async function reloadCompatLayer() {
             window.BdApi.Plugins.folder + "/" + element,
             "utf8"
         );
-        convertPlugin(pluginJS, element).then(plugin => {
+        convertPlugin(pluginJS, element, true).then(plugin => {
             addCustomPlugin(plugin);
         });
     }

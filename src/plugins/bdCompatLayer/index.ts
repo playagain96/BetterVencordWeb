@@ -157,7 +157,7 @@ const thePlugin = {
                     return Vencord.Plugins.isPluginEnabled(name);
                 },
                 get: function (name) {
-                    return this.getAll().filter(x => x.name == name)[0];
+                    return this.getAll().filter(x => x.name == name)[0] ?? this.getAll().filter(x => x.originalName == name)[0];
                 },
                 reload: name => {
                     Vencord.Plugins.stopPlugin(Vencord.Plugins.plugins[name]);
@@ -804,7 +804,7 @@ const thePlugin = {
                     BdApiReImplementation.Plugins.folder + "/" + element,
                     "utf8"
                 );
-                convertPlugin(pluginJS, element).then(plugin => {
+                convertPlugin(pluginJS, element, true).then(plugin => {
                     addCustomPlugin(plugin);
                 });
             }
