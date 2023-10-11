@@ -233,7 +233,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             // "const Buffer = window.BrowserFS.BFSRequire('buffer').Buffer;",
             "const __filename=BdApi.Plugins.folder+`/" + filename + "`;",
             "const __dirname=BdApi.Plugins.folder;",
-            "const DiscordNative={clipboard:{}};",
+            "const DiscordNative={get clipboard() { return window.BdCompatLayer.fakeClipboard; }};",
             // "debugger;",
         ];
         // codeData = "(()=>{const module = { exports: {} };const global = window;const __filename=BdApi.Plugins.folder+`/" + filename + "`;const __dirname=BdApi.Plugins.folder;debugger;" + (true ? debugLine : codeData) + "\nreturn module;})();\n";

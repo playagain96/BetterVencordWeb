@@ -142,6 +142,7 @@ const thePlugin = {
             reloadCompatLayer,
             fsReadyPromise: getDeferred(),
             mainObserver: {},
+            fakeClipboard: undefined,
         };
         window.BdCompatLayer = windowBdCompatLayer;
 
@@ -719,6 +720,17 @@ const thePlugin = {
         this.originalBuffer = window.Buffer;
         window.Buffer = BdApiReImplementation.Webpack.getModule(x => x.INSPECT_MAX_BYTES)?.Buffer;
         // window.BdApi.ReqImpl = ReImplementationObject;
+        windowBdCompatLayer.fakeClipboard = (() => {
+            const try1 = BdApiReImplementation.Webpack.getModule(x => x.clipboard);
+            if (try1) {
+                return try1.clipboard;
+            }
+            const filter = x2 => x2 && x2.toString?.().includes(".copy(") && x2.toString?.().length < 100;
+            const try2 = Object.values(BdApiReImplementation.Webpack.getModule(x => x && Object.values(x).some(filter))).find(filter);
+            return {
+                copy: try2,
+            };
+        })();
 
         const DiscordModulesInjectorOutput = addDiscordModules(proxyUrl);
         const DiscordModules = DiscordModulesInjectorOutput.output;
