@@ -29,6 +29,10 @@ We will pull changes from upstream, so if you want to make a plugin for Vencord 
 > - ZIP.js: https://github.com/gildas-lormeau/zip.js
 > - Some of BetterDiscord's code: https://github.com/Davilarek/Vencord/blob/main/src/plugins/bdCompatLayer/stuffFromBD.js
 
+> "it's called vencord because it's made by ven,
+> it's called bettervencord because it's bettter than vencord"
+> - Davilarek
+
 ### Installation Instructions
 
 1. **Install VencordInstaller:**
