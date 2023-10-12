@@ -300,8 +300,9 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         final.description = final.instance.getDescription();
     final.originalName = final.name;
     if (detectDuplicateName) {
+        // eslint-disable-next-line dot-notation
         if (Vencord.Plugins.plugins[final.name] && !Vencord.Plugins.plugins[final.name]["instance"]) {
-            final.name = final.name + "-BD";
+            final.name += "-BD";
         }
     }
 
@@ -473,7 +474,7 @@ export async function removeAllCustomPlugins() {
         const element = GeneratedPlugins[i];
         removePlugin(element);
     }
-    if (window["BDFDB_Global"]) // workaround... again
-        delete window["BDFDB_Global"];
+    if (window.BDFDB_Global) // workaround... again
+        delete window.BDFDB_Global;
     GeneratedPlugins.length = 0;
 }
