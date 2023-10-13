@@ -244,6 +244,23 @@ const thePlugin = {
                         });
                     });
                 },
+                getModuleWithKey(filter) {
+                    let target, id, key;
+
+                    BdApiReImplementation.Webpack.getModule(
+                        (e, m, i) => filter(e, m, i) && (target = m) && (id = i) && true,
+                        { searchExports: true }
+                    );
+
+                    for (const k in target.exports) {
+                        if (filter(target.exports[k], target, id)) {
+                            key = k;
+                            break;
+                        }
+                    }
+
+                    return [target.exports, key];
+                },
                 getByDisplayName(name) {
                     return this.getModule(
                         this.Filters.byDisplayName(name)

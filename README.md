@@ -29,14 +29,29 @@ We will pull changes from upstream, so if you want to make a plugin for Vencord 
 > - ZIP.js: https://github.com/gildas-lormeau/zip.js
 > - Some of BetterDiscord's code: https://github.com/Davilarek/Vencord/blob/main/src/plugins/bdCompatLayer/stuffFromBD.js
 
-## Installing / Uninstalling
-Currently, the only way to install is to build it manually. No tutorial yet.
+> "it's called Vencord because it's made by ven,<br>
+> it's called BetterVencord because it's bettter than Vencord"<br>
+> \- Davilarek
 
-## Installing on Browser
-Needs building manually too.
-```
-pnpm buildWeb --standalone
-```
+### Installation Instructions
+
+1. **Install VencordInstaller:**
+   - For PC start by installing [VencordInstaller](https://vencord.dev/download/) depending on your OS. Follow the on-screen instructions to complete the installation.
+
+2. **BetterVencord Installation:**
+   - For PC Installation:<br>
+     a. Run `install.bat`.<br>
+     b. Run `build.bat`.
+
+   - For Web Installation:<br>
+     a. Run `install.bat`.<br>
+     b. Run `buildWeb.bat`.<br>
+     c. Install like a normal extension
+
+3. **Finalize Installation:**
+   - Run `automaticInstallDist.bat` and type `a`.
+   - After the build process is complete, the software should be ready to use.
+
 
 ## Disclaimer
 
