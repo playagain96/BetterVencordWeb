@@ -426,7 +426,7 @@ export const ZIPUtils = {
         const fs = window.require("fs");
         const path = window.require("path");
         const { BlobReader, ZipReader, BlobWriter } = window.zip;
-        const zipFileReader = new BlobReader(await this.uploadZip());
+        const zipFileReader = new BlobReader(await openFileSelect());
         // await zipWriter.add("hello.txt", helloWorldReader);
         const zipReader = new ZipReader(zipFileReader);
         FSUtils.formatFs();
@@ -460,31 +460,6 @@ export const ZIPUtils = {
         const data = await zipReader.close();
         // console.log(data);
         return data;
-    },
-    uploadZip() {
-        return new Promise<Blob>((resolve, reject) => {
-            // return new Promise((resolve, reject) => {
-            //     const fileInput = document.createElement("input");
-            //     fileInput.type = "file";
-            //     fileInput.accept = "*";
-            //     fileInput.onchange = event => {
-            //         const file = event.target.files[0];
-            (openFileSelect() as Promise<File>).then(file => {
-                // if (!file)
-                //     return null;
-                const reader = new FileReader();
-                reader.onload = () => {
-                    const blob = new Blob([reader.result as BlobPart], {
-                        type: file.type,
-                    });
-                    resolve(blob);
-                };
-                reader.readAsArrayBuffer(file);
-            });
-            //     };
-            //     fileInput.click();
-            // });
-        });
     },
     async downloadZip() {
         const zipFile = await this.exportZip();
