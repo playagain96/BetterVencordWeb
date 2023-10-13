@@ -101,7 +101,7 @@ function makeTab() {
                     <Button size={Button.Sizes.SMALL} onClick={() => ZIPUtils.downloadZip()}>
                         Export Filesystem as ZIP
                     </Button>
-                    <Button size={Button.Sizes.SMALL} onClick={() => ZIPUtils.uploadZip()}>
+                    <Button size={Button.Sizes.SMALL} onClick={() => ZIPUtils.importZip()}>
                         Import Filesystem From ZIP
                     </Button>
                     <Button size={Button.Sizes.SMALL} onClick={() => reloadCompatLayer()}>
