@@ -26,11 +26,11 @@ import definePlugin, { OptionType, PluginDef } from "@utils/types";
 const { Plugin } = require("@utils/types");
 import { Settings } from "@api/Settings";
 
+import { createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
-import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch } from "./stuffFromBD";
-import { docCreateElement, FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -147,7 +147,8 @@ const thePlugin = {
         window.BdCompatLayer = windowBdCompatLayer;
 
         window.GeneratedPlugins = [];
-        const BdApiReImplementation = {
+        /*
+        const BdApiReImplementation_ = {
             ContextMenu: {},
             Patcher,
             Plugins: {
@@ -491,7 +492,7 @@ const thePlugin = {
                         extraReact: extraReact
                     }
                     );
-                    */
+                    *
                     extraReact.forEach(reactElement => {
                         moreReact.push(reactElement);
                     });
@@ -669,6 +670,7 @@ const thePlugin = {
                 }
             }
         };
+        */
         const ReImplementationObject = {
             // request: (url, cb) => {
             //     cb({ err: "err" }, undefined, undefined);
@@ -737,6 +739,7 @@ const thePlugin = {
         const RequireReimpl = name => {
             return ReImplementationObject[name];
         };
+        const BdApiReImplementation = createGlobalBdApi();
         window.BdApi = BdApiReImplementation;
         window // Talk about being tedious
             .nuhuh = // Why the hell did vencord not expose process??
@@ -934,7 +937,7 @@ const thePlugin = {
         console.warn("Disabling observer...");
         window.BdCompatLayer.mainObserver.disconnect();
         console.warn("UnPatching context menu...");
-        window.BdApi.Patcher.unpatchAll("ContextMenuPatcher");
+        getGlobalApi().Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
         await removeAllCustomPlugins();
         console.warn("Removing settings tab...");
