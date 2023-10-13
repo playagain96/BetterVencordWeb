@@ -20,6 +20,7 @@ import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalRoot, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 
+import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
 
 type AssembledBetterDiscordPlugin = {
@@ -46,11 +47,11 @@ type AssembledBetterDiscordPlugin = {
 
 const modal = (props, name: string, child) => {
     const { React } = Vencord.Webpack.Common;
-    const mc = window.BdApi.Webpack.getByProps("Header", "Footer");
-    const TextElement = window.BdApi.Webpack.getModule(
+    const mc = getGlobalApi().Webpack.getByProps("Header", "Footer");
+    const TextElement = getGlobalApi().Webpack.getModule(
         m => m?.Sizes?.SIZE_32 && m.Colors
     );
-    const Buttons = window.BdApi.Webpack.getModule(
+    const Buttons = getGlobalApi().Webpack.getModule(
         m => m.BorderColors,
         { searchExports: true }
     );
@@ -325,7 +326,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         <strong>${ThisShouldGiveUsWhatIsMissingInThePlugin.toUpperCase()}</strong><br><br>
         The plugin could not be started, Please fix.`;
 
-        window.BdApi.showNotice(TextElement, {
+        getGlobalApi().showNotice(TextElement, {
             timeout: 0,
             buttons: [
                 {

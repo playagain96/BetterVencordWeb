@@ -21,6 +21,7 @@ import { SettingsTab, wrapTab } from "@components/VencordSettings/shared";
 import { Plugin } from "@utils/types";
 import { Button, Card, Forms, React, useRef } from "@webpack/common";
 
+import { getGlobalApi } from "./fakeBdApi";
 import TreeView, { findInTree, TreeNode } from "./treeView";
 import { FSUtils, readdirPromise, reloadCompatLayer, ZIPUtils } from "./utils";
 
@@ -63,7 +64,8 @@ function makeTab() {
     const contextMenuHandler = (event: MouseEvent) => {
         // console.log(event);
         const contextMenuBuild = () => {
-            return window.BdApi.ContextMenu.buildMenu([
+            // @ts-ignore
+            return getGlobalApi().ContextMenu.buildMenu([
                 { label: ref.current, disabled: true },
                 findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable && {
                     label: "Import a file here",
@@ -88,7 +90,8 @@ function makeTab() {
                 },
             ].filter(Boolean));
         };
-        window.BdApi.ContextMenu.open(event, contextMenuBuild(), {});
+        // @ts-ignore
+        getGlobalApi().ContextMenu.open(event, contextMenuBuild(), {});
     };
 
     return <SettingsTab title={TabName}>

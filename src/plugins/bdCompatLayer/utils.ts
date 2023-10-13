@@ -19,6 +19,7 @@
 import { Link } from "@components/Link";
 import { React } from "@webpack/common";
 
+import { getGlobalApi } from "./fakeBdApi";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 
 export function getDeferred() {
@@ -201,7 +202,7 @@ export async function reloadCompatLayer() {
     await new Promise((resolve, reject) => setTimeout(resolve, 500));
     const localFs = window.require("fs");
     const pluginFolder = localFs
-        .readdirSync(window.BdApi.Plugins.folder)
+        .readdirSync(getGlobalApi().Plugins.folder)
         .sort();
     const plugins = pluginFolder.filter(x =>
         x.endsWith(".plugin.js")
@@ -209,7 +210,7 @@ export async function reloadCompatLayer() {
     for (let i = 0; i < plugins.length; i++) {
         const element = plugins[i];
         const pluginJS = localFs.readFileSync(
-            window.BdApi.Plugins.folder + "/" + element,
+            getGlobalApi().Plugins.folder + "/" + element,
             "utf8"
         );
         convertPlugin(pluginJS, element, true).then(plugin => {
