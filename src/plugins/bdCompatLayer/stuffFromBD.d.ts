@@ -22,7 +22,7 @@ export declare class Patcher {
     static before(...args): any;
     static instead(...args): any;
     static after(...args): any;
-    static getPatchesByCaller(): any;
+    static getPatchesByCaller(...args): any;
     static unpatchAll(...args): any;
     static setup(DiscordModules: any): void;
 }

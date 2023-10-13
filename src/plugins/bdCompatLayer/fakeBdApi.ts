@@ -41,11 +41,14 @@ class PatcherWrapper {
         };
     }
     get getPatchesByCaller() {
-        return Patcher.getPatchesByCaller;
-
+        return () => {
+            return Patcher.getPatchesByCaller(this.#label);
+        };
     }
     get unpatchAll() {
-        return Patcher.unpatchAll;
+        return () => {
+            return Patcher.unpatchAll(this.#label);
+        };
     }
 }
 
