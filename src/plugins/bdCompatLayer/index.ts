@@ -244,6 +244,15 @@ const thePlugin = {
                         });
                     });
                 },
+                getModuleWithKey(filter) {
+                    const result = BdApiReImplementation.Webpack.getModule((e, m, i) => {
+                        if (filter(e, m, i)) return { module: m, id: i };
+                    }, { searchExports: true });
+
+                    const moduleExports = result.module ? result.module.exports : {};
+                    const key = Object.keys(moduleExports).find(k => filter(moduleExports[k], result.module, result.id));
+                    return [moduleExports, key];
+                },
                 getByDisplayName(name) {
                     return this.getModule(
                         this.Filters.byDisplayName(name)
