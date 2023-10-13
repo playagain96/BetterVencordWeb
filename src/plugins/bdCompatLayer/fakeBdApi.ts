@@ -108,6 +108,23 @@ export const WebpackHolder = {
             });
         });
     },
+    getModuleWithKey(filter) {
+        let target, id, key;
+
+        this.getModule(
+            (e, m, i) => filter(e, m, i) && (target = m) && (id = i) && true,
+            { searchExports: true }
+        );
+
+        for (const k in target.exports) {
+            if (filter(target.exports[k], target, id)) {
+                key = k;
+                break;
+            }
+        }
+
+        return [target.exports, key];
+    },
     getByDisplayName(name) {
         return this.getModule(
             this.Filters.byDisplayName(name)
@@ -605,22 +622,43 @@ class BdApiReImplementationInstance {
         return this.Data.load.bind(this.Data);
     }
     readonly Utils = {
-        findInTree(tree, searchFilter, { walkable = null, ignore = [] } = {}) {
-            if (typeof searchFilter === "string") {
-                return tree?.[searchFilter];
-            } else if (searchFilter(tree)) {
-                return tree;
+        findInTree(tree, searchFilter, options = {}) {
+            const { walkable = null, ignore = [] } = options as { walkable: string[], ignore: string[]; };
+
+            function findInObject(obj) {
+                for (const key in obj) {
+                    if (ignore.includes(key)) continue;
+                    const value = obj[key];
+
+                    if (searchFilter(value)) return value;
+
+                    if (typeof value === "object" && value !== null) {
+                        const result = findInObject(value);
+                        if (result !== undefined) return result;
+                    }
+                }
+                return undefined;
             }
 
-            if (!tree || typeof tree !== "object") return undefined;
+            if (typeof searchFilter === "string") return tree?.[searchFilter];
+            if (searchFilter(tree)) return tree;
 
-            return Array.isArray(tree)
-                ? tree.find(value => this.findInTree(value, searchFilter, { walkable, ignore }) !== undefined)
-                : Object.keys(tree).find(
-                    key => !ignore.includes(key) && this.findInTree(tree[key], searchFilter, { walkable, ignore }) !== undefined
-                );
+            if (Array.isArray(tree)) {
+                for (const value of tree) {
+                    const result = this.findInTree(value, searchFilter, { walkable, ignore });
+                    if (result !== undefined) return result;
+                }
+            } else if (typeof tree === "object" && tree !== null) {
+                const keysToWalk = walkable || Object.keys(tree);
+                for (const key of keysToWalk) {
+                    if (tree[key] === undefined) continue;
+                    const result = this.findInTree(tree[key], searchFilter, { walkable, ignore });
+                    if (result !== undefined) return result;
+                }
+            }
+
+            return undefined;
         }
-
     };
     get UI() {
         return UIHolder;
