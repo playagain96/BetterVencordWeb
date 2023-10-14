@@ -352,6 +352,7 @@ export const FSUtils = {
         const path = window.require("path");
         for (const file of files) {
             let filePath = targetPath;
+            console.log("Importing file", filePath);
             if (autoGuessName) {
                 if (!targetPath.endsWith("/")) {
                     filePath += "/";
