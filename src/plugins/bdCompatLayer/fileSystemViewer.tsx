@@ -94,6 +94,10 @@ function makeTab() {
         getGlobalApi().ContextMenu.open(event, contextMenuBuild(), {});
     };
 
+    // const [sizeOfRoot, setSizeOfRoot] = React.useState("Loading");
+    // const getSizeOfRoot = async () => {
+    // }
+
     return <SettingsTab title={TabName}>
         <Forms.FormSection title="File System Actions">
             <Card className={cl("quick-actions-card")}>
@@ -113,6 +117,7 @@ function makeTab() {
                     <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true, true, ".js")}>
                         Import Bulk Plugins
                     </Button>
+                    <Forms.FormText>Size of `/`: {((FSUtils.getDirectorySize("/") / 1024) / 1024).toFixed(2)} MB</Forms.FormText>
                 </React.Fragment>
             </Card>
         </Forms.FormSection>

@@ -390,6 +390,30 @@ export const FSUtils = {
                 },
             );
         });
+    },
+    getDirectorySize(directoryPath: string) {
+        const fs = window.require("fs");
+        const path = window.require("path");
+        let totalSize = 0;
+
+        function traverseDirectory(dirPath) {
+            const files = fs.readdirSync(dirPath);
+
+            files.forEach(file => {
+                const filePath = path.join(dirPath, file);
+                const stats = fs.statSync(filePath);
+
+                if (stats.isDirectory()) {
+                    traverseDirectory(filePath);
+                } else {
+                    totalSize += stats.size;
+                }
+            });
+        }
+
+        traverseDirectory(directoryPath);
+
+        return totalSize;
     }
 };
 
