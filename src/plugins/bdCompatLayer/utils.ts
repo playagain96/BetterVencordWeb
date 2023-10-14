@@ -486,7 +486,9 @@ export const ZIPUtils = {
                 () => { }
             );
         }
-        return;
+        return console.log("ZIP import finished");
+        // return;
+        /*
         const zip = fflate.unzipSync(new Uint8Array(await (await openFileSelect() as File).arrayBuffer()));
         const entries = Object.keys(zip);
         // debugger;
@@ -522,6 +524,7 @@ export const ZIPUtils = {
         // const data = await zipReader.close();
         // console.log(data);
         // return data;
+        */
     },
     async downloadZip() {
         const zipFile = await this.exportZip();
