@@ -57,6 +57,12 @@ const thePlugin = {
             default: "https://cors-get-proxy.sirjosh.workers.dev/?url=",
             restartNeeded: true,
         },
+        useIndexedDBInstead: {
+            description: "Uses indexedDB instead of localStorage. It may cause memory usage issues but prevents exceeding localStorage quota. Note, after switching, you have to import your stuff back manually",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
         pluginUrl1: {
             description: "Plugin url 1",
             type: OptionType.STRING,
@@ -103,12 +109,31 @@ const thePlugin = {
                     )
                 );
                 const temp: any = {};
+                const browserFSSetting = Settings.plugins[this.name].useIndexedDBInstead === true ? {
+                    fs: "AsyncMirror",
+                    options: {
+                        sync: { fs: "InMemory" },
+                        async: { fs: "IndexedDB", options: { storeName: "VirtualFS" } },
+                    }
+                } : {
+                    fs: "LocalStorage",
+                };
                 window.BrowserFS.install(temp);
                 window.BrowserFS.configure(
-                    {
-                        // fs: "InMemory"
-                        fs: "LocalStorage",
-                    },
+                    browserFSSetting,
+                    // {
+                    // fs: "InMemory"
+                    // fs: "LocalStorage",
+                    // fs: "IndexedDB",
+                    // options: {
+                    //     "storeName": "VirtualFS"
+                    // },
+                    // fs: "AsyncMirror",
+                    // options: {
+                    //     sync: { fs: "InMemory" },
+                    //     async: { fs: "IndexedDB", options: { storeName: "VirtualFS" } },
+                    // }
+                    // },
                     () => {
                         // window.BdApi.ReqImpl.fs = temp.require("fs");
                         // window.BdApi.ReqImpl.path = temp.require("path");
