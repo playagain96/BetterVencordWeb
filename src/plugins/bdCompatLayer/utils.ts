@@ -18,6 +18,7 @@
 
 import { Link } from "@components/Link";
 import { React } from "@webpack/common";
+import * as fflate from "fflate";
 
 import { getGlobalApi } from "./fakeBdApi";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
@@ -104,13 +105,13 @@ export function readdirPromise(filename) {
     });
 }
 
-export function injectZipToWindow() {
-    window.eval(
-        simpleGET(
-            "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
-        ).responseText
-    );
-}
+// export function injectZipToWindow() {
+//     window.eval(
+//         simpleGET(
+//             "https://raw.githubusercontent.com/gildas-lormeau/zip.js/master/dist/zip.min.js"
+//         ).responseText
+//     );
+// }
 
 export function createTextForm(field1, field2, asLink = false, linkLabel = field2) {
     return React.createElement(
@@ -240,7 +241,7 @@ export function docCreateElement(tag: string, props: Record<string, any> = {}, c
 }
 
 export const FSUtils = {
-    readDirectory(dirPath: string) {
+    readDirectory(dirPath: string, raw = false): { [key: string]: ReadableStream | Uint8Array; } {
         const fs = window.require("fs");
         const path = window.require("path");
         const files = fs.readdirSync(dirPath);
@@ -253,9 +254,9 @@ export const FSUtils = {
             const stat = fs.statSync(filePath);
 
             if (stat.isDirectory()) {
-                result[file] = this.readDirectory(filePath);
+                result[file] = this.readDirectory(filePath, raw);
             } else if (stat.isFile()) {
-                result[file] = new ReadableStream({
+                result[file] = raw ? fs.readFileSync(filePath) : new ReadableStream({
                     start(controller) {
                         controller.enqueue(fs.readFileSync(filePath));
                         controller.close();
@@ -401,65 +402,68 @@ export function arrayToObject<T>(array: T[]) {
 
 export const ZIPUtils = {
     async exportZip() {
-        if (!window.zip) {
-            injectZipToWindow();
-        }
-        const { BlobWriter, ZipWriter } = window.zip;
-        const zipFileWriter = new BlobWriter();
-        const zipWriter = new ZipWriter(zipFileWriter);
+        // if (!window.zip) {
+        //     injectZipToWindow();
+        // }
+        // const { BlobWriter, ZipWriter } = window.zip;
+        // const zipFileWriter = new BlobWriter();
+        // const zipWriter = new ZipWriter(zipFileWriter);
         // await zipWriter.add("hello.txt", helloWorldReader);
-        const fileSystem = FSUtils.completeFileSystem();
-        for (const key in fileSystem) {
-            if (Object.hasOwnProperty.call(fileSystem, key)) {
-                const element = fileSystem[key];
-                await zipWriter.add(key, element);
-            }
-        }
-        const data = await zipWriter.close();
+        const fileSystem = FSUtils.readDirectory("/", true) as { [key: string]: Uint8Array; };
+        // for (const key in fileSystem) {
+        //     if (Object.hasOwnProperty.call(fileSystem, key)) {
+        //         const element = fileSystem[key];
+        //         // await zipWriter.add(key, element);
+        //     }
+        // }
+        // const data = await zipWriter.close();
         // console.log(data);
-        return data;
+        const data = fflate.zipSync(fileSystem);
+        return new Blob([data], { type: "application/zip" });
     },
     async importZip() {
-        if (!window.zip) {
-            injectZipToWindow();
-        }
         const fs = window.require("fs");
         const path = window.require("path");
-        const { BlobReader, ZipReader, BlobWriter } = window.zip;
-        const zipFileReader = new BlobReader(await openFileSelect());
+        // const { BlobReader, ZipReader, BlobWriter } = window.zip;
+        // const zipFileReader = new BlobReader(await openFileSelect());
         // await zipWriter.add("hello.txt", helloWorldReader);
-        const zipReader = new ZipReader(zipFileReader);
+        // const zipReader = new ZipReader(zipFileReader);
+        const zip = fflate.unzipSync(new Uint8Array(await (await openFileSelect() as File).arrayBuffer()));
         FSUtils.formatFs();
-        const entries = await zipReader.getEntries();
+        const entries = Object.keys(zip);
         // debugger;
         for (let i = 0; i < entries.length; i++) {
             const element = entries[i];
-            const dir = element.directory
-                ? element.filename
-                : path.dirname(element.filename);
-            const modElement =
-                dir === element.filename
-                    ? dir.endsWith("/")
-                        ? dir.slice(0, 1)
-                        : dir
-                    : dir;
-            FSUtils.mkdirSyncRecursive("/" + modElement);
-            const writer = new BlobWriter();
-            const out = await element.getData(writer);
+            // const dir = element.endsWith("/")
+            //     ? element
+            //     : path.dirname(element);
+            // const modElement =
+            //     dir === element
+            //         ? dir.endsWith("/")
+            //             ? dir.slice(0, 1)
+            //             : dir
+            //         : dir;
+            // const modElement: { dir: string, base: string; } = path.parse(element);
+            const out = zip[element];
+            const isDir = element.endsWith("/") && out.length === 0;
+            FSUtils.mkdirSyncRecursive("/" + (isDir ? element : path.dirname(element)));
+            // const writer = new BlobWriter();
+            // const out = await element.getData(writer);
             // console.log(out);
             // debugger;
-            if (element.directory) continue;
+            // if (element.directory) continue;
+            if (isDir) continue;
             fs.writeFile(
-                "/" + element.filename,
+                "/" + element,
                 window.BrowserFS.BFSRequire("buffer").Buffer.from(
-                    await out.arrayBuffer()
+                    out,
                 ),
                 () => { }
             );
         }
-        const data = await zipReader.close();
+        // const data = await zipReader.close();
         // console.log(data);
-        return data;
+        // return data;
     },
     async downloadZip() {
         const zipFile = await this.exportZip();

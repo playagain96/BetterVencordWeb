@@ -26,7 +26,6 @@ We will pull changes from upstream, so if you want to make a plugin for Vencord 
 > [!NOTE]
 > External Sources were used.
 > - BrowserFS: https://github.com/jvilk/BrowserFS
-> - ZIP.js: https://github.com/gildas-lormeau/zip.js
 > - Some of BetterDiscord's code: https://github.com/Davilarek/Vencord/blob/main/src/plugins/bdCompatLayer/stuffFromBD.js
 
 > "it's called Vencord because it's made by ven,<br>
