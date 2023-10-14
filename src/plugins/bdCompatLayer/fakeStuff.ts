@@ -18,6 +18,8 @@
 
 import { addLogger, evalInScope, findFirstLineWithoutX, simpleGET } from "./utils";
 
+export const TARGET_HASH = "b62deff1407c52bda5415a2d464de9566a78e4f4";
+
 export const FakeEventEmitter = class {
     callbacks: any;
     constructor() {
@@ -52,7 +54,7 @@ export const addDiscordModules = proxyUrl => {
     };
     const ModuleDataText = simpleGET(
         proxyUrl +
-        "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/discordmodules.js"
+        `https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/discordmodules.js`
     ).responseText.replaceAll("\r", "");
     const ev =
         "(" +
@@ -69,7 +71,7 @@ export const addContextMenu = (DiscordModules, proxyUrl) => {
      */
     const ModuleDataText = simpleGET(
         proxyUrl +
-        "https://github.com/BetterDiscord/BetterDiscord/raw/main/renderer/src/modules/api/contextmenu.js"
+        `https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/api/contextmenu.js`
     ).responseText.replaceAll("\r", "");
     const context = {
         get WebpackModules() {
