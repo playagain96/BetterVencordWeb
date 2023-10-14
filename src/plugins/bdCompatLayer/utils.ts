@@ -392,6 +392,28 @@ export const FSUtils = {
     }
 };
 
+export async function unzipFile(file: File) {
+    const files: fflate.UnzipFile[] = [];
+    const unZipper = new fflate.Unzip();
+    unZipper.register(fflate.UnzipInflate);
+    unZipper.onfile = f => {
+        files.push(f);
+    };
+    const reader = file.stream().getReader();
+    const read = async () => {
+        await reader.read().then(async res => {
+            if (!res.done) {
+                unZipper.push(res.value, res.done);
+                await read();
+            } else {
+                unZipper.push(new Uint8Array(0), true);
+            }
+        });
+    };
+    await read();
+    return files;
+}
+
 export function arrayToObject<T>(array: T[]) {
     const object: { [key: number]: T; } = array.reduce((obj, element, index) => {
         obj[index] = element;
@@ -428,8 +450,43 @@ export const ZIPUtils = {
         // const zipFileReader = new BlobReader(await openFileSelect());
         // await zipWriter.add("hello.txt", helloWorldReader);
         // const zipReader = new ZipReader(zipFileReader);
-        const zip = fflate.unzipSync(new Uint8Array(await (await openFileSelect() as File).arrayBuffer()));
+        const fileSelected = await openFileSelect() as File;
+        const zip1 = await unzipFile(fileSelected);
         FSUtils.formatFs();
+        for (let i = 0; i < zip1.length; i++) {
+            const element = zip1[i];
+            console.log(element.name);
+            const fullReadPromise = new Promise<Uint8Array[]>((resolve, reject) => {
+                const out: Uint8Array[] = [];
+                element.ondata = (err, data, final) => {
+                    if (err) {
+                        console.error("Failed at", element.name, err);
+                        return;
+                    }
+                    out.push(data);
+                    if (final === true)
+                        resolve(out);
+                };
+            });
+            element.start();
+            const out = await fullReadPromise;
+
+            const isDir = element.name.endsWith("/") && out[0].length === 0;
+            FSUtils.mkdirSyncRecursive("/" + (isDir ? element.name : path.dirname(element.name)));
+            if (isDir) continue;
+
+            console.log("Writing", out);
+            fs.writeFile(
+                "/" + element.name,
+                // window.BrowserFS.BFSRequire("buffer").Buffer.concat(
+                window.Buffer.concat(
+                    out,
+                ),
+                () => { }
+            );
+        }
+        return;
+        const zip = fflate.unzipSync(new Uint8Array(await (await openFileSelect() as File).arrayBuffer()));
         const entries = Object.keys(zip);
         // debugger;
         for (let i = 0; i < entries.length; i++) {
