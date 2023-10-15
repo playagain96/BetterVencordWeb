@@ -728,7 +728,7 @@ const thePlugin = {
                 }
             },
             get request() {
-                const fakeRequest = function (url, cb = (...args) => { }, headers = {}) {
+                const fakeRequest = function (url: string, cb = (...args) => { }, headers = {}) {
                     const stuff = { theCallback: cb };
                     if (typeof headers === "function") {
                         // @ts-ignore
@@ -745,13 +745,16 @@ const thePlugin = {
                         cb(undefined, Object.assign({}, x, {
                             statusCode: x.status,
                             headers: Object.fromEntries(x.headers.entries()),
-                        }), await x.text());
+                        }), await x.text()); // shouldn't this be arrayBuffer?
                     });
                     fetchOut.catch(x => {
                         cb(x, undefined, undefined);
                     });
                 };
                 // fakeRequest.stuffHere = function () {}
+                fakeRequest.get = function (url: string, cb = (...args) => { }, options = {}) {
+                    return this(url, cb, { ...options, method: "get" });
+                };
                 if (Settings.plugins[thePlugin.name].enableExperimentalRequestPolyfills === true)
                     return fakeRequest;
                 return undefined;
