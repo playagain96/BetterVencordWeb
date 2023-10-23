@@ -17,6 +17,10 @@
 */
 
 /* eslint-disable eqeqeq */
+import { Settings } from "@api/Settings";
+
+import { PLUGIN_NAME } from "./constants";
+import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { docCreateElement } from "./utils";
 
@@ -663,6 +667,11 @@ class BdApiReImplementationInstance {
     get UI() {
         return UIHolder;
     }
+    get Net() {
+        return {
+            fetch: (url: string, options) => { return fetchWithCorsProxyFallback(url, options, Settings.plugins[PLUGIN_NAME].corsProxyUrl); },
+        };
+    }
     alert(title, content) {
         UIHolder.showConfirmationModal(title, content, { cancelText: null });
     }
@@ -688,6 +697,7 @@ Object.defineProperty(BdApiReImplementationInstance, "React", { get: () => letsH
 Object.defineProperty(BdApiReImplementationInstance, "ReactDOM", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.ReactDOM });
 Object.defineProperty(BdApiReImplementationInstance, "ReactUtils", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.ReactUtils });
 Object.defineProperty(BdApiReImplementationInstance, "UI", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.UI });
+Object.defineProperty(BdApiReImplementationInstance, "Net", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Net });
 Object.defineProperty(BdApiReImplementationInstance, "Utils", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Utils });
 Object.defineProperty(BdApiReImplementationInstance, "Webpack", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Webpack });
 Object.defineProperty(BdApiReImplementationInstance, "labelsOfInstancedAPI", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.labelsOfInstancedAPI });

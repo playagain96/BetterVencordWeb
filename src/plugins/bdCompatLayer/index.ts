@@ -26,6 +26,7 @@ import definePlugin, { OptionType, PluginDef } from "@utils/types";
 const { Plugin } = require("@utils/types");
 import { Settings } from "@api/Settings";
 
+import { PLUGIN_NAME } from "./constants";
 import { createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
@@ -37,7 +38,7 @@ import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLa
 // };
 
 const thePlugin = {
-    name: "BD Compatibility Layer",
+    name: PLUGIN_NAME,
     description: "Converts BD plugins to run in Vencord",
     authors: [
         Devs.Davvy,
