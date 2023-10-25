@@ -241,7 +241,7 @@ function patchPush(webpackGlobal: any) {
         },
         configurable: true
     });
-    window[WEBPACK_CHUNK].push([[Symbol()], {}, require => {
+    webpackGlobal.push([[Symbol()], {}, require => {
         require.d = (target, exports) => {
             for (const key in exports) {
                 if (!Reflect.has(exports, key) || target[key]) continue;
@@ -256,5 +256,5 @@ function patchPush(webpackGlobal: any) {
         };
     }]);
 
-    window[WEBPACK_CHUNK].pop();
+    webpackGlobal.pop();
 }
