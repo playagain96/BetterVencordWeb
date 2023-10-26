@@ -341,16 +341,13 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         throw new Error("Incomplete plugin");
     }
 
-    if (final.authors[0].name && typeof final.authors[0].name === "string") {
-        final.options = {
-            authorsLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Author", final.authors[0].name),
-            },
-            ...final.options,
-        };
-    }
-
+    final.options = {
+        versionLabel: {
+            type: OptionType.COMPONENT,
+            component: () => createTextForm("Version", final.version),
+        },
+        ...final.options,
+    };
     if (final.invite && typeof final.invite === "string") {
         final.options = {
             inviteLabel: {
@@ -405,13 +402,16 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             ...final.options,
         };
     }
-    final.options = {
-        authorsLabel: {
-            type: OptionType.COMPONENT,
-            component: () => createTextForm("Version", final.version),
-        },
-        ...final.options,
-    };
+    if (final.authors[0].name && typeof final.authors[0].name === "string") {
+        final.options = {
+            authorsLabel: {
+                type: OptionType.COMPONENT,
+                component: () => createTextForm("Author", final.authors[0].name),
+            },
+            ...final.options,
+        };
+    }
+
     // if (final.instance.getAuthor)
     //     final.authors[0].id = final.instance.getAuthor();
     // eslint-disable-next-line eqeqeq
