@@ -37,6 +37,8 @@ We will pull changes from upstream, so if you want to make a plugin for Vencord 
 1. **Install VencordInstaller:**
    - For PC start by installing [VencordInstaller](https://vencord.dev/download/) depending on your OS. Follow the on-screen instructions to complete the installation.
 
+   - If you do NOT know what `pnpm` is. Please run `pnpmInstall.sh`, or if you DO NOT have it installed, Do the same thing !!!
+
 2. **BetterVencord Installation:**
    - For PC Installation:<br>
      a. Run `install.bat`.<br>
