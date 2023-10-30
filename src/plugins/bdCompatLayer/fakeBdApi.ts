@@ -142,6 +142,9 @@ export const WebpackHolder = {
     getByProps(...props) {
         return this.getModule(this.Filters.byProps(...props), {});
     },
+    get getByKeys() {
+        return this.getByProps;
+    },
     getByPrototypes(...fields) {
         return this.getModule(
             x =>
