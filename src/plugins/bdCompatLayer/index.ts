@@ -44,7 +44,12 @@ const thePlugin = {
         Devs.Davvy,
         Devs.WhoIsThis,
     ],
-    // patches: [],
+    // patches: [
+    //     {
+    //         match: (/(\w+)\.\w+\s*=\s*function\(\w+\,\w+\){for\(var\s+\w\s+in\s\w+\)\w\.o\(\w,\w\)&&!\w\.o\(\w,\w\)&&Object.defineProperty\(\w,\w,{enumerable:!0,get:\w\[\w\]}\)}/.toString()),
+    //         replace: `$1.d = function (target, exports) { console.log("hello there"); for (const key in exports) { Object.defineProperty( target, key, {get: () => exports[key](),set: e => { exports[key] = () => e }, enumerable: !0, configurable: !1}); } }`
+    //     }
+    // ],
     options: {
         enableExperimentalRequestPolyfills: {
             description: "Enables request polyfills that first try to request using normal fetch, then using a cors proxy when the normal one fails",

@@ -106,21 +106,22 @@ function patchPush(webpackGlobal: any) {
     });
 
     // is it good to place it here?
-    webpackGlobal.push([[Symbol()], {}, require => {
-        require.d = (target, exports) => {
-            for (const key in exports) {
-                if (!Reflect.has(exports, key) || target[key]) continue;
-
-                Object.defineProperty(target, key, {
-                    get: () => exports[key](),
-                    set: v => { exports[key] = () => v; },
-                    enumerable: true,
-                    configurable: true
-                });
-            }
-        };
-    }]);
-    webpackGlobal.pop();
+    // webpackGlobal.push([[Symbol()], {}, require => {
+    //     require.d = (target, exports) => {
+    //         for (const key in exports) {
+    //             // if (!Reflect.has(exports, key) || target[key]) continue;
+    //             // if (!Reflect.has(exports, key) || target[key]) continue;
+    //
+    //             Object.defineProperty(target, key, {
+    //                 get: () => exports[key](),
+    //                 set: v => { exports[key] = () => v; },
+    //                 enumerable: true,
+    //                 configurable: true
+    //             });
+    //         }
+    //     };
+    // }]);
+    // webpackGlobal.pop();
 }
 
 function patchFactories(factories: Record<string | number, (module: { exports: any; }, exports: any, require: any) => void>) {
@@ -146,6 +147,19 @@ function patchFactories(factories: Record<string | number, (module: { exports: a
         const patchedBy = new Set();
 
         const factory = factories[id] = function (module, exports, require) {
+            require.d = (target, exports) => {
+                for (const key in exports) {
+                    // if (!Reflect.has(exports, key) || target[key]) continue;
+                    if (!Reflect.has(exports, key)) continue;
+
+                    Object.defineProperty(target, key, {
+                        get: () => exports[key](),
+                        set: v => { exports[key] = () => v; },
+                        enumerable: true,
+                        configurable: false
+                    });
+                }
+            };
             try {
                 mod(module, exports, require);
             } catch (err) {
