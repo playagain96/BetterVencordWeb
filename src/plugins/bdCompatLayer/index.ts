@@ -711,7 +711,10 @@ const thePlugin = {
             https: {
                 get_(url, options, cb) {
                     const ev = new ReImplementationObject.events.EventEmitter();
-                    fetchWithCorsProxyFallback(url, { ...options, method: "get" }, proxyUrl).then(async x => {
+                    const ev2 = new ReImplementationObject.events.EventEmitter();
+                    const fetchResponse = fetchWithCorsProxyFallback(url, { ...options, method: "get" }, proxyUrl);
+                    fetchResponse.then(async x => {
+                        ev2.emit("response", ev);
                         if (x.body) {
                             const reader = x.body.getReader();
                             let result = await reader.read();
@@ -726,6 +729,11 @@ const thePlugin = {
                         }));
                     });
                     cb(ev);
+                    fetchResponse.catch((reason) => {
+                        if (ev2.callbacks["error"]) // https://nodejs.org/api/http.html#class-httpclientrequest "For backward compatibility, res will only emit 'error' if there is an 'error' listener registered."
+                            ev2.emit("error", reason);
+                    });
+                    return ev2;
                 },
                 get get() {
                     if (Settings.plugins[thePlugin.name].enableExperimentalRequestPolyfills === true)
