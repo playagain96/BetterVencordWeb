@@ -741,7 +741,7 @@ const thePlugin = {
                     return undefined;
                 }
             },
-            get request() {
+            get request_() {
                 const fakeRequest = function (url: string, cb = (...args) => { }, headers = {}) {
                     const stuff = { theCallback: cb };
                     if (typeof headers === "function") {
@@ -769,8 +769,11 @@ const thePlugin = {
                 fakeRequest.get = function (url: string, cb = (...args) => { }, options = {}) {
                     return this(url, cb, { ...options, method: "get" });
                 };
+                return fakeRequest;
+            },
+            get request() {
                 if (Settings.plugins[thePlugin.name].enableExperimentalRequestPolyfills === true)
-                    return fakeRequest;
+                    return this.request_;
                 return undefined;
             },
             events: {
