@@ -24,7 +24,7 @@ import { PLUGIN_NAME } from "./constants.js";
 import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
 
-type AssembledBetterDiscordPlugin = {
+export type AssembledBetterDiscordPlugin = {
     started: boolean;
     authors: any[];
     name: string;

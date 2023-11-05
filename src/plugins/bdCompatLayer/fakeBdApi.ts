@@ -23,6 +23,7 @@ import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { docCreateElement } from "./utils";
+import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 
 class PatcherWrapper {
     #label;
@@ -58,7 +59,7 @@ class PatcherWrapper {
 
 export const PluginsHolder = {
     getAll: () => {
-        return window.GeneratedPlugins;
+        return window.GeneratedPlugins as AssembledBetterDiscordPlugin[];
     },
     isEnabled: name => {
         return Vencord.Plugins.isPluginEnabled(name);
