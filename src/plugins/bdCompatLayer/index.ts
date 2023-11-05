@@ -174,6 +174,7 @@ const thePlugin = {
             fsReadyPromise: getDeferred(),
             mainObserver: {},
             fakeClipboard: undefined,
+            wrapPluginCode: (code: string, filename = "RuntimeGenerated.plugin.js") => { return convertPlugin(code, filename, false); }
         };
         window.BdCompatLayer = windowBdCompatLayer;
 
@@ -902,7 +903,7 @@ const thePlugin = {
                     BdApiReImplementation.Plugins.folder + "/" + element,
                     "utf8"
                 );
-                convertPlugin(pluginJS, element, true).then(plugin => {
+                convertPlugin(pluginJS, element, true, BdApiReImplementation.Plugins.folder).then(plugin => {
                     addCustomPlugin(plugin);
                 });
             }

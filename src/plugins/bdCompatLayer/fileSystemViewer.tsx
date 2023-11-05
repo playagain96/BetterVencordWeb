@@ -24,6 +24,8 @@ import { Button, Card, Forms, React, useRef } from "@webpack/common";
 import { getGlobalApi } from "./fakeBdApi";
 import TreeView, { findInTree, TreeNode } from "./treeView";
 import { FSUtils, readdirPromise, reloadCompatLayer, ZIPUtils } from "./utils";
+import { addCustomPlugin, convertPlugin } from "./pluginConstructor";
+import { PLUGIN_NAME } from "./constants";
 
 type SettingsPlugin = Plugin & {
     customSections: ((ID: Record<string, unknown>) => any)[];
@@ -88,6 +90,52 @@ function makeTab() {
                         window.require("fs").unlink(ref.current.split("fs-")[1]);
                     },
                 },
+                (!findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable) && ref.current.endsWith(".plugin.js") && {
+                    type: "group",
+                    items: [
+                        {
+                            type: "submenu",
+                            label: "Plugin actions",
+                            items: [
+                                {
+                                    // label: "(Re)Load plugin",
+                                    label: "Reload plugin",
+                                    action: () => {
+                                        const selected = ref.current.split("fs-")[1];
+                                        const parsed: { dir: string, base: string; } = window.require("path").parse(selected);
+                                        parsed.dir = parsed.dir.startsWith("//") ? parsed.dir.slice(1) : parsed.dir;
+                                        const foundOrNot = getGlobalApi().Plugins.getAll().find(x => x.sourcePath == parsed.dir && x.filename == parsed.base);
+                                        // if (!foundOrNot) {
+                                        //     const converted = convertPlugin(window.require("fs").readFileSync(selected, "utf8"), parsed.base, true, parsed.dir);
+                                        //     converted.then(x => {
+                                        //         addCustomPlugin(x);
+                                        //     });
+                                        // }
+                                        if (foundOrNot) {
+                                            (async () => { // TODO: move to a separate function
+                                                Vencord.Settings.plugins[foundOrNot.name].enabled = false;
+                                                if (foundOrNot.started === true) {
+                                                    const currentStatus = Vencord.Settings.plugins[PLUGIN_NAME].pluginsStatus[foundOrNot.name];
+                                                    Vencord.Plugins.stopPlugin(foundOrNot as Plugin);
+                                                    if (currentStatus === true)
+                                                        Vencord.Settings.plugins[PLUGIN_NAME].pluginsStatus[foundOrNot.name] = currentStatus;
+                                                }
+                                                delete Vencord.Plugins.plugins[foundOrNot.name];
+                                                (window.GeneratedPlugins as any[]).splice((window.GeneratedPlugins as any[]).indexOf(foundOrNot), 1);
+
+                                                await new Promise((resolve, reject) => setTimeout(resolve, 500));
+
+                                                const convertPromise = convertPlugin(window.require("fs").readFileSync(selected, "utf8"), parsed.base, true, parsed.dir);
+                                                const converted = await convertPromise;
+                                                addCustomPlugin(converted);
+                                            })();
+                                        }
+                                    },
+                                }
+                            ],
+                        }
+                    ]
+                }
             ].filter(Boolean));
         };
         // @ts-ignore

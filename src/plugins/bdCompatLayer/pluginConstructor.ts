@@ -44,6 +44,8 @@ export type AssembledBetterDiscordPlugin = {
     website: string;
     authorLink: string;
     donate: string;
+    sourcePath: string | undefined;
+    filename: string;
 };
 
 const modal = (props, name: string, child) => {
@@ -108,9 +110,11 @@ const modal = (props, name: string, child) => {
     );
 };
 
-export async function convertPlugin(BetterDiscordPlugin: string, filename: string, detectDuplicateName: boolean = false) {
+export async function convertPlugin(BetterDiscordPlugin: string, filename: string, detectDuplicateName: boolean = false, sourcePath = "") {
     const final = {} as AssembledBetterDiscordPlugin;
     final.started = false;
+    final.sourcePath = sourcePath;
+    final.filename = filename;
     // final.patches = [];
     final.authors = [
         {

@@ -214,7 +214,7 @@ export async function reloadCompatLayer() {
             getGlobalApi().Plugins.folder + "/" + element,
             "utf8"
         );
-        convertPlugin(pluginJS, element, true).then(plugin => {
+        convertPlugin(pluginJS, element, true, getGlobalApi().Plugins.folder).then(plugin => {
             addCustomPlugin(plugin);
         });
     }
