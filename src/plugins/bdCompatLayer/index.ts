@@ -161,6 +161,7 @@ const thePlugin = {
         //         });
         //     },
         // };
+        let _Router = null;
         const windowBdCompatLayer = {
             // Utils,
             // exportZip,
@@ -173,6 +174,15 @@ const thePlugin = {
             reloadCompatLayer,
             fsReadyPromise: getDeferred(),
             mainObserver: {},
+            mainRouterListener: () =>
+                window.GeneratedPlugins.forEach(plugin =>
+                    BdApiReImplementation.Plugins.isEnabled(plugin.name) && typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
+                ),
+            get Router() {
+                if (_Router == null)
+                    _Router = BdApiReImplementation.Webpack.getModule(x => x.listeners && x.flushRoute);
+                return _Router;
+            },
             fakeClipboard: undefined,
             wrapPluginCode: (code: string, filename = "RuntimeGenerated.plugin.js") => { return convertPlugin(code, filename, false); }
         };
@@ -853,12 +863,7 @@ const thePlugin = {
         //         return;
         //     clearInterval(checkInterval);
         windowBdCompatLayer.fsReadyPromise.promise.then(() => {
-            const Router = BdApiReImplementation.Webpack.getModule(x => x.listeners && x.flushRoute);
-            Router.listeners.add(() =>
-                window.GeneratedPlugins.forEach(plugin =>
-                    BdApiReImplementation.Plugins.isEnabled(plugin.name) && typeof plugin.instance.onSwitch === "function" && plugin.instance.onSwitch()
-                )
-            );
+            windowBdCompatLayer.Router.listeners.add(windowBdCompatLayer.mainRouterListener);
             const observer = new MutationObserver(mutations => mutations.forEach(m => window.GeneratedPlugins.forEach(p => BdApiReImplementation.Plugins.isEnabled(p.name) && p.instance.observer?.(m))));
             observer.observe(document, {
                 childList: true,
@@ -992,6 +997,8 @@ const thePlugin = {
     async stop() {
         console.warn("Disabling observer...");
         window.BdCompatLayer.mainObserver.disconnect();
+        console.warn("Removing onSwitch listener...");
+        window.BdCompatLayer.Router.listeners.delete(window.BdCompatLayer.mainRouterListener);
         console.warn("UnPatching context menu...");
         getGlobalApi().Patcher.unpatchAll("ContextMenuPatcher");
         console.warn("Removing plugins...");
