@@ -282,7 +282,7 @@ export const UIHolder = {
         console.info("hi");
     },
     showToast(message, toastType = 1) {
-        const { createToast, showToast } = getGlobalApi().Webpack.getModule(x => x.createToast);
+        const { createToast, showToast } = getGlobalApi().Webpack.getModule(x => x.createToast && x.showToast);
         showToast(createToast(message || "Success !", [0, 1, 2, 3, 4, 5].includes(toastType) ? toastType : 1)); // showToast has more then 3 toast types?
         // uhmm.. aschtually waht is 4.
     },
