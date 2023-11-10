@@ -181,7 +181,7 @@ const thePlugin = {
             get Router() {
                 if (_Router == null)
                     _Router = BdApiReImplementation.Webpack.getModule(x => x.listeners && x.flushRoute);
-                return _Router;
+                return _Router as null | { listeners: Set<Function>; };
             },
             fakeClipboard: undefined,
             wrapPluginCode: (code: string, filename = "RuntimeGenerated.plugin.js") => { return convertPlugin(code, filename, false); }
@@ -863,7 +863,7 @@ const thePlugin = {
         //         return;
         //     clearInterval(checkInterval);
         windowBdCompatLayer.fsReadyPromise.promise.then(() => {
-            windowBdCompatLayer.Router.listeners.add(windowBdCompatLayer.mainRouterListener);
+            windowBdCompatLayer.Router?.listeners.add(windowBdCompatLayer.mainRouterListener);
             const observer = new MutationObserver(mutations => mutations.forEach(m => window.GeneratedPlugins.forEach(p => BdApiReImplementation.Plugins.isEnabled(p.name) && p.instance.observer?.(m))));
             observer.observe(document, {
                 childList: true,
