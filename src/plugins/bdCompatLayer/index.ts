@@ -781,6 +781,16 @@ const thePlugin = {
                 EventEmitter: FakeEventEmitter,
             },
             electron: {},
+            process: {
+                env: {
+                    // HOME: "/home/fake",
+                    get HOME() {
+                        const target = "/home/fake";
+                        FSUtils.mkdirSyncRecursive(target);
+                        return target;
+                    }
+                },
+            },
         };
         const RequireReimpl = name => {
             return ReImplementationObject[name];
