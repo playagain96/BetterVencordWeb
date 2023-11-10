@@ -679,6 +679,9 @@ class BdApiReImplementationInstance {
     alert(title, content) {
         UIHolder.showConfirmationModal(title, content, { cancelText: null });
     }
+    showToast(content, toastType = 1) {
+        UIHolder.showToast(content, toastType);
+    }
     showNotice(content, settings = {}) {
         UIHolder.showNotice(content, settings);
     }
