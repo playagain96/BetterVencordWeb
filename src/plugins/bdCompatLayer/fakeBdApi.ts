@@ -721,6 +721,7 @@ Object.defineProperty(BdApiReImplementationInstance, "saveData", { get: () => le
 Object.defineProperty(BdApiReImplementationInstance, "setData", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.setData });
 Object.defineProperty(BdApiReImplementationInstance, "showConfirmationModal", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.showConfirmationModal });
 Object.defineProperty(BdApiReImplementationInstance, "showNotice", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.showNotice });
+Object.defineProperty(BdApiReImplementationInstance, "showToast", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.showToast });
 Object.defineProperty(BdApiReImplementationInstance, "suppressErrors", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.suppressErrors });
 // I'm sorry
 
