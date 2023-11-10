@@ -82,7 +82,7 @@ const TreeNodeItem: React.FC<{ node: TreeNode, selectedNode: string, selectNode:
                     </Text>
             }
             {/* <TransparentButton clickTarget={node} clicked={selectedNode === node.id} onClick={selectNode}> */}
-            <TransparentButton isToggle={false} onClick={() => { }} onContextMenu={ev => {
+            <TransparentButton isToggle={false} onClick={toggleExpand} onContextMenu={ev => {
                 { /* <TransparentButton clickTarget={node} clicked={selectedNode === node.id} onClick={selectNode} onContextMenu={ev => { */ }
                 selectNode(node);
                 onContextMenu(ev);
