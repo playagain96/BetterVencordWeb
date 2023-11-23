@@ -16,12 +16,13 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { MaskedLinkStore, Tooltip } from "@webpack/common";
+import { Tooltip } from "@webpack/common";
 
 import { Badge } from "../entities";
 import { cl } from "../utils";
 
 export default function ReviewBadge(badge: Badge) {
+    const MaskedLinkStore = Vencord.Webpack.findStore("MaskedLinkStore");
     return (
         <Tooltip
             text={badge.name}>
