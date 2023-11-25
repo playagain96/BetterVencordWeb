@@ -694,36 +694,19 @@ class BdApiReImplementationInstance {
 }
 
 const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
-Object.defineProperty(BdApiReImplementationInstance, "Components", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Components });
-Object.defineProperty(BdApiReImplementationInstance, "ContextMenu", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.ContextMenu, set: v => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.ContextMenu = v });
-Object.defineProperty(BdApiReImplementationInstance, "DOM", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.DOM });
-Object.defineProperty(BdApiReImplementationInstance, "Data", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Data });
-Object.defineProperty(BdApiReImplementationInstance, "Patcher", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Patcher });
-Object.defineProperty(BdApiReImplementationInstance, "Plugins", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Plugins });
-Object.defineProperty(BdApiReImplementationInstance, "React", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.React });
-Object.defineProperty(BdApiReImplementationInstance, "ReactDOM", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.ReactDOM });
-Object.defineProperty(BdApiReImplementationInstance, "ReactUtils", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.ReactUtils });
-Object.defineProperty(BdApiReImplementationInstance, "UI", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.UI });
-Object.defineProperty(BdApiReImplementationInstance, "Net", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Net });
-Object.defineProperty(BdApiReImplementationInstance, "Utils", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Utils });
-Object.defineProperty(BdApiReImplementationInstance, "Webpack", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.Webpack });
-Object.defineProperty(BdApiReImplementationInstance, "labelsOfInstancedAPI", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.labelsOfInstancedAPI });
-Object.defineProperty(BdApiReImplementationInstance, "alert", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.alert });
-Object.defineProperty(BdApiReImplementationInstance, "disableSetting", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.disableSetting });
-Object.defineProperty(BdApiReImplementationInstance, "enableSetting", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.enableSetting });
-Object.defineProperty(BdApiReImplementationInstance, "findModule", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.findModule });
-Object.defineProperty(BdApiReImplementationInstance, "findModuleByProps", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.findModuleByProps });
-Object.defineProperty(BdApiReImplementationInstance, "getData", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.getData });
-Object.defineProperty(BdApiReImplementationInstance, "isSettingEnabled", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.isSettingEnabled });
-Object.defineProperty(BdApiReImplementationInstance, "loadData", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.loadData });
-Object.defineProperty(BdApiReImplementationInstance, "monkeyPatch", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.monkeyPatch });
-Object.defineProperty(BdApiReImplementationInstance, "saveData", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.saveData });
-Object.defineProperty(BdApiReImplementationInstance, "setData", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.setData });
-Object.defineProperty(BdApiReImplementationInstance, "showConfirmationModal", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.showConfirmationModal });
-Object.defineProperty(BdApiReImplementationInstance, "showNotice", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.showNotice });
-Object.defineProperty(BdApiReImplementationInstance, "showToast", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.showToast });
-Object.defineProperty(BdApiReImplementationInstance, "suppressErrors", { get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance.suppressErrors });
-// I'm sorry
+const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors"];
+const settersToSet = ["ContextMenu"];
+for (let index = 0; index < gettersToSet.length; index++) {
+    const element = gettersToSet[index];
+    let setter = undefined as ((v: any) => any) | undefined;
+    if (settersToSet.indexOf(element) !== -1) {
+        setter = (v => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element] = v);
+    }
+    Object.defineProperty(BdApiReImplementationInstance, element, {
+        get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element],
+        set: setter,
+    });
+}
 
 type BdApiReImplementationGlobal = typeof BdApiReImplementationInstance & BdApiReImplementationInstance;
 
