@@ -16,31 +16,27 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { Tooltip } from "@webpack/common";
+import { MaskedLink, Tooltip } from "@webpack/common";
 
 import { Badge } from "../entities";
 import { cl } from "../utils";
 
 export default function ReviewBadge(badge: Badge) {
-    const MaskedLinkStore = Vencord.Webpack.findStore("MaskedLinkStore");
     return (
         <Tooltip
             text={badge.name}>
             {({ onMouseEnter, onMouseLeave }) => (
-                <img
-                    className={cl("badge")}
-                    width="22px"
-                    height="22px"
-                    onMouseEnter={onMouseEnter}
-                    onMouseLeave={onMouseLeave}
-                    src={badge.icon}
-                    alt={badge.description}
-                    onClick={() =>
-                        MaskedLinkStore.openUntrustedLink({
-                            href: badge.redirectURL,
-                        })
-                    }
-                />
+                <MaskedLink href={badge.redirectURL}>
+                    <img
+                        className={cl("badge")}
+                        width="22px"
+                        height="22px"
+                        onMouseEnter={onMouseEnter}
+                        onMouseLeave={onMouseLeave}
+                        src={badge.icon}
+                        alt={badge.description}
+                    />
+                </MaskedLink>
             )}
         </Tooltip>
     );
