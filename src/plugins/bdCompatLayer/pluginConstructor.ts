@@ -36,7 +36,18 @@ export type AssembledBetterDiscordPlugin = {
     id: string;
     start: () => void;
     stop: () => void;
-    instance: any;
+    instance: {
+        start: () => void;
+        stop: () => void;
+        getSettingsPanel: (() => typeof React.Component | Node | string) | undefined;
+        /** @deprecated */
+        getName: () => string;
+        /** @deprecated */
+        getVersion: () => string;
+        /** @deprecated */
+        getDescription: () => string;
+        load: () => void; // is this even officially supported? I don't think bd docs even mention this...
+    };
     options: object;
     version: string;
     invite: string;
@@ -56,7 +67,7 @@ const modalStuff = {
     get TextElement() { return this.TextElement_ ??= getGlobalApi().Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors); },
 };
 
-const modal = (props, name: string, child) => {
+const pluginSettingsModalCreator = (props, name: string, child) => {
     return React.createElement(
         ErrorBoundary,
         {},
@@ -112,6 +123,56 @@ const modal = (props, name: string, child) => {
     );
 };
 
+function openSettingsModalForPlugin(final: AssembledBetterDiscordPlugin) {
+    openModal(props => {
+        // let el = final.instance.getSettingsPanel();
+        // if (el instanceof Node) {
+        //     el = Vencord.Webpack.Common.React.createElement("div", { dangerouslySetInnerHTML: { __html: el.outerHTML } });
+        // }
+        const panel = final.instance.getSettingsPanel!();
+        let child: typeof panel | React.ReactElement = panel;
+        if (panel instanceof Node || typeof panel === "string")
+            child = class ReactWrapper extends React.Component {
+                elementRef: React.RefObject<Node>;
+                element: Node | string;
+                constructor(props: {}) {
+                    super(props);
+                    this.elementRef = React.createRef<Node>();
+                    this.element = panel as Node | string;
+                    this.state = { hasError: false };
+                }
+
+                componentDidCatch() {
+                    this.setState({ hasError: true });
+                }
+
+                componentDidMount() {
+                    if (this.element instanceof Node)
+                        this.elementRef.current?.appendChild(
+                            this.element
+                        );
+                }
+
+                render() {
+                    if ((this.state as any).hasError) return null;
+                    const props = {
+                        className: "bd-addon-settings-wrap",
+                        ref: this.elementRef,
+                    };
+                    if (typeof this.element === "string")
+                        (props as any).dangerouslySetInnerHTML = {
+                            __html: this.element,
+                        };
+                    return React.createElement("div", props);
+                }
+            };
+        if (typeof child === "function")
+            child = React.createElement(child);
+
+        return pluginSettingsModalCreator(props, final.name, child as React.ReactElement);
+    });
+}
+
 export async function convertPlugin(BetterDiscordPlugin: string, filename: string, detectDuplicateName: boolean = false, sourcePath = "") {
     const final = {} as AssembledBetterDiscordPlugin;
     final.started = false;
@@ -130,63 +191,14 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     final.id = "";
     final.start = () => { };
     final.stop = () => { };
-    const openSettingsModal = () => {
-        openModal(props => {
-            // let el = final.instance.getSettingsPanel();
-            // if (el instanceof Node) {
-            //     el = Vencord.Webpack.Common.React.createElement("div", { dangerouslySetInnerHTML: { __html: el.outerHTML } });
-            // }
-            const panel = final.instance.getSettingsPanel();
-            let child = panel;
-            if (panel instanceof Node || typeof panel === "string")
-                child = class ReactWrapper extends React.Component {
-                    elementRef: React.RefObject<Node>;
-                    element;
-                    constructor(props) {
-                        super(props);
-                        this.elementRef = React.createRef<Node>();
-                        this.element = panel;
-                        this.state = { hasError: false };
-                    }
-
-                    componentDidCatch() {
-                        this.setState({ hasError: true });
-                    }
-
-                    componentDidMount() {
-                        if (this.element instanceof Node)
-                            this.elementRef.current?.appendChild(
-                                this.element
-                            );
-                    }
-
-                    render() {
-                        if ((this.state as any).hasError) return null;
-                        const props = {
-                            className: "bd-addon-settings-wrap",
-                            ref: this.elementRef,
-                        };
-                        if (typeof this.element === "string")
-                            (props as any).dangerouslySetInnerHTML = {
-                                __html: this.element,
-                            };
-                        return React.createElement("div", props);
-                    }
-                };
-            if (typeof child === "function")
-                child = React.createElement(child);
-
-            return modal(props, final.name, child);
-        });
-    };
     final.options = {
         openSettings: {
             type: OptionType.COMPONENT,
             description: "Open settings",
             component: () =>
                 React.createElement(
-                    Vencord.Webpack.Common.Button,
-                    { onClick: openSettingsModal, disabled: !(typeof final.instance.getSettingsPanel === "function") },
+                    Button,
+                    { onClick: () => openSettingsModalForPlugin(final), disabled: !(typeof final.instance.getSettingsPanel === "function") },
                     "Open settings"
                 ),
         },
@@ -194,9 +206,6 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
 
     let metaEndLine = 0;
     function generateMeta() {
-        /**
-         * @type {string[]}
-         */
         const metadata = BetterDiscordPlugin
             .split("/**")[1]
             .split("*/")[0]
