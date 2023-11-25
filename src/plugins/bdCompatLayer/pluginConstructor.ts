@@ -238,7 +238,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             "const global = window;",
             // "const Buffer = window.BrowserFS.BFSRequire('buffer').Buffer;",
             "const __filename=BdApi.Plugins.folder+`/" + filename + "`;",
-            "const __dirname=BdApi.Plugins.folder;",
+            "const __dirname=BdApi.Plugins.folder;", // should this be set to `sourcePath`?
             "const DiscordNative={get clipboard() { return window.BdCompatLayer.fakeClipboard; }};",
             // "debugger;",
         ];
