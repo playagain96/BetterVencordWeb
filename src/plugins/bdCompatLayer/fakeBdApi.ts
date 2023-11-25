@@ -556,6 +556,7 @@ class BdApiReImplementationInstance {
             });
         }
         else {
+            // window.globalApisCreated = (window.globalApisCreated !== undefined ? window.globalApisCreated + 1 : 0);
             this.#patcher = Patcher;
             this.#data = DataHolder;
             this.#dom = DOMHolder;
@@ -693,21 +694,22 @@ class BdApiReImplementationInstance {
     }
 }
 
-const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
-const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors"];
-const settersToSet = ["ContextMenu"];
-for (let index = 0; index < gettersToSet.length; index++) {
-    const element = gettersToSet[index];
-    let setter = undefined as ((v: any) => any) | undefined;
-    if (settersToSet.indexOf(element) !== -1) {
-        setter = (v => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element] = v);
+function assignToGlobal() {
+    const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
+    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors"];
+    const settersToSet = ["ContextMenu"];
+    for (let index = 0; index < gettersToSet.length; index++) {
+        const element = gettersToSet[index];
+        let setter = undefined as ((v: any) => any) | undefined;
+        if (settersToSet.indexOf(element) !== -1) {
+            setter = (v => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element] = v);
+        }
+        Object.defineProperty(BdApiReImplementationInstance, element, {
+            get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element],
+            set: setter,
+        });
     }
-    Object.defineProperty(BdApiReImplementationInstance, element, {
-        get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element],
-        set: setter,
-    });
 }
-
 type BdApiReImplementationGlobal = typeof BdApiReImplementationInstance & BdApiReImplementationInstance;
 
 // class BdApi_ {
@@ -724,6 +726,7 @@ type BdApiReImplementationGlobal = typeof BdApiReImplementationInstance & BdApiR
 // it's late night
 
 export function createGlobalBdApi() {
+    assignToGlobal();
     return BdApiReImplementationInstance as BdApiReImplementationGlobal;
     // return new BdApiReImplementationInstance();
     // const mod = BdApiReImplementationInstance;

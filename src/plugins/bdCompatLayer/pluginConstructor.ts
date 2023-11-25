@@ -17,12 +17,13 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 
 import { PLUGIN_NAME } from "./constants.js";
 import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
+import { Button, React } from "@webpack/common";
 
 export type AssembledBetterDiscordPlugin = {
     started: boolean;
@@ -48,16 +49,14 @@ export type AssembledBetterDiscordPlugin = {
     filename: string;
 };
 
+const modalStuff = {
+    mc_: undefined,
+    TextElement_: undefined,
+    get mc() { return this.mc_ ??= getGlobalApi().Webpack.getByProps("Header", "Footer"); },
+    get TextElement() { return this.TextElement_ ??= getGlobalApi().Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors); },
+};
+
 const modal = (props, name: string, child) => {
-    const { React } = Vencord.Webpack.Common;
-    const mc = getGlobalApi().Webpack.getByProps("Header", "Footer");
-    const TextElement = getGlobalApi().Webpack.getModule(
-        m => m?.Sizes?.SIZE_32 && m.Colors
-    );
-    const Buttons = getGlobalApi().Webpack.getModule(
-        m => m.BorderColors,
-        { searchExports: true }
-    );
     return React.createElement(
         ErrorBoundary,
         {},
@@ -65,40 +64,43 @@ const modal = (props, name: string, child) => {
             ModalRoot,
             Object.assign(
                 {
-                    size: mc.Sizes.MEDIUM,
+                    size: modalStuff.mc.Sizes.MEDIUM,
                     className:
                         "bd-addon-modal" +
                         " " +
-                        mc.Sizes.MEDIUM,
+                        modalStuff.mc.Sizes.MEDIUM,
                 },
                 props
             ),
             React.createElement(
-                mc.Header,
+                // mc.Header,
+                ModalHeader,
                 {
                     separator: false,
                     className: "bd-addon-modal-header",
                 },
                 React.createElement(
-                    TextElement,
+                    modalStuff.TextElement,
                     {
                         tag: "h1",
-                        size: TextElement.Sizes.SIZE_20,
+                        size: modalStuff.TextElement.Sizes.SIZE_20,
                         strong: true,
                     },
                     `${name} Settings`
                 )
             ),
             React.createElement(
-                mc.Content,
+                // mc.Content,
+                ModalContent,
                 { className: "bd-addon-modal-settings" },
                 React.createElement(ErrorBoundary, {}, child)
             ),
             React.createElement(
-                mc.Footer,
+                // mc.Footer,
+                ModalFooter,
                 { className: "bd-addon-modal-footer" },
                 React.createElement(
-                    Buttons,
+                    Button,
                     {
                         onClick: props.onClose,
                         className: "bd-button",
@@ -128,7 +130,6 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     final.id = "";
     final.start = () => { };
     final.stop = () => { };
-    const { React } = Vencord.Webpack.Common;
     const openSettingsModal = () => {
         openModal(props => {
             // let el = final.instance.getSettingsPanel();
@@ -139,11 +140,11 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
             let child = panel;
             if (panel instanceof Node || typeof panel === "string")
                 child = class ReactWrapper extends React.Component {
-                    elementRef;
+                    elementRef: React.RefObject<Node>;
                     element;
                     constructor(props) {
                         super(props);
-                        this.elementRef = React.createRef();
+                        this.elementRef = React.createRef<Node>();
                         this.element = panel;
                         this.state = { hasError: false };
                     }
@@ -154,7 +155,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
 
                     componentDidMount() {
                         if (this.element instanceof Node)
-                            this.elementRef.current.appendChild(
+                            this.elementRef.current?.appendChild(
                                 this.element
                             );
                     }

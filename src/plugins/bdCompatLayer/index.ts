@@ -23,7 +23,6 @@ import definePlugin, { OptionType, PluginDef } from "@utils/types";
 // import { readFileSync } from "fs";
 // const process = require("~process");
 
-const { Plugin } = require("@utils/types");
 import { Settings } from "@api/Settings";
 
 import { PLUGIN_NAME } from "./constants";
@@ -32,6 +31,7 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxy
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { Clipboard } from "@webpack/common";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -196,7 +196,7 @@ const thePlugin = {
             fs: {},
             path: {},
             https: {
-                get_(url, options, cb) {
+                get_(url: string, options, cb: (em: typeof FakeEventEmitter.prototype) => void) {
                     const ev = new ReImplementationObject.events.EventEmitter();
                     const ev2 = new ReImplementationObject.events.EventEmitter();
                     const fetchResponse = fetchWithCorsProxyFallback(url, { ...options, method: "get" }, proxyUrl);
@@ -278,7 +278,7 @@ const thePlugin = {
                 },
             },
         };
-        const FakeRequireRedirect = (name: string) => {
+        const FakeRequireRedirect = (name: keyof typeof ReImplementationObject) => {
             return ReImplementationObject[name];
         };
         const BdApiReImplementation = createGlobalBdApi();
@@ -308,10 +308,8 @@ const thePlugin = {
             if (try1) {
                 return try1.clipboard;
             }
-            const filter = x2 => x2 && x2.toString?.().includes(".copy(") && x2.toString?.().length < 100;
-            const try2 = Object.values(BdApiReImplementation.Webpack.getModule(x => x && Object.values(x).some(filter))).find(filter);
             return {
-                copy: try2,
+                copy: Clipboard.copy,
             };
         })();
 

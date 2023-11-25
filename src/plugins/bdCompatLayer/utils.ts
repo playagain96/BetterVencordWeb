@@ -17,7 +17,7 @@
 */
 
 import { Link } from "@components/Link";
-import { React } from "@webpack/common";
+import { Forms, React } from "@webpack/common";
 import * as fflate from "fflate";
 
 import { getGlobalApi } from "./fakeBdApi";
@@ -118,14 +118,14 @@ export function createTextForm(field1, field2, asLink = false, linkLabel = field
         "div",
         {},
         React.createElement(
-            Vencord.Webpack.Common.Forms.FormTitle,
+            Forms.FormTitle,
             {
                 tag: "h3",
             },
             [
                 field1,
                 React.createElement(
-                    Vencord.Webpack.Common.Forms.FormText,
+                    Forms.FormText,
                     {},
                     asLink ? React.createElement(Link, { href: field2 }, linkLabel) : field2,
                 ),
