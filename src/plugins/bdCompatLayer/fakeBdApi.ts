@@ -570,7 +570,7 @@ class BdApiReImplementationInstance {
     Components = {
         get Tooltip() {
             return getGlobalApi().Webpack.getModule(
-                x => x.prototype.renderTooltip,
+                x => x && x.prototype && x.prototype.renderTooltip,
                 { searchExports: true }
             );
         },
