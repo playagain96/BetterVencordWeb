@@ -46,16 +46,18 @@ export const FakeEventEmitter = class {
     }
 };
 
-export const addDiscordModules = proxyUrl => {
+export const addDiscordModules = async proxyUrl => {
     const context = {
         get WebpackModules() {
             return window.BdApi.Webpack;
         }
     };
-    const ModuleDataText = simpleGET(
-        proxyUrl +
-        `https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/discordmodules.js`
-    ).responseText.replaceAll("\r", "");
+    // const ModuleDataText = simpleGET(
+    //     proxyUrl +
+    //     `https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/discordmodules.js`
+    // ).responseText.replaceAll("\r", "");
+    const request = await fetchWithCorsProxyFallback(`https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/discordmodules.js`, undefined, proxyUrl);
+    const ModuleDataText = (await request.text()).replaceAll("\r", "");
     const ev =
         "(" +
         ModuleDataText.split("export default Utilities.memoizeObject(")[1];
@@ -65,14 +67,16 @@ export const addDiscordModules = proxyUrl => {
     return { output: evalInScope(ev + "\n//# sourceURL=" + "betterDiscord://internal/DiscordModules.js", context), sourceBlobUrl: undefined };
 };
 
-export const addContextMenu = (DiscordModules, proxyUrl) => {
-    /**
-     * @type {string}
-     */
-    const ModuleDataText = simpleGET(
-        proxyUrl +
-        `https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/api/contextmenu.js`
-    ).responseText.replaceAll("\r", "");
+export const addContextMenu = async (DiscordModules, proxyUrl) => {
+    // /**
+    //  * @type {string}
+    //  */
+    // const ModuleDataText = simpleGET(
+    //     proxyUrl +
+    //     `https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/api/contextmenu.js`
+    // ).responseText.replaceAll("\r", "");
+    const request = await fetchWithCorsProxyFallback(`https://github.com/BetterDiscord/BetterDiscord/raw/${TARGET_HASH}/renderer/src/modules/api/contextmenu.js`, undefined, proxyUrl);
+    const ModuleDataText = (await request.text()).replaceAll("\r", "");
     const context = {
         get WebpackModules() {
             return window.BdApi.Webpack;

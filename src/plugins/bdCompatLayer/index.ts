@@ -315,15 +315,17 @@ const thePlugin = {
             };
         })();
 
-        const DiscordModulesInjectorOutput = addDiscordModules(proxyUrl);
-        const DiscordModules = DiscordModulesInjectorOutput.output;
-        Patcher.setup(DiscordModules);
-        // windowBdCompatLayer.discordModulesBlobUrl = DiscordModulesInjectorOutput.sourceBlobUrl;
-
-        const ContextMenuInjectorOutput = addContextMenu(DiscordModules, proxyUrl);
-        const ContextMenu = ContextMenuInjectorOutput.output;
-        // windowBdCompatLayer.contextMenuBlobUrl = ContextMenuInjectorOutput.sourceBlobUrl;
-        BdApiReImplementation.ContextMenu = ContextMenu;
+        const injectedAndPatched = new Promise<void>((resolve, reject) => {
+            addDiscordModules(proxyUrl).then(DiscordModulesInjectorOutput => {
+                const DiscordModules = DiscordModulesInjectorOutput.output;
+                Patcher.setup(DiscordModules);
+                addContextMenu(DiscordModules, proxyUrl).then(ContextMenuInjectorOutput => {
+                    const ContextMenu = ContextMenuInjectorOutput.output;
+                    BdApiReImplementation.ContextMenu = ContextMenu;
+                    resolve();
+                }, reject);
+            }, reject);
+        });
 
         const fakeLoading = document.createElement("span");
         fakeLoading.style.display = "none";
@@ -338,7 +340,7 @@ const thePlugin = {
         //     if (window.BdApi.ReqImpl.fs === undefined)
         //         return;
         //     clearInterval(checkInterval);
-        windowBdCompatLayer.fsReadyPromise.promise.then(() => {
+        Promise.all([windowBdCompatLayer.fsReadyPromise.promise, injectedAndPatched]).then(() => {
             windowBdCompatLayer.Router?.listeners.add(windowBdCompatLayer.mainRouterListener);
             const observer = new MutationObserver(mutations => mutations.forEach(m => window.GeneratedPlugins.forEach(p => BdApiReImplementation.Plugins.isEnabled(p.name) && p.instance.observer?.(m))));
             observer.observe(document, {
