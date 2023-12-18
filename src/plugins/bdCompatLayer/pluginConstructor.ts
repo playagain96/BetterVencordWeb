@@ -124,51 +124,50 @@ const pluginSettingsModalCreator = (props, name: string, child) => {
 };
 
 function openSettingsModalForPlugin(final: AssembledBetterDiscordPlugin) {
-    openModal(props => {
-        // let el = final.instance.getSettingsPanel();
-        // if (el instanceof Node) {
-        //     el = Vencord.Webpack.Common.React.createElement("div", { dangerouslySetInnerHTML: { __html: el.outerHTML } });
-        // }
-        const panel = final.instance.getSettingsPanel!();
-        let child: typeof panel | React.ReactElement = panel;
-        if (panel instanceof Node || typeof panel === "string")
-            child = class ReactWrapper extends React.Component {
-                elementRef: React.RefObject<Node>;
-                element: Node | string;
-                constructor(props: {}) {
-                    super(props);
-                    this.elementRef = React.createRef<Node>();
-                    this.element = panel as Node | string;
-                    this.state = { hasError: false };
-                }
+    // let el = final.instance.getSettingsPanel();
+    // if (el instanceof Node) {
+    //     el = Vencord.Webpack.Common.React.createElement("div", { dangerouslySetInnerHTML: { __html: el.outerHTML } });
+    // }
+    const panel = final.instance.getSettingsPanel!();
+    let child: typeof panel | React.ReactElement = panel;
+    if (panel instanceof Node || typeof panel === "string")
+        child = class ReactWrapper extends React.Component {
+            elementRef: React.RefObject<Node>;
+            element: Node | string;
+            constructor(props: {}) {
+                super(props);
+                this.elementRef = React.createRef<Node>();
+                this.element = panel as Node | string;
+                this.state = { hasError: false };
+            }
 
-                componentDidCatch() {
-                    this.setState({ hasError: true });
-                }
+            componentDidCatch() {
+                this.setState({ hasError: true });
+            }
 
-                componentDidMount() {
-                    if (this.element instanceof Node)
-                        this.elementRef.current?.appendChild(
-                            this.element
-                        );
-                }
+            componentDidMount() {
+                if (this.element instanceof Node)
+                    this.elementRef.current?.appendChild(
+                        this.element
+                    );
+            }
 
-                render() {
-                    if ((this.state as any).hasError) return null;
-                    const props = {
-                        className: "bd-addon-settings-wrap",
-                        ref: this.elementRef,
+            render() {
+                if ((this.state as any).hasError) return null;
+                const props = {
+                    className: "bd-addon-settings-wrap",
+                    ref: this.elementRef,
+                };
+                if (typeof this.element === "string")
+                    (props as any).dangerouslySetInnerHTML = {
+                        __html: this.element,
                     };
-                    if (typeof this.element === "string")
-                        (props as any).dangerouslySetInnerHTML = {
-                            __html: this.element,
-                        };
-                    return React.createElement("div", props);
-                }
-            };
-        if (typeof child === "function")
-            child = React.createElement(child);
-
+                return React.createElement("div", props);
+            }
+        };
+    if (typeof child === "function")
+        child = React.createElement(child);
+    openModal(props => {
         return pluginSettingsModalCreator(props, final.name, child as React.ReactElement);
     });
 }
