@@ -205,29 +205,36 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
 
     let metaEndLine = 0;
     function generateMeta() {
-        const metadata = BetterDiscordPlugin
-            .split("/**")[1]
-            .split("*/")[0]
-            .replaceAll("\n", "")
-            .split("*")
-            .filter(x => x !== "" && x !== " ");
-        metaEndLine = metadata.length + 3;
-        for (let i = 0; i < metadata.length; i++) {
-            const element = metadata[i].trim();
-            if (element.startsWith("@name")) {
-                final.name = element.split("@name")[1].trim();
-                final.id = final.name || window.require("path").basename(filename); // what?
-            } else if (element.startsWith("@description")) {
-                final.description = element.split("@description ")[1];
-            } else if (element.startsWith("@authorId")) {
-                final.authors[0].id = Number(
-                    element.split("@authorId ")[1] + "n"
-                );
-            } else if (element.startsWith("@author")) {
-                final.authors[0].name = element.split("@author ")[1];
-                // eslint-disable-next-line eqeqeq
-            } else if (element != "" && element.length > 2)
-                final[element.split("@")[1].split(" ")[0]] = element.substring(element.split("@")[1].split(" ")[0].length + 2);
+        let lastSuccessfulMetaLine = 0;
+        try {
+            const metadata = BetterDiscordPlugin
+                .split("/**")[1]
+                .split("*/")[0]
+                .replaceAll("\n", "")
+                .split("*")
+                .filter(x => x !== "" && x !== " ");
+            metaEndLine = metadata.length + 3;
+            for (let i = 0; i < metadata.length; i++) {
+                const element = metadata[i].trim();
+                if (element.startsWith("@name")) {
+                    final.name = element.split("@name")[1].trim();
+                    final.id = final.name || window.require("path").basename(filename); // what?
+                } else if (element.startsWith("@description")) {
+                    final.description = element.split("@description ")[1];
+                } else if (element.startsWith("@authorId")) {
+                    final.authors[0].id = Number(
+                        element.split("@authorId ")[1] + "n"
+                    );
+                } else if (element.startsWith("@author")) {
+                    final.authors[0].name = element.split("@author ")[1];
+                    // eslint-disable-next-line eqeqeq
+                } else if (element != "" && element.length > 2)
+                    final[element.split("@")[1].split(" ")[0]] = element.substring(element.split("@")[1].split(" ")[0].length + 2);
+                lastSuccessfulMetaLine = i;
+            }
+        } catch (error) {
+            console.error("Something snapped during parsing of meta for file:", filename, `The error got triggered after ${lastSuccessfulMetaLine}-nth line of meta`, "The error was:", error);
+            throw error; // let the caller handle this >:)
         }
     }
 
