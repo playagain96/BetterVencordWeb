@@ -21,9 +21,9 @@ import { Settings } from "@api/Settings";
 
 import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
+import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { docCreateElement } from "./utils";
-import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 
 class PatcherWrapper {
     #label;
@@ -604,6 +604,9 @@ class BdApiReImplementationInstance {
     }
     findModule(filter) {
         return this.Webpack.getModule(filter);
+    }
+    findAllModule(filter) {
+        return this.Webpack.getModule(filter, { first: false });
     }
     suppressErrors(method, message = "") {
         return (...params) => {
