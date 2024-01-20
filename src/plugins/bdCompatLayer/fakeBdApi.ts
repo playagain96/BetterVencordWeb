@@ -605,101 +605,101 @@ class BdApiReImplementationInstance {
     findModule(filter) {
         return this.Webpack.getModule(filter);
     }
-    findAllModules(filter: lambda)) {
-    return this.Webpack.getModule(filter, { first: false });
-}
-suppressErrors(method, message = "") {
-    return (...params) => {
-        try {
-            return method(...params);
-        } catch (err) {
-            console.error(err, `Error occured in ${message}`);
-        }
-    };
-}
+    findAllModules(filter) {
+        return this.Webpack.getModule(filter, { first: false });
+    }
+    suppressErrors(method, message = "") {
+        return (...params) => {
+            try {
+                return method(...params);
+            } catch (err) {
+                console.error(err, `Error occured in ${message}`);
+            }
+        };
+    }
     get monkeyPatch() { return BdApi_monkeyPatch; }
     get Data() {
-    return this.#data;
-}
+        return this.#data;
+    }
     get loadData() {
-    return this.Data.load.bind(this.Data);
-}
+        return this.Data.load.bind(this.Data);
+    }
     get saveData() {
-    return this.Data.save.bind(this.Data);
-}
+        return this.Data.save.bind(this.Data);
+    }
     get setData() {
-    return this.Data.save.bind(this.Data);
-}
+        return this.Data.save.bind(this.Data);
+    }
     get getData() {
-    return this.Data.load.bind(this.Data);
-}
+        return this.Data.load.bind(this.Data);
+    }
     readonly Utils = {
-    findInTree(tree, searchFilter, options = {}) {
-        const { walkable = null, ignore = [] } = options as { walkable: string[], ignore: string[]; };
+        findInTree(tree, searchFilter, options = {}) {
+            const { walkable = null, ignore = [] } = options as { walkable: string[], ignore: string[]; };
 
-        function findInObject(obj) {
-            for (const key in obj) {
-                if (ignore.includes(key)) continue;
-                const value = obj[key];
+            function findInObject(obj) {
+                for (const key in obj) {
+                    if (ignore.includes(key)) continue;
+                    const value = obj[key];
 
-                if (searchFilter(value)) return value;
+                    if (searchFilter(value)) return value;
 
-                if (typeof value === "object" && value !== null) {
-                    const result = findInObject(value);
+                    if (typeof value === "object" && value !== null) {
+                        const result = findInObject(value);
+                        if (result !== undefined) return result;
+                    }
+                }
+                return undefined;
+            }
+
+            if (typeof searchFilter === "string") return tree?.[searchFilter];
+            if (searchFilter(tree)) return tree;
+
+            if (Array.isArray(tree)) {
+                for (const value of tree) {
+                    const result = this.findInTree(value, searchFilter, { walkable, ignore });
+                    if (result !== undefined) return result;
+                }
+            } else if (typeof tree === "object" && tree !== null) {
+                const keysToWalk = walkable || Object.keys(tree);
+                for (const key of keysToWalk) {
+                    if (tree[key] === undefined) continue;
+                    const result = this.findInTree(tree[key], searchFilter, { walkable, ignore });
                     if (result !== undefined) return result;
                 }
             }
+
             return undefined;
         }
-
-        if (typeof searchFilter === "string") return tree?.[searchFilter];
-        if (searchFilter(tree)) return tree;
-
-        if (Array.isArray(tree)) {
-            for (const value of tree) {
-                const result = this.findInTree(value, searchFilter, { walkable, ignore });
-                if (result !== undefined) return result;
-            }
-        } else if (typeof tree === "object" && tree !== null) {
-            const keysToWalk = walkable || Object.keys(tree);
-            for (const key of keysToWalk) {
-                if (tree[key] === undefined) continue;
-                const result = this.findInTree(tree[key], searchFilter, { walkable, ignore });
-                if (result !== undefined) return result;
-            }
-        }
-
-        return undefined;
-    }
-};
-    get UI() {
-    return UIHolder;
-}
-    get Net() {
-    return {
-        fetch: (url: string, options) => { return fetchWithCorsProxyFallback(url, options, Settings.plugins[PLUGIN_NAME].corsProxyUrl); },
     };
-}
-alert(title, content) {
-    UIHolder.showConfirmationModal(title, content, { cancelText: null });
-}
-showToast(content, toastType = 1) {
-    UIHolder.showToast(content, toastType);
-}
-showNotice(content, settings = {}) {
-    UIHolder.showNotice(content, settings);
-}
-showConfirmationModal(title, content, settings = {}) {
-    UIHolder.showConfirmationModal(title, content, settings);
-}
+    get UI() {
+        return UIHolder;
+    }
+    get Net() {
+        return {
+            fetch: (url: string, options) => { return fetchWithCorsProxyFallback(url, options, Settings.plugins[PLUGIN_NAME].corsProxyUrl); },
+        };
+    }
+    alert(title, content) {
+        UIHolder.showConfirmationModal(title, content, { cancelText: null });
+    }
+    showToast(content, toastType = 1) {
+        UIHolder.showToast(content, toastType);
+    }
+    showNotice(content, settings = {}) {
+        UIHolder.showNotice(content, settings);
+    }
+    showConfirmationModal(title, content, settings = {}) {
+        UIHolder.showConfirmationModal(title, content, settings);
+    }
     get DOM() {
-    return this.#dom;
-}
+        return this.#dom;
+    }
 }
 
 function assignToGlobal() {
     const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
-    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors"];
+    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors"];
     const settersToSet = ["ContextMenu"];
     for (let index = 0; index < gettersToSet.length; index++) {
         const element = gettersToSet[index];
