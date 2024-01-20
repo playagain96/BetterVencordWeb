@@ -605,7 +605,7 @@ class BdApiReImplementationInstance {
     findModule(filter) {
         return this.Webpack.getModule(filter);
     }
-    findAllModule(filter) {
+    findAllModules(filter) {
         return this.Webpack.getModule(filter, { first: false });
     }
     suppressErrors(method, message = "") {
