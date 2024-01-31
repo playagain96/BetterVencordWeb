@@ -14,7 +14,7 @@ import { ReviewDBAuth } from "./entities";
 
 const DATA_STORE_KEY = "rdb-auth";
 
-const OAuth = findByPropsLazy("OAuth2AuthorizeModal");
+const { OAuth2AuthorizeModal } = findByPropsLazy("OAuth2AuthorizeModal");
 
 export let Auth: ReviewDBAuth = {};
 
@@ -46,7 +46,7 @@ export async function updateAuth(newAuth: ReviewDBAuth) {
 
 export function authorize(callback?: any) {
     openModal(props =>
-        <OAuth.OAuth2AuthorizeModal
+        <OAuth2AuthorizeModal
             {...props}
             scopes={["identify"]}
             responseType="code"
@@ -61,14 +61,17 @@ export function authorize(callback?: any) {
                     const res = await fetch(url, {
                         headers: new Headers({ Accept: "application/json" })
                     });
-                    const { token, success } = await res.json();
-                    if (success) {
-                        updateAuth({ token });
-                        showToast("Successfully logged in!");
-                        callback?.();
-                    } else if (res.status === 1) {
-                        showToast("An Error occurred while logging in.", Toasts.Type.FAILURE);
+
+                    if (!res.ok) {
+                        const { message } = await res.json();
+                        showToast(message || "An error occured while authorizing", Toasts.Type.FAILURE);
+                        return;
                     }
+
+                    const { token } = await res.json();
+                    updateAuth({ token });
+                    showToast("Successfully logged in!", Toasts.Type.SUCCESS);
+                    callback?.();
                 } catch (e) {
                     new Logger("ReviewDB").error("Failed to authorize", e);
                 }
