@@ -19,11 +19,11 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
+import { Button, React } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants.js";
 import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
-import { Button, React } from "@webpack/common";
 
 export type AssembledBetterDiscordPlugin = {
     started: boolean;

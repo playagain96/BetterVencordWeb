@@ -18,12 +18,12 @@
 
 "use strict";
 /* eslint-disable eqeqeq */
-import { Devs } from "@utils/constants";
-import definePlugin, { OptionType, PluginDef } from "@utils/types";
 // import { readFileSync } from "fs";
 // const process = require("~process");
-
 import { Settings } from "@api/Settings";
+import { Devs } from "@utils/constants";
+import definePlugin, { OptionType, PluginDef } from "@utils/types";
+import { Clipboard } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants";
 import { createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
@@ -31,7 +31,6 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxy
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
-import { Clipboard } from "@webpack/common";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -216,7 +215,8 @@ const thePlugin = {
                         }));
                     });
                     cb(ev);
-                    fetchResponse.catch((reason) => {
+                    fetchResponse.catch(reason => {
+                        // eslint-disable-next-line dot-notation
                         if (ev2.callbacks["error"]) // https://nodejs.org/api/http.html#class-httpclientrequest "For backward compatibility, res will only emit 'error' if there is an 'error' listener registered."
                             ev2.emit("error", reason);
                     });
