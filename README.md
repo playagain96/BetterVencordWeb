@@ -59,6 +59,10 @@ We will pull changes from upstream, so if you want to make a plugin for Vencord 
 Discord is trademark of Discord Inc. and solely mentioned for the sake of descriptivity.
 Mention of it does not imply any affiliation with or endorsement by Discord Inc.
 
+## Read this....
+For people who don't see it. Before you can *actually* use BetterVencord for the purpose of running BetterDiscord plugins on Vencord, You actually have to enable the compatibility layer for any BetterDiscord plugin to work.
+***BD Compatibility Layer*** is a plugin that is ***NEEDED*** for BetterVencord to actually ***run*** BetterDiscord plugins.
+
 <details>
 <summary>Using Vencord violates Discord's terms of service</summary>
 
