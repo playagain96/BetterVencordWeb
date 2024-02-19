@@ -155,7 +155,7 @@ export const WebpackHolder = {
         );
     },
     getByStringsOptimal(...strings) {
-        return module => {
+        return this.getModule(module => {
             if (!module?.toString || typeof (module?.toString) !== "function") return; // Not stringable
             let moduleString = "";
             try { moduleString = module?.toString([]); }
@@ -165,16 +165,15 @@ export const WebpackHolder = {
                 if (!moduleString.includes(s)) return false;
             }
             return true;
-        };
+        });
     },
     getByStrings(...strings) {
-        return module => {
+        return this.getModule(module => {
             const moduleString = module?.toString([]) || "";
             if (!moduleString) return false; // Could not create string
 
             return strings.every(s => moduleString.includes(s));
-        };
-
+        });
     },
     findByUniqueProperties(props, first = true) {
         return first
