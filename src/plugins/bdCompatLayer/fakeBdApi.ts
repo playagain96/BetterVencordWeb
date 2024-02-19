@@ -101,8 +101,16 @@ export const WebpackHolder = {
                 );
             };
         },
-        get byStrings() {
-            return WebpackHolder.getByStrings;
+        // get byStrings() {
+        //     return WebpackHolder.getByStrings;
+        // }
+        byStrings(...strings) {
+            return module => {
+                const moduleString = module?.toString([]) || "";
+                if (!moduleString) return false; // Could not create string
+
+                return strings.every(s => moduleString.includes(s));
+            };
         }
     },
     getModule: BdApi_getModule,
@@ -155,7 +163,7 @@ export const WebpackHolder = {
         );
     },
     getByStringsOptimal(...strings) {
-        return this.getModule(module => {
+        return module => {
             if (!module?.toString || typeof (module?.toString) !== "function") return; // Not stringable
             let moduleString = "";
             try { moduleString = module?.toString([]); }
@@ -165,15 +173,10 @@ export const WebpackHolder = {
                 if (!moduleString.includes(s)) return false;
             }
             return true;
-        });
+        };
     },
     getByStrings(...strings) {
-        return this.getModule(module => {
-            const moduleString = module?.toString([]) || "";
-            if (!moduleString) return false; // Could not create string
-
-            return strings.every(s => moduleString.includes(s));
-        });
+        return this.getModule(this.Filters.byStrings(strings));
     },
     findByUniqueProperties(props, first = true) {
         return first
