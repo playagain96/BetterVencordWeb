@@ -106,9 +106,10 @@ const thePlugin = {
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
         // const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
         const proxyUrl = Settings.plugins[this.name].corsProxyUrl ?? this.options.corsProxyUrl.default;
+        // eslint-disable-next-line no-prototype-builtins
         if (!Settings.plugins[this.name].hasOwnProperty("pluginsStatus")) {
             Settings.plugins[this.name].pluginsStatus = this.options.pluginsStatus.default;
-        };
+        }
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
         fetch(
             proxyUrl +
