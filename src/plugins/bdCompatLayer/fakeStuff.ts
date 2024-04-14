@@ -16,7 +16,7 @@
  * along with this program.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-import { addLogger, evalInScope, findFirstLineWithoutX, simpleGET } from "./utils";
+import { addLogger, evalInScope, findFirstLineWithoutX } from "./utils";
 
 export const TARGET_HASH = "b62deff1407c52bda5415a2d464de9566a78e4f4";
 

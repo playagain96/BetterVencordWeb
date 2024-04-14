@@ -122,6 +122,7 @@ function makeTab() {
                                         const selected = ref.current.split("fs-")[1];
                                         const parsed: { dir: string, base: string; } = window.require("path").parse(selected);
                                         parsed.dir = parsed.dir.startsWith("//") ? parsed.dir.slice(1) : parsed.dir;
+                                        // eslint-disable-next-line eqeqeq
                                         const foundOrNot = getGlobalApi().Plugins.getAll().find(x => x.sourcePath == parsed.dir && x.filename == parsed.base);
                                         // if (!foundOrNot) {
                                         //     const converted = convertPlugin(window.require("fs").readFileSync(selected, "utf8"), parsed.base, true, parsed.dir);
@@ -183,7 +184,16 @@ function makeTab() {
                     <Button size={Button.Sizes.SMALL} onClick={async () => await FSUtils.importFile("//BD/plugins", true, true, ".js")}>
                         Import Bulk Plugins
                     </Button>
-                    <Forms.FormText>Size of `/`: {((FSUtils.getDirectorySize("/") / 1024) / 1024).toFixed(2)} MB</Forms.FormText>
+                    <Forms.FormText>Size of `/`: {
+                        (() => {
+                            try {
+                                return ((FSUtils.getDirectorySize("/") / 1024) / 1024).toFixed(2);
+                            } catch (error) {
+                                console.error("This error probably indicates filesystem breakage...", error);
+                                return "ERROR, CHECK CONSOLE";
+                            }
+                        })()
+                    } MB</Forms.FormText>
                 </React.Fragment>
             </Card>
         </Forms.FormSection>
