@@ -293,8 +293,8 @@ export const UIHolder = {
         const Colors = {
             BRAND: getGlobalApi().findModuleByProps("colorBrand").colorBrand
         };
-        const ConfirmationModal = getGlobalApi().Webpack.getModule(m => m?.toString?.()?.includes(".confirmButtonColor"), { searchExports: true });
-        const { openModal } = getGlobalApi().findModuleByProps("openModal");
+        const ConfirmationModal = getGlobalApi().Webpack.getModule(x => x.ConfirmModal).ConfirmModal;
+        const { openModal } = getGlobalApi().Webpack.getModule(x => x.closeModal && x.openModal && x.hasModalOpen && !x.Anchor);
 
         const {
             confirmText = settings.confirmText || "Confirm",
