@@ -77,6 +77,24 @@ function makeTab() {
                         findInTree(baseNode, x => x.id === ref.current)?.fetchChildren();
                     },
                 },
+                findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable && {
+                    label: "Remove directory and all subdirectories",
+                    color: "danger",
+                    action: () => {
+                        getGlobalApi().UI.showConfirmationModal(
+                            "Confirm your action",
+                            `Are you sure you want to delete ${findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.label} and all of it's children? This cannot be undone.`,
+                            {
+                                confirmText: "Yes",
+                                cancelText: "No",
+                                onConfirm: () => {
+                                    FSUtils.removeDirectoryRecursive(ref.current.split("fs-")[1]);
+                                },
+                                onCancel: () => undefined
+                            }
+                        );
+                    },
+                },
                 (!findInTree(baseNode, x => x.expandable === true && x.id === ref.current)?.expandable) && {
                     label: "Export file",
                     action: async () => {
