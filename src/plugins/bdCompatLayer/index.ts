@@ -23,7 +23,7 @@
 import { Settings } from "@api/Settings";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginDef } from "@utils/types";
-import { Clipboard } from "@webpack/common";
+import { Clipboard, React } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants";
 import { createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
@@ -92,6 +92,13 @@ const thePlugin = {
             default: "",
             restartNeeded: true,
         },
+        pluginsStatus: {
+            default: {},
+            type: OptionType.COMPONENT,
+            component() {
+                return React.createElement("div");
+            }
+        }
     },
     originalBuffer: {},
     start() {
@@ -99,6 +106,9 @@ const thePlugin = {
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
         // const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
         const proxyUrl = Settings.plugins[this.name].corsProxyUrl ?? this.options.corsProxyUrl.default;
+        if (!Settings.plugins[this.name].hasOwnProperty("pluginsStatus")) {
+            Settings.plugins[this.name].pluginsStatus = this.options.pluginsStatus.default;
+        };
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
         fetch(
             proxyUrl +

@@ -441,13 +441,13 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     // }
     const startFunction = function (this: AssembledBetterDiscordPlugin) {
         const compatLayerSettings = Vencord.Settings.plugins[PLUGIN_NAME];
-        compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
+        // compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
         compatLayerSettings.pluginsStatus[this.name] = true;
         this.instance.start();
     };
     const stopFunction = function (this: AssembledBetterDiscordPlugin) {
         const compatLayerSettings = Vencord.Settings.plugins[PLUGIN_NAME];
-        compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
+        // compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
         compatLayerSettings.pluginsStatus[this.name] = false;
         this.instance.stop();
     };
@@ -463,8 +463,8 @@ export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlu
     Vencord.Plugins.plugins[generated.name] = generated as Plugin;
     Vencord.Settings.plugins[generated.name].enabled = false;
 
-    const compatLayerSettings = Vencord.Settings.plugins[PLUGIN_NAME];
-    compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
+    const compatLayerSettings = Vencord.PlainSettings.plugins[PLUGIN_NAME];
+    // compatLayerSettings.pluginsStatus = compatLayerSettings.pluginsStatus ?? {};
     if (generatedPlugin.name in compatLayerSettings.pluginsStatus) {
         const thePluginStatus = compatLayerSettings.pluginsStatus[generatedPlugin.name];
         Vencord.Settings.plugins[generated.name].enabled = thePluginStatus;
