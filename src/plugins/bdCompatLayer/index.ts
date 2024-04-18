@@ -327,6 +327,12 @@ const thePlugin = {
         const injectedAndPatched = new Promise<void>((resolve, reject) => {
             addDiscordModules(proxyUrl).then(DiscordModulesInjectorOutput => {
                 const DiscordModules = DiscordModulesInjectorOutput.output;
+                const makeOverrideOriginal = Patcher.makeOverride;
+                Patcher.makeOverride = function makeOverride(...args) {
+                    const ret = makeOverrideOriginal.call(this, ...args);
+                    Object.defineProperty(ret, "name", { value: "BDPatcher" });
+                    return ret;
+                };
                 Patcher.setup(DiscordModules);
                 addContextMenu(DiscordModules, proxyUrl).then(ContextMenuInjectorOutput => {
                     const ContextMenu = ContextMenuInjectorOutput.output;

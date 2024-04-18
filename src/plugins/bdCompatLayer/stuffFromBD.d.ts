@@ -25,4 +25,5 @@ export declare class Patcher {
     static getPatchesByCaller(...args): any;
     static unpatchAll(...args): any;
     static setup(DiscordModules: any): void;
+    static makeOverride(patch: any): (...args: any[]) => any;
 }
