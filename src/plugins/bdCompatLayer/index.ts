@@ -93,6 +93,7 @@ const thePlugin = {
             restartNeeded: true,
         },
         pluginsStatus: {
+            description: "",
             default: {},
             type: OptionType.COMPONENT,
             component() {
