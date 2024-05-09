@@ -694,6 +694,9 @@ class BdApiReImplementationInstance {
     showConfirmationModal(title, content, settings = {}) {
         UIHolder.showConfirmationModal(title, content, settings);
     }
+    get injectCSS() {
+        return DOMHolder.addStyle;
+    }
     get DOM() {
         return this.#dom;
     }
@@ -701,7 +704,7 @@ class BdApiReImplementationInstance {
 
 function assignToGlobal() {
     const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
-    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors"];
+    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS"];
     const settersToSet = ["ContextMenu"];
     for (let index = 0; index < gettersToSet.length; index++) {
         const element = gettersToSet[index];
