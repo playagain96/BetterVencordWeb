@@ -118,6 +118,7 @@ const thePlugin = {
         )
             .then(out => out.text())
             .then(out2 => {
+                out2 += "\n//# sourceURL=betterDiscord://internal/BrowserFs.js";
                 eval.call(
                     window,
                     out2.replaceAll(
