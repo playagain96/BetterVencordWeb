@@ -63,7 +63,11 @@ export type AssembledBetterDiscordPlugin = {
 const modalStuff = {
     mc_: undefined,
     TextElement_: undefined,
-    get mc() { return this.mc_ ??= getGlobalApi().Webpack.getByProps("Header", "Footer"); },
+    get mc() {
+        return this.mc_ ??= {
+            Sizes: getGlobalApi().Webpack.getModule(x => x.Modal && x.ModalFooter && !x.Anchor).ModalSize,
+        } as unknown as undefined;
+    },
     get TextElement() { return this.TextElement_ ??= getGlobalApi().Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors); },
 };
 
