@@ -17,7 +17,7 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal, ModalSize } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { Button, React } from "@webpack/common";
 
@@ -61,13 +61,7 @@ export type AssembledBetterDiscordPlugin = {
 };
 
 const modalStuff = {
-    mc_: undefined,
     TextElement_: undefined,
-    get mc() {
-        return this.mc_ ??= {
-            Sizes: getGlobalApi().Webpack.getModule(x => x.Modal && x.ModalFooter && !x.Anchor).ModalSize,
-        } as unknown as undefined;
-    },
     get TextElement() { return this.TextElement_ ??= getGlobalApi().Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors); },
 };
 
@@ -79,11 +73,8 @@ const pluginSettingsModalCreator = (props, name: string, child) => {
             ModalRoot,
             Object.assign(
                 {
-                    size: modalStuff.mc.Sizes.MEDIUM,
-                    className:
-                        "bd-addon-modal" +
-                        " " +
-                        modalStuff.mc.Sizes.MEDIUM,
+                    size: ModalSize.MEDIUM,
+                    className: "bd-addon-modal"
                 },
                 props
             ),
