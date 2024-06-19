@@ -68,6 +68,12 @@ const thePlugin = {
             default: false,
             restartNeeded: true,
         },
+        safeMode: {
+            description: "Loads only filesystem",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
         pluginUrl1: {
             description: "Plugin url 1",
             type: OptionType.STRING,
@@ -158,8 +164,9 @@ const thePlugin = {
                         // ReImplementationObject.fs = temp.require("fs");
                         ReImplementationObject.fs = patchReadFileSync(patchMkdirSync(temp.require("fs")));
                         ReImplementationObject.path = temp.require("path");
-                        // @ts-ignore
-                        windowBdCompatLayer.fsReadyPromise.resolve();
+                        if (Settings.plugins[this.name].safeMode == undefined || Settings.plugins[this.name].safeMode == false)
+                            // @ts-ignore
+                            windowBdCompatLayer.fsReadyPromise.resolve();
                     }
                 );
             });
