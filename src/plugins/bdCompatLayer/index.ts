@@ -26,7 +26,7 @@ import definePlugin, { OptionType, PluginDef } from "@utils/types";
 import { Clipboard, React } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants";
-import { createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
+import { cleanupGlobal, createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
@@ -512,6 +512,7 @@ const thePlugin = {
         console.warn("Removing compat layer...");
         delete window.BdCompatLayer;
         console.warn("Removing BdApi...");
+        cleanupGlobal();
         delete window.BdApi;
         if (window.zip) {
             console.warn("Removing ZIP...");

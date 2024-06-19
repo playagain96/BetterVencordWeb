@@ -715,7 +715,15 @@ function assignToGlobal() {
         Object.defineProperty(BdApiReImplementationInstance, element, {
             get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element],
             set: setter,
+            configurable: true,
         });
+    }
+}
+export function cleanupGlobal() {
+    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS"];
+    for (let index = 0; index < gettersToSet.length; index++) {
+        const element = gettersToSet[index];
+        delete getGlobalApi()[element];
     }
 }
 type BdApiReImplementationGlobal = typeof BdApiReImplementationInstance & BdApiReImplementationInstance;
