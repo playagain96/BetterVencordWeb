@@ -24,6 +24,7 @@ import { Button, React } from "@webpack/common";
 import { PLUGIN_NAME } from "./constants.js";
 import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
+import { PluginMeta } from "~plugins";
 
 export type AssembledBetterDiscordPlugin = {
     started: boolean;
@@ -455,6 +456,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
 export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlugin) {
     const { GeneratedPlugins } = window;
     const generated = generatedPlugin;
+    PluginMeta[generated.name] = { userPlugin: true, folderName: `${generated.name}/${generated.filename}` };
     Vencord.Plugins.plugins[generated.name] = generated as Plugin;
     Vencord.Settings.plugins[generated.name].enabled = false;
 
@@ -483,6 +485,7 @@ export async function removeAllCustomPlugins() {
             if (currentStatus === true)
                 Vencord.Settings.plugins[PLUGIN_NAME].pluginsStatus[generated.name] = currentStatus;
         }
+        delete PluginMeta[generated.name];
         delete Vencord.Plugins.plugins[generated.name];
         // copyOfGeneratedPlugin.splice(copyOfGeneratedPlugin.indexOf(generated), 1);
         delete copyOfGeneratedPlugin[GeneratedPlugins.indexOf(generated)];
