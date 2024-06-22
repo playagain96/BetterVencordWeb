@@ -25,6 +25,7 @@ import { PLUGIN_NAME } from "./constants.js";
 import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
 import { PluginMeta } from "~plugins";
+import { DetailedReactHTMLElement } from "react";
 
 export type AssembledBetterDiscordPlugin = {
     started: boolean;
@@ -167,6 +168,19 @@ function openSettingsModalForPlugin(final: AssembledBetterDiscordPlugin) {
         return pluginSettingsModalCreator(props, final.name, child as React.ReactElement);
     });
 }
+
+const createOption = (tempOptions: { [x: string]: { type: OptionType; component: () => DetailedReactHTMLElement<{}, HTMLElement>; }; }, key: string | number, label: any, value: any, isUrl = false) => {
+    if (value && typeof value === "string") {
+        Object.defineProperty(tempOptions, key, {
+            value: {
+                type: OptionType.COMPONENT,
+                component: () => createTextForm(label, value, isUrl),
+            },
+            enumerable: true,
+            writable: true,
+        });
+    }
+};
 
 export async function convertPlugin(BetterDiscordPlugin: string, filename: string, detectDuplicateName: boolean = false, sourcePath = "") {
     const final = {} as AssembledBetterDiscordPlugin;
@@ -357,76 +371,25 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         throw new Error("Incomplete plugin");
     }
 
-    final.options = {
-        versionLabel: {
-            type: OptionType.COMPONENT,
-            component: () => createTextForm("Version", final.version),
-        },
-        ...final.options,
+    const tempOptions = {};
+    tempOptions["versionLabel"] = {
+        type: OptionType.COMPONENT,
+        component: () => createTextForm("Version", final.version),
     };
-    if (final.invite && typeof final.invite === "string") {
-        final.options = {
-            inviteLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Author's Server", "https://discord.gg/" + final.invite, true),
-            },
-            ...final.options,
-        };
+    createOption(tempOptions, "inviteLabel", "Author's Server", `https://discord.gg/${final.invite}`, true);
+    createOption(tempOptions, "sourceLabel", "Plugin Source", final.source, true);
+    createOption(tempOptions, "websiteLabel", "Plugin's Website", final.website, true);
+    createOption(tempOptions, "authorLabel", "Author's Website", final.authorLink, true);
+    createOption(tempOptions, "donateLabel", "Author's Donation", final.donate, true);
+    createOption(tempOptions, "patreonLabel", "Author's Patreon", final.patreon, true);
+    createOption(tempOptions, "authorsLabel", "Author", final.authors[0]?.name);
+    final.options = { ...tempOptions, ...final.options };
+    for (let prop in tempOptions) {
+        if (tempOptions.hasOwnProperty(prop)) {
+            tempOptions[prop] = null;
+        }
     }
-    if (final.source && typeof final.source === "string") {
-        final.options = {
-            sourceLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Plugin Source", final.source, true),
-            },
-            ...final.options,
-        };
-    }
-    if (final.website && typeof final.website === "string") {
-        final.options = {
-            websiteLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Plugin's Website", final.website, true),
-            },
-            ...final.options,
-        };
-    }
-    if (final.authorLink && typeof final.authorLink === "string") {
-        final.options = {
-            authorLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Author's Website", final.authorLink, true),
-            },
-            ...final.options,
-        };
-    }
-    if (final.donate && typeof final.donate === "string") {
-        final.options = {
-            donateLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Author's Donation", final.donate, true),
-            },
-            ...final.options,
-        };
-    }
-    if (final.patreon && typeof final.patreon === "string") {
-        final.options = {
-            patreonLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Author's Patreon", final.patreon, true),
-            },
-            ...final.options,
-        };
-    }
-    if (final.authors[0].name && typeof final.authors[0].name === "string") {
-        final.options = {
-            authorsLabel: {
-                type: OptionType.COMPONENT,
-                component: () => createTextForm("Author", final.authors[0].name),
-            },
-            ...final.options,
-        };
-    }
+    Object.assign(tempOptions, {});
 
     // if (final.instance.getAuthor)
     //     final.authors[0].id = final.instance.getAuthor();
