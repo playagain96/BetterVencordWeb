@@ -466,11 +466,11 @@ export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlu
         const thePluginStatus = compatLayerSettings.pluginsStatus[generatedPlugin.name];
         Vencord.Settings.plugins[generated.name].enabled = thePluginStatus;
         if (thePluginStatus === true)
-            Vencord.Plugins.startPlugin(generated as Plugin);
+            Vencord.Plugins.startPlugin(Vencord.Plugins.plugins[generated.name]);
     }
     // Vencord.Settings.plugins[generated.name].enabled = true;
     // Vencord.Plugins.startPlugin(generated as Plugin);
-    GeneratedPlugins.push(generated);
+    GeneratedPlugins.push(Vencord.Plugins.plugins[generated.name]);
 }
 
 export async function removeAllCustomPlugins() {
