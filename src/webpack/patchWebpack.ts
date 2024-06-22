@@ -172,24 +172,6 @@ function patchPush(webpackGlobal: any) {
             handlePush.$$vencordOriginal = v;
         }
     });
-
-    // is it good to place it here?
-    // webpackGlobal.push([[Symbol()], {}, require => {
-    //     require.d = (target, exports) => {
-    //         for (const key in exports) {
-    //             // if (!Reflect.has(exports, key) || target[key]) continue;
-    //             // if (!Reflect.has(exports, key) || target[key]) continue;
-    //
-    //             Object.defineProperty(target, key, {
-    //                 get: () => exports[key](),
-    //                 set: v => { exports[key] = () => v; },
-    //                 enumerable: true,
-    //                 configurable: true
-    //             });
-    //         }
-    //     };
-    // }]);
-    // webpackGlobal.pop();
 }
 
 let webpackNotInitializedLogged = false;
@@ -210,6 +192,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
                 return void originalMod(module, exports, require);
             }
+
             require.d = (target, exports) => {
                 for (const key in exports) {
                     // if (!Reflect.has(exports, key) || target[key]) continue;
