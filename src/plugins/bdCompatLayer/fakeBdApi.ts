@@ -162,6 +162,9 @@ export const WebpackHolder = {
             {}
         );
     },
+    get getByPrototypeKeys() {
+        return this.getByPrototypes;
+    },
     getByStringsOptimal(...strings) {
         return module => {
             if (!module?.toString || typeof (module?.toString) !== "function") return; // Not stringable
