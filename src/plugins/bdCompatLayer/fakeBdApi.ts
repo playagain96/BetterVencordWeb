@@ -297,7 +297,7 @@ export const UIHolder = {
             BRAND: getGlobalApi().findModuleByProps("colorBrand").colorBrand
         };
         const ConfirmationModal = getGlobalApi().Webpack.getModule(x => x.ConfirmModal).ConfirmModal;
-        const { openModal } = getGlobalApi().Webpack.getModule(x => x.closeModal && x.openModal && x.hasModalOpen && !x.Anchor);
+        const { openModal } = getGlobalApi().Webpack.getModule(x => x.closeModal && x.openModal && x.hasModalOpen);
 
         const {
             confirmText = settings.confirmText || "Confirm",
@@ -313,7 +313,8 @@ export const UIHolder = {
             color: "white",
         };
 
-        const whiteTextContent = getGlobalApi().React.createElement("div", { style: whiteTextStyle }, content);
+        const React = getGlobalApi().React;
+        const whiteTextContent = React.createElement("div", { style: whiteTextStyle }, content);
 
         moreReact.push(whiteTextContent);
         // moreReact.push(...extraReact) // IM ADDING MORE DIV POSSIBILITESS !!!!
@@ -339,7 +340,7 @@ export const UIHolder = {
             moreReact.push(reactElement);
         });
 
-        openModal(props => getGlobalApi().React.createElement(ConfirmationModal, Object.assign({
+        openModal(props => React.createElement(ConfirmationModal, Object.assign({
             header: title,
             confirmButtonColor: Colors.BRAND,
             confirmText: confirmText,
