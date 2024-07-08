@@ -31,6 +31,7 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxy
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { PluginMeta } from "~plugins";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -303,6 +304,17 @@ const thePlugin = {
         };
         const BdApiReImplementation = createGlobalBdApi();
         window.BdApi = BdApiReImplementation;
+        if (PluginMeta[PLUGIN_NAME].userPlugin === true) {
+            BdApiReImplementation.UI.showConfirmationModal("Error", "BD Compatibility Layer will not work as a user plugin!", { cancelText: null, onCancel: null });
+            console.warn("Removing settings tab...");
+            unInjectSettingsTab();
+            console.warn("Removing compat layer...");
+            delete window.BdCompatLayer;
+            console.warn("Removing BdApi...");
+            cleanupGlobal();
+            delete window.BdApi;
+            throw new Error("BD Compatibility Layer will not work as a user plugin!");
+        }
         window // Talk about being tedious
             .nuhuh = // Why the hell did vencord not expose process??
             (bool = true) => {
