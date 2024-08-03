@@ -32,39 +32,25 @@ We will pull changes from upstream, so if you want to make a plugin for Vencord 
 > it's called BetterVencord because it's bettter than Vencord"<br>
 > \- Davilarek
 
-## Installation Instructions (officially as per upstream)
+## Installation instructions (primarily for Linux but may work for Windows)
+### Install pnpm and nodejs
+[Node.js](https://nodejs.org/en) I recommend LTS version,
 
-1. **Install VencordInstaller:**
-   - For PC start by installing [VencordInstaller](https://vencord.dev/download/) depending on your OS. Follow the on-screen instructions to complete the installation.
-
-   - If you do NOT know what `pnpm` is. Please run `pnpmInstall.sh`, or if you DO NOT have it installed, Do the same thing !!!
-
-2. **BetterVencord Installation:**
-   - For PC Installation:<br>
-     a. Run `install.bat`.<br>
-     b. Run `build.bat`.
-
-   - For Web Installation:<br>
-     a. Run `install.bat`.<br>
-     b. Run `buildWeb.bat`.<br>
-     c. Install like a normal extension
-
-3. **Finalize Installation:**
-   - Run `automaticInstallDist.bat` and type `a`.
-   - After the build process is complete, the software should be ready to use.
-
-## Installation instructions (unofficially and primarily for Linux)
-### Compiling source
-[BetterVencord](https://github.com/Davilarek/Vencord) needs to be compiled. The following below are build instructions for [Linux](https://github.com/Vendicated/Vencord/blob/main/.github/workflows/build.yml):
+[pnpm](https://pnpm.io/installation)
+### Obtaining source
 ```
 git clone https://github.com/Davilarek/Vencord.git
 cd Vencord
+```
+### Compiling source
+[BetterVencord](https://github.com/Davilarek/Vencord) needs to be compiled:
+```
 pnpm install --frozen-lockfile
-pnpm build
+pnpm build --standalone
 ```
 
 ```
-pnpm buildWeb
+pnpm buildWeb --standalone
 ```
 Could be optionally run if you intend to use BetterVencord on the web, like ArmCord, or Discord in a browser. 
 
@@ -91,14 +77,7 @@ Run [Vencord's official installer](https://github.com/Vendicated/Vencord#install
 
 Once done,
 1. Backup your Vencord user data first. On Linux for example is defined by [`XDG_CONFIG_HOME`](https://github.com/Vencord/Installer/blob/main/install.sh), as `$HOME/.config/Vencord/`, on Windows, try checking `%appdata%/Vencord`.
-2. Copy your the contents of your compiled BetterVencord's `dist` directory/folder into own Vencord user data.
-
-## Installing on Browser
-Needs building manually too. These are incompatible with desktop app variant, as it generates a standalone variant that doesn't have the ability to check for updates, for a forked build that does not have releases.
-```
-pnpm buildWeb --standalone
-pnpm build --standalone
-```
+2. Copy your compiled BetterVencord's `dist` directory/folder into own Vencord user data.
 
 ## Using
 Once installed, BetterVencord functions similar to Vencord but with BD Compatibility Layer under Plugins. This needs to be enabled first before you can add [BetterDiscord](https://betterdiscord.app/) plugin(s). A successful enabling of BD Compatibility Layer will show up an extra menu entry (on the left of discord UI) as Virtual Filesystem, under Backup & Restore. To then add BetterDiscord plugins, in Virtual Filesystem, left click on `/`, then `BD`, then right click on `plugins`, and click on Import a file here.
@@ -117,38 +96,16 @@ To remove BD plugins from BetterVencord, navigate to plugins directory/folder as
 It should be possible to uninstall BetterVencord via Vencord's official installer tool. If that fails, you will need to revert changes done to your Vencord user data path first, before running the uninstaller. If you do not have a backup for whatever reason, try deleting your Vencord user data directory or folder first, run through Vencord's official installer to install, then try uninstalling.
 
 ## Updating
-BetterVencord is ineligible for updates via Vencord's official installer tool. Due to the fact that it was installed via `git`, it will require your Vencord user data (see Installing/Uninstalling section) to be set as a local git repository. See the subsequent section on initialising.
+You should keep the source code you cloned in first step to be able to update BV.
 
-### Initialising
-Setting this up should be one-off for only checking updates. Any updates discovered for BetterVencord will need to be compiled first. Do not enable automatic updates, it is not advised for non-standard Vencord installation, in which BetterVencord is presently one.
+First, you `cd` to your directory where you cloned the source code.
 
-Again the instructions below are for Linux to enable update checking via patched discord UI, under user settings Vencord → Updater:
+Then,
 ```
-cd $HOME/.config/Vencord
-git init
-git branch -M main
-git remote add origin https://github.com/Davilarek/Vencord.git
-git remote set-url --push origin -- --read-only--
-git fetch origin
-git merge origin main
+git fetch
+git pull
 ```
-
-### Upkeeping
-Any updates found upstream needs to be manually merged first, then compiled. These needs to be done everytime you noticed BetterVencord has updates. The process are as follows for manually merging:
-```
-cd $HOME/.config/Vencord
-git fetch origin
-git merge origin main
-```
-For Windows, substitute `$HOME/.config/Vencord` for `%appdata%/Vencord`
-
-Manually compiling and installing are as follows:
-```
-pnpm install --frozen-lockfile
-pnpm build
-```
-
-Once installed, changes do not take effect to a currently running discord client with BetterVencord installation. It will need to be restarted.
+and then repeat compiling steps.
 
 ## Disclaimer
 
