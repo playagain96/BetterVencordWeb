@@ -17,15 +17,16 @@
 */
 
 import ErrorBoundary from "@components/ErrorBoundary";
-import { ModalContent, ModalFooter, ModalHeader, ModalRoot, openModal, ModalSize } from "@utils/modal";
+import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
 import { Button, React } from "@webpack/common";
+import { DetailedReactHTMLElement } from "react";
+
+import { PluginMeta } from "~plugins";
 
 import { PLUGIN_NAME } from "./constants.js";
 import { getGlobalApi } from "./fakeBdApi.js";
 import { arrayToObject, createTextForm } from "./utils.js";
-import { PluginMeta } from "~plugins";
-import { DetailedReactHTMLElement } from "react";
 
 export type AssembledBetterDiscordPlugin = {
     started: boolean;
@@ -213,117 +214,25 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         },
     };
 
-    let metaEndLine = 0;
-    function generateMeta() {
-        let lastSuccessfulMetaLine = 0;
-        try {
-            const metadata = BetterDiscordPlugin
-                .split("/**")[1]
-                .split("*/")[0]
-                .replaceAll("\n", "")
-                .split("*")
-                .filter(x => x !== "" && x !== " ");
-            metaEndLine = metadata.length + 3;
-            for (let i = 0; i < metadata.length; i++) {
-                const element = metadata[i].trim();
-                if (element.startsWith("@name")) {
-                    final.name = element.split("@name")[1].trim();
-                    final.id = final.name || window.require("path").basename(filename); // what?
-                } else if (element.startsWith("@description")) {
-                    final.description = element.split("@description ")[1];
-                } else if (element.startsWith("@authorId")) {
-                    final.authors[0].id = Number(
-                        element.split("@authorId ")[1] + "n"
-                    );
-                } else if (element.startsWith("@author")) {
-                    final.authors[0].name = element.split("@author ")[1];
-                    // eslint-disable-next-line eqeqeq
-                } else if (element != "" && element.length > 2)
-                    final[element.split("@")[1].split(" ")[0]] = element.substring(element.split("@")[1].split(" ")[0].length + 2);
-                lastSuccessfulMetaLine = i;
-            }
-        } catch (error) {
-            console.error("Something snapped during parsing of meta for file:", filename, `The error got triggered after ${lastSuccessfulMetaLine}-nth line of meta`, "The error was:", error);
-            throw error; // let the caller handle this >:)
-        }
+    const parsedMeta = parseNewMeta(BetterDiscordPlugin, filename);
+    const { metaEndLine } = parsedMeta;
+    // final.name = parsedMeta.pluginMeta.name;
+    // final.id = parsedMeta.pluginMeta.id;
+    // final.description = parsedMeta.pluginMeta.description;
+    // final.authors = parsedMeta.pluginMeta.authors;
+    // final.version = parsedMeta.pluginMeta.version;
+    Object.assign(final, parsedMeta.pluginMeta);
+
+    final.internals = wrapBetterDiscordPluginCode(BetterDiscordPlugin, filename);
+    let { exports } = final.internals.module;
+    if (typeof exports === "object") {
+        exports = exports[final.name];
     }
+    final.instance = exports.prototype ? new exports(final) : exports(final);
+    // passing the plugin object directly as "meta". what could go wrong??!?!?
+    if (typeof final.instance.load === "function") // ESLINT.SHUT. THE. HELL. UP. == IS FINE GOD DANG IT.
+        final.instance.load(); // we might crash here but nahhh
 
-    function generateCode() {
-        // const lines = data.split("\n");
-        // const desiredLine = metaEndLine;
-        // let codeData = lines.slice(desiredLine - 1).join("\n");
-        let codeData = BetterDiscordPlugin;
-        // console.log(codeData);
-        // const context = {
-        // "generatedClass": null,
-        // };
-        const debugLine =
-            "\ntry{" + codeData + "}catch(e){console.error(e);debugger;}";
-        const additionalCode = [
-            "const module = { exports: {} };",
-            "const global = window;",
-            // "const Buffer = window.BrowserFS.BFSRequire('buffer').Buffer;",
-            "const __filename=BdApi.Plugins.folder+`/" + filename + "`;",
-            "const __dirname=BdApi.Plugins.folder;", // should this be set to `sourcePath`?
-            "const DiscordNative={get clipboard() { return window.BdCompatLayer.fakeClipboard; }};",
-            // "debugger;",
-        ];
-        // codeData = "(()=>{const module = { exports: {} };const global = window;const __filename=BdApi.Plugins.folder+`/" + filename + "`;const __dirname=BdApi.Plugins.folder;debugger;" + (true ? debugLine : codeData) + "\nreturn module;})();\n";
-        // eslint-disable-next-line no-constant-condition
-        codeData =
-            "(()=>{" +
-            additionalCode.join("") +
-            // eslint-disable-next-line no-constant-condition
-            (true ? debugLine : codeData) +
-            "\nreturn module;})();\n";
-        // const sourceBlob = new Blob([codeData], {
-        //     type: "application/javascript",
-        // });
-        // const sourceBlobUrl = URL.createObjectURL(sourceBlob);
-        // codeData += "\n//# sourceURL=" + sourceBlobUrl;
-        codeData += "\n//# sourceURL=" + "betterDiscord://plugins/" + filename;
-        if (!window.GeneratedPluginsBlobs)
-            window.GeneratedPluginsBlobs = {};
-        // window.GeneratedPluginsBlobs[final.name] = sourceBlobUrl;
-        // codeData = codeData.replaceAll("module.exports = ", "this.generatedClass = ");
-        // window.GeneratedPlugins[final.name] = evalInContext(codeData, context);
-        // const codeClass = evalInContext(codeData, context);
-        const codeClass = eval.call(window, codeData);
-        // const functions = Object.getOwnPropertyNames(codeClass.prototype);
-
-        // for (let i = 0; i < functions.length; i++) {
-        //     const element = functions[i];
-        //     final[element] = codeClass.prototype[element];
-        // }
-        final.internals = {
-            module: codeClass,
-        };
-    }
-
-    function generateFunctions() {
-        let { exports } = final.internals.module;
-        if (typeof exports === "object") {
-            exports = exports[final.name];
-        }
-        final.instance = exports.prototype ? new exports(final) : exports(final);
-        // passing the plugin object directly as "meta". what could go wrong??!?!?
-        if (typeof final.instance.load === "function") // ESLINT.SHUT. THE. HELL. UP. == IS FINE GOD DANG IT.
-            final.instance.load(); // we might crash here but nahhh
-
-        // const functions = Object.getOwnPropertyNames(exports.prototype);
-
-        // for (let i = 0; i < functions.length; i++) {
-        //     const element = functions[i];
-        //     // if (final.instance[element].bind)
-        //     //     final[element] = final.instance[element].bind(final.instance);
-        //     // else
-        //     final[element] = final.instance[element];
-        // }
-    }
-
-    generateMeta();
-    generateCode();
-    generateFunctions();
     if (final.instance.getName) final.name = final.instance.getName();
     if (final.instance.getVersion)
         final.version = final.instance.getVersion() || "6.6.6";
@@ -352,12 +261,12 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         const ThisShouldGiveUsWhatIsMissingInThePlugin = whatsMissingDavil.join(", ");
         // throw new Error(`The BD Plugin ${final.name || final.id} is missing: ${ThisShouldGiveUsWhatIsMissingInThePlugin}`); Screw this. I am using our noticesystem
         // LITERALLY WHAT ITS MADE FOR BUDDY OL' PAL
-        const TextElement = document.createElement("div");
-        TextElement.innerHTML = `The BD Plugin ${final.name || final.id} is missing the following metadata below<br><br>
+        const newTextElement = document.createElement("div");
+        newTextElement.innerHTML = `The BD Plugin ${final.name || final.id} is missing the following metadata below<br><br>
         <strong>${ThisShouldGiveUsWhatIsMissingInThePlugin.toUpperCase()}</strong><br><br>
         The plugin could not be started, Please fix.`;
 
-        getGlobalApi().showNotice(TextElement, {
+        getGlobalApi().showNotice(newTextElement, {
             timeout: 0,
             buttons: [
                 {
@@ -368,10 +277,11 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
                 }
             ]
         });
-        throw new Error("Incomplete plugin");
+        throw new Error("Incomplete plugin, " + newTextElement.innerHTML);
     }
 
     const tempOptions = {};
+    // eslint-disable-next-line dot-notation
     tempOptions["versionLabel"] = {
         type: OptionType.COMPONENT,
         component: () => createTextForm("Version", final.version),
@@ -384,8 +294,8 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     createOption(tempOptions, "patreonLabel", "Author's Patreon", final.patreon, true);
     createOption(tempOptions, "authorsLabel", "Author", final.authors[0]?.name);
     final.options = { ...tempOptions, ...final.options };
-    for (let prop in tempOptions) {
-        if (tempOptions.hasOwnProperty(prop)) {
+    for (const prop in tempOptions) {
+        if (Object.prototype.hasOwnProperty.call(tempOptions, prop)) {
             tempOptions[prop] = null;
         }
     }
@@ -414,6 +324,66 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     final.stop = stopFunction.bind(final);
     console.log(final);
     return final;
+}
+
+function parseNewMeta(pluginCode: string, filename: string) {
+    let lastSuccessfulMetaLine = 0;
+    let metaEndLine = 0;
+    const resultMeta = { name: "", id: "", description: "", authors: [{}] as { id: number, name: string }[], version: "" };
+    try {
+        const metadata = pluginCode
+            .split("/**")[1]
+            .split("*/")[0]
+            .replaceAll("\n", "")
+            .split("*")
+            .filter(x => x !== "" && x !== " ");
+        metaEndLine = metadata.length + 3;
+        for (let i = 0; i < metadata.length; i++) {
+            const element = metadata[i].trim();
+            if (element.startsWith("@name")) {
+                resultMeta.name = element.split("@name")[1].trim();
+                resultMeta.id = resultMeta.name || window.require("path").basename(filename); // what?
+            } else if (element.startsWith("@description")) {
+                resultMeta.description = element.split("@description ")[1];
+            } else if (element.startsWith("@authorId")) {
+                resultMeta.authors[0].id = Number(
+                    element.split("@authorId ")[1] + "n"
+                );
+            } else if (element.startsWith("@author")) {
+                resultMeta.authors[0].name = element.split("@author ")[1];
+                // eslint-disable-next-line eqeqeq
+            } else if (element != "" && element.length > 2)
+                resultMeta[element.split("@")[1].split(" ")[0]] = element.substring(element.split("@")[1].split(" ")[0].length + 2);
+            lastSuccessfulMetaLine = i;
+        }
+    } catch (error) {
+        console.error("Something snapped during parsing of meta for file:", filename, `The error got triggered after ${lastSuccessfulMetaLine}-nth line of meta`, "The error was:", error);
+        throw error; // let the caller handle this >:)
+    }
+    return { pluginMeta: resultMeta, metaEndLine };
+}
+
+function wrapBetterDiscordPluginCode(pluginCode: string, filename: string) {
+    let codeData = pluginCode;
+    const debugLine = "\ntry{" + codeData + "}catch(e){console.error(e);debugger;}";
+    const additionalCode = [
+        "const module = { exports: {} };",
+        "const global = window;",
+        "const __filename=BdApi.Plugins.folder+`/" + filename + "`;",
+        "const __dirname=BdApi.Plugins.folder;", // should this be set to `sourcePath`?
+        "const DiscordNative={get clipboard() { return window.BdCompatLayer.fakeClipboard; }};",
+    ];
+    codeData =
+        "(()=>{" +
+        additionalCode.join("") +
+        // eslint-disable-next-line no-constant-condition
+        (true ? debugLine : codeData) +
+        "\nreturn module;})();\n";
+    codeData += "\n//# sourceURL=" + "betterDiscord://plugins/" + filename;
+    const codeClass = eval.call(window, codeData);
+    return {
+        module: codeClass,
+    };
 }
 
 export async function addCustomPlugin(generatedPlugin: AssembledBetterDiscordPlugin) {
