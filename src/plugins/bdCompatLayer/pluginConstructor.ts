@@ -214,7 +214,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         },
     };
 
-    const parsedMeta = parseNewMeta(BetterDiscordPlugin, filename);
+    const parsedMeta = BetterDiscordPlugin.substring(0, 64).includes("//META") ? parseLegacyMeta(BetterDiscordPlugin, filename) : parseNewMeta(BetterDiscordPlugin, filename);
     const { metaEndLine } = parsedMeta;
     // final.name = parsedMeta.pluginMeta.name;
     // final.id = parsedMeta.pluginMeta.id;
@@ -326,6 +326,18 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     return final;
 }
 
+function parseLegacyMeta(pluginCode: string, filename: string) {
+    const theLine = pluginCode.split("*//")[0].split("//META")[1];
+    const parsedLine = {} as { name: string, id: string, description: string, authors: { id: number, name: string }[], version: string };
+    try {
+        Object.assign(parsedLine, JSON.parse(theLine));
+    } catch (error) {
+        console.error("Something snapped during parsing of meta for file:", filename, "The error was:", error);
+        throw error; // let the caller handle this >:)
+    }
+    return { pluginMeta: parsedLine, metaEndLine: 1 };
+}
+
 function parseNewMeta(pluginCode: string, filename: string) {
     let lastSuccessfulMetaLine = 0;
     let metaEndLine = 0;
@@ -334,6 +346,7 @@ function parseNewMeta(pluginCode: string, filename: string) {
         const metadata = pluginCode
             .split("/**")[1]
             .split("*/")[0]
+            .replace(/\r/g, "")
             .replaceAll("\n", "")
             .split("*")
             .filter(x => x !== "" && x !== " ");
