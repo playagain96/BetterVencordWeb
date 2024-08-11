@@ -25,13 +25,14 @@ import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginDef } from "@utils/types";
 import { Clipboard, React } from "@webpack/common";
 
+import { PluginMeta } from "~plugins";
+
 import { PLUGIN_NAME } from "./constants";
 import { cleanupGlobal, createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
-import { PluginMeta } from "~plugins";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
