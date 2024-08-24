@@ -246,7 +246,7 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
                     logger.error("Error while firing callback for Webpack subscription:\n", err, filter, callback);
                 }
             }
-        } as any as { toString: () => string, original: any, (...args: any[]): void; };
+        } as any as { toString: () => string, original: any, (...args: any[]): void; $$vencordPatchedSource?: string; };
 
         factory.toString = originalMod.toString.bind(originalMod);
         factory.original = originalMod;
@@ -367,9 +367,17 @@ function patchFactories(factories: Record<string, (module: any, exports: any, re
 
             if (!patch.all) patches.splice(i--, 1);
         }
-        Object.defineProperty(factories, id, {
-            configurable: true,
-            writable: true,
-        });
+
+        if (IS_DEV) {
+            if (mod !== originalMod) {
+                factory.$$vencordPatchedSource = String(mod);
+            } else if (wreq != null) {
+                const existingFactory = wreq.m[id];
+
+                if (existingFactory != null) {
+                    factory.$$vencordPatchedSource = existingFactory.$$vencordPatchedSource;
+                }
+            }
+        }
     }
 }
