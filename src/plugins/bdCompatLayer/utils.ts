@@ -23,16 +23,16 @@ import * as fflate from "fflate";
 import { getGlobalApi } from "./fakeBdApi";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 
-export function getDeferred() {
-    let resolve: undefined | ((arg: any) => void) = undefined;
-    let reject: undefined | ((e?: Error) => void) = undefined;
+export function getDeferred<T = any>() {
+    let resolve: (value: T | PromiseLike<T>) => void;
+    let reject: (reason?: any) => void;
 
-    const promise = new Promise((resolveCb, rejectCb) => {
+    const promise = new Promise<T>((resolveCb, rejectCb) => {
         resolve = resolveCb;
         reject = rejectCb;
     });
 
-    return { resolve, reject, promise };
+    return { resolve: resolve!, reject: reject!, promise };
 }
 
 // export function evalInScope(js, contextAsScope) {
