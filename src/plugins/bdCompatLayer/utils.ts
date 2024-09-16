@@ -17,6 +17,7 @@
 */
 
 import { Link } from "@components/Link";
+import { PluginNative } from "@utils/types";
 import { Forms, React } from "@webpack/common";
 import * as fflate from "fflate";
 
@@ -583,4 +584,9 @@ export function patchReadFileSync(fs) {
         return orig_readFileSync(path, optionsOrEncoding);
     };
     return fs;
+}
+
+export function aquireNative() {
+    return Object.values(VencordNative.pluginHelpers)
+        .find(m => m.bdCompatLayerUniqueId) as PluginNative<typeof import("./native")>;
 }

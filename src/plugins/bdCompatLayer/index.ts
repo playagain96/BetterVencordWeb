@@ -27,12 +27,12 @@ import { Clipboard, React } from "@webpack/common";
 
 import { PluginMeta } from "~plugins";
 
-import { PLUGIN_NAME } from "./constants";
+import { BROWSERFS_BUILD_HASH, PLUGIN_NAME } from "./constants";
 import { cleanupGlobal, createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
-import { FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { aquireNative, FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -70,6 +70,20 @@ const thePlugin = {
             default: false,
             restartNeeded: true,
         },
+        useRealFsInstead: {
+            description: "Uses true, real filesystem hosted locally mounted on RealFS server's mount point instead of localStorage. It may cause memory usage issues but prevents exceeding localStorage quota. Note, after switching, you have to import your stuff back manually",
+            type: OptionType.BOOLEAN,
+            default: false,
+            restartNeeded: true,
+        },
+        ...(!IS_WEB && {
+            usePoorlyMadeRealFs: {
+                description: "Uses your very own filesystem to manage plugins, etc. Not recommended as there is no security for this option. Use at your own risk, basically. Not functional right now.",
+                type: OptionType.BOOLEAN,
+                default: false,
+                restartNeeded: true,
+            }
+        }),
         safeMode: {
             description: "Loads only filesystem",
             type: OptionType.BOOLEAN,
@@ -112,6 +126,7 @@ const thePlugin = {
     originalBuffer: {},
     start() {
         injectSettingsTabs();
+        const reimplementationsReady = getDeferred<void>();
         // const proxyUrl = "https://api.allorigins.win/raw?url=";
         // const proxyUrl = "https://cors-get-proxy.sirjosh.workers.dev/?url=";
         const proxyUrl = Settings.plugins[this.name].corsProxyUrl ?? this.options.corsProxyUrl.default;
@@ -120,58 +135,98 @@ const thePlugin = {
             Settings.plugins[this.name].pluginsStatus = this.options.pluginsStatus.default;
         }
         // const Filer = this.simpleGET(proxyUrl + "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.js");
-        fetch(
-            proxyUrl +
-            "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.min.js"
-        )
-            .then(out => out.text())
-            .then(out2 => {
-                out2 += "\n//# sourceURL=betterDiscord://internal/BrowserFs.js";
-                eval.call(
-                    window,
-                    out2.replaceAll(
-                        ".localStorage",
-                        ".Vencord.Util.localStorage"
-                    )
-                );
-                const temp: any = {};
-                const browserFSSetting = Settings.plugins[this.name].useIndexedDBInstead === true ? {
-                    fs: "AsyncMirror",
-                    options: {
-                        sync: { fs: "InMemory" },
-                        async: { fs: "IndexedDB", options: { storeName: "VirtualFS" } },
+        const reallyUsePoorlyMadeRealFs = IS_WEB ? false : (Settings.plugins[this.name].usePoorlyMadeRealFs ?? this.options.usePoorlyMadeRealFs!.default);
+        if (!reallyUsePoorlyMadeRealFs) {
+            fetch(
+                proxyUrl +
+                // "https://github.com/jvilk/BrowserFS/releases/download/v1.4.3/browserfs.min.js"
+                // "http://localhost:8080/browserfs.min.js"
+                `https://github.com/LosersUnited/BrowserFS-builds/raw/${BROWSERFS_BUILD_HASH}/dist/browserfs.min.js` // TODO: Add option to change this
+            )
+                .then(out => out.text())
+                .then(out2 => {
+                    out2 += "\n//# sourceURL=betterDiscord://internal/BrowserFs.js";
+                    eval.call(
+                        window,
+                        out2.replaceAll(
+                            ".localStorage",
+                            ".Vencord.Util.localStorage"
+                        )
+                    );
+                    const temp: any = {};
+                    const target = {
+                        browserFSSetting: {},
+                    }; // because "let" sucks
+                    if (Settings.plugins[this.name].useRealFsInstead === true) {
+                        target.browserFSSetting = {
+                            fs: "AsyncMirror",
+                            options: {
+                                sync: { fs: "InMemory" },
+                                async: { fs: "RealFS", options: { apiUrl: "http://localhost:2137/api" } },
+                            },
+                        };
+                    } else if (Settings.plugins[this.name].useIndexedDBInstead === true) {
+                        target.browserFSSetting = {
+                            fs: "AsyncMirror",
+                            options: {
+                                sync: { fs: "InMemory" },
+                                async: { fs: "IndexedDB", options: { storeName: "VirtualFS" } },
+                            },
+                        };
+                    } else {
+                        target.browserFSSetting = {
+                            fs: "LocalStorage",
+                        };
                     }
-                } : {
-                    fs: "LocalStorage",
-                };
-                window.BrowserFS.install(temp);
-                window.BrowserFS.configure(
-                    browserFSSetting,
-                    // {
-                    // fs: "InMemory"
-                    // fs: "LocalStorage",
-                    // fs: "IndexedDB",
-                    // options: {
-                    //     "storeName": "VirtualFS"
-                    // },
-                    // fs: "AsyncMirror",
-                    // options: {
-                    //     sync: { fs: "InMemory" },
-                    //     async: { fs: "IndexedDB", options: { storeName: "VirtualFS" } },
-                    // }
-                    // },
-                    () => {
-                        // window.BdApi.ReqImpl.fs = temp.require("fs");
-                        // window.BdApi.ReqImpl.path = temp.require("path");
-                        // ReImplementationObject.fs = temp.require("fs");
-                        ReImplementationObject.fs = patchReadFileSync(patchMkdirSync(temp.require("fs")));
-                        ReImplementationObject.path = temp.require("path");
-                        if (Settings.plugins[this.name].safeMode == undefined || Settings.plugins[this.name].safeMode == false)
-                            // @ts-ignore
-                            windowBdCompatLayer.fsReadyPromise.resolve();
-                    }
-                );
+                    window.BrowserFS.install(temp);
+                    window.BrowserFS.configure(
+                        target.browserFSSetting,
+                        // {
+                        // fs: "InMemory"
+                        // fs: "LocalStorage",
+                        // fs: "IndexedDB",
+                        // options: {
+                        //     "storeName": "VirtualFS"
+                        // },
+                        // fs: "AsyncMirror",
+                        // options: {
+                        //     sync: { fs: "InMemory" },
+                        //     async: { fs: "IndexedDB", options: { storeName: "VirtualFS" } },
+                        // }
+                        // },
+                        () => {
+                            // window.BdApi.ReqImpl.fs = temp.require("fs");
+                            // window.BdApi.ReqImpl.path = temp.require("path");
+                            // ReImplementationObject.fs = temp.require("fs");
+
+                            // reimplementationsReady should be checked but nahh
+                            ReImplementationObject.fs = patchReadFileSync(patchMkdirSync(temp.require("fs")));
+                            ReImplementationObject.path = temp.require("path");
+                            if (Settings.plugins[this.name].safeMode == undefined || Settings.plugins[this.name].safeMode == false)
+                                // @ts-ignore
+                                windowBdCompatLayer.fsReadyPromise.resolve();
+                        }
+                    );
+                });
+        }
+        else {
+            const native = aquireNative();
+            console.warn("Waiting for reimplementation object to be ready...");
+            reimplementationsReady.promise.then(async () => {
+                console.warn("Enabling real fs...");
+                // const nativeBridge = await native.getBridge();
+                // ReImplementationObject.fs = nativeBridge.fs;
+                // ReImplementationObject.path = nativeBridge.path;
+                // ReImplementationObject.process.env._home_secret = nativeBridge.getUserHome()!;
+                const req = (await native.unsafe_req()) as globalThis.NodeRequire;
+                ReImplementationObject.fs = await req("fs");
+                ReImplementationObject.path = await req("path");
+                ReImplementationObject.process.env._home_secret = (await native.getUserHome())!;
+                if (Settings.plugins[this.name].safeMode == undefined || Settings.plugins[this.name].safeMode == false)
+                    // @ts-ignore
+                    windowBdCompatLayer.fsReadyPromise.resolve();
             });
+        }
         // const Utils = {
         //     stream2buffer(stream) {
         //         return new Promise((resolve, reject) => {
@@ -292,7 +347,11 @@ const thePlugin = {
             process: {
                 env: {
                     // HOME: "/home/fake",
+                    _home_secret: "",
                     get HOME() {
+                        if (reallyUsePoorlyMadeRealFs) {
+                            return this._home_secret;
+                        }
                         const target = "/home/fake";
                         FSUtils.mkdirSyncRecursive(target);
                         return target;
@@ -300,6 +359,7 @@ const thePlugin = {
                 },
             },
         };
+        reimplementationsReady.resolve();
         const FakeRequireRedirect = (name: keyof typeof ReImplementationObject) => {
             return ReImplementationObject[name];
         };
@@ -545,4 +605,7 @@ const thePlugin = {
     },
 };
 
-export default definePlugin(thePlugin as PluginDef);
+export default definePlugin({
+    name: "BD Compatibility Layer",
+    ...thePlugin
+} as PluginDef);
