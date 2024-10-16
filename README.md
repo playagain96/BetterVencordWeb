@@ -72,6 +72,39 @@ You have few options:
 * (less ideal), downgrade/install the older, required version, 8.10.2 and retry running `pnpm install` again.
 * (not recommended) edit `package.json` so that it correctly matches your installed `pnpm` version, and retry running `pnpm install` again.
 
+## My plugin that uses network fails to load, what to do?
+In BD Compat Layer, there is a toggle "Enable Experimental Request Polyfills" that allows plugins to use network.
+## My BV install shows filesystem failed to load, what to do?
+There are some occasions you might see that error,
+#### Issue #1
+Steps to confirm:
+1. Open console
+2. Scroll up to the point you see " Vencord   PluginManager  Starting plugin BD Compatibility Layer"
+3. Look around there for errors
+4. If you see something like `Access to fetch at https://xxxxxx/xxxxx from origin 'discord.com' has been blocked by CORS policy` 4 times close to eachother, it's likely this is your issue.
+   
+Solution:
+1. Find a suitable replacement for your CORS proxy url. It's up to the user to find an appropriate substitute for the cors proxy url. The default one is just an example.
+2. Open BD Compat Layer settings
+3. Paste the url you found in first step into "CORS proxy used to bypass CORS" field
+4. Reload
+#### Issue #2
+Steps to confirm:
+1. You have enabled "Use Indexed DB Instead".
+2. You have a small amount of RAM installed or a small amount of free space.
+3. Open console
+4. See Out of Memory Error
+   
+Solution:
+There is no known fix for this issue right now. Try adding more RAM, perhaps.
+#### Issue #3
+Stepts to confirm:
+1. You have not enabled "Use Indexed DB Instead".
+2. You store large data (>10 MB) in Virtual Filesystem.
+   
+Solution:
+There is a limit on localStorage size that varies on different platforms. If possible try migrating to IndexedDB.
+
 ### Installing
 Run [Vencord's official installer](https://github.com/Vendicated/Vencord#installing--uninstalling) first. If your discord installation path includes files or directories that are not owned by you, or that you are not a member of, or you have no write access to, ensure that you run the installer as a privileged account. Vencord needs to patch `app.asar`.
 
