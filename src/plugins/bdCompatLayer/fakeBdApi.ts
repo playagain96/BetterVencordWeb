@@ -283,6 +283,9 @@ class DataWrapper {
 }
 
 export const UIHolder = {
+    alert(title: string, content: any) {
+        return this.showConfirmationModal(title, content, { cancelText: null });
+    },
     helper() {
         console.info("hi");
     },
