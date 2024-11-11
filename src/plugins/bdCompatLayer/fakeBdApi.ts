@@ -148,6 +148,9 @@ export const WebpackHolder = {
             first: false,
         });
     },
+    get getAllByKeys() {
+        return this.getAllByProps;
+    },
     getByProps(...props) {
         return this.getModule(this.Filters.byProps(...props), {});
     },
