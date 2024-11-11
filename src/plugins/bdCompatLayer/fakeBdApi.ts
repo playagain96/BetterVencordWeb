@@ -80,6 +80,13 @@ export const PluginsHolder = {
     },
 };
 
+const getOptions = (args: any[], defaultOptions = {}) => {
+    const lastArg = args[args.length - 1];
+    if (typeof lastArg === "object" && lastArg !== null && !Array.isArray(lastArg)) {
+        Object.assign(defaultOptions, args.pop());
+    }
+    return defaultOptions;
+};
 export const WebpackHolder = {
     Filters: {
         byDisplayName: name => {
@@ -144,12 +151,15 @@ export const WebpackHolder = {
         );
     },
     getAllByProps(...props) {
-        return this.getModule(this.Filters.byProps(...props), {
-            first: false,
-        });
+        const moreOpts = getOptions(props, { first: false });
+        return this.getModule(this.Filters.byProps(...props), moreOpts);
     },
     get getAllByKeys() {
         return this.getAllByProps;
+    },
+    getAllByStrings(...strings: any[]) {
+        const moreOpts = getOptions(strings, { first: false });
+        return this.getModule(this.Filters.byStrings(...strings), moreOpts);
     },
     getByProps(...props) {
         return this.getModule(this.Filters.byProps(...props), {});
