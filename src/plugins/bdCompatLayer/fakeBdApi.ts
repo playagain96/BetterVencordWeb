@@ -24,6 +24,7 @@ import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { docCreateElement } from "./utils";
+import { proxyLazy } from "@utils/lazy";
 
 class PatcherWrapper {
     #label;
@@ -195,7 +196,8 @@ export const WebpackHolder = {
         };
     },
     getByStrings(...strings) {
-        return this.getModule(this.Filters.byStrings(strings));
+        const moreOpts = getOptions(strings);
+        return this.getModule(this.Filters.byStrings(...strings), moreOpts);
     },
     findByUniqueProperties(props, first = true) {
         return first
@@ -480,6 +482,18 @@ export const UIHolder = {
     },
     showNotice(content, options) {
         return this.showNotice_("Notice", content, options);
+    },
+    createTooltip(attachTo, content, opts) {
+        return { // yeah... no. atleast not right now (it's midnight)
+            label: "",
+            show() {
+                console.warn("Remind davil to implement tooltip grrr!");
+                return null;
+            },
+            hide() {
+                return this.show();
+            }
+        };
     },
 };
 
