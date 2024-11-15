@@ -260,7 +260,8 @@ const thePlugin = {
                 return _Router as null | { listeners: Set<Function>; };
             },
             fakeClipboard: undefined,
-            wrapPluginCode: (code: string, filename = "RuntimeGenerated.plugin.js") => { return convertPlugin(code, filename, false); }
+            wrapPluginCode: (code: string, filename = "RuntimeGenerated.plugin.js") => { return convertPlugin(code, filename, false); },
+            queuedPlugins: [],
         };
         window.BdCompatLayer = windowBdCompatLayer;
 

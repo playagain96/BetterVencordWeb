@@ -24,7 +24,6 @@ import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { docCreateElement } from "./utils";
-import { proxyLazy } from "@utils/lazy";
 
 class PatcherWrapper {
     #label;
@@ -60,7 +59,8 @@ class PatcherWrapper {
 
 export const PluginsHolder = {
     getAll: () => {
-        return window.GeneratedPlugins as AssembledBetterDiscordPlugin[];
+        const queuedPlugins = window.BdCompatLayer.queuedPlugins as unknown[];
+        return [...window.GeneratedPlugins, ...queuedPlugins] as AssembledBetterDiscordPlugin[];
     },
     isEnabled: name => {
         return Vencord.Plugins.isPluginEnabled(name);

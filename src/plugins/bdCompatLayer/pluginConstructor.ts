@@ -61,6 +61,7 @@ export type AssembledBetterDiscordPlugin = {
     donate: string;
     sourcePath: string | undefined;
     filename: string;
+    myProxy: {} | undefined;
 };
 
 const modalStuff = {
@@ -222,6 +223,13 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     // final.authors = parsedMeta.pluginMeta.authors;
     // final.version = parsedMeta.pluginMeta.version;
     Object.assign(final, parsedMeta.pluginMeta);
+    // we already have all needed meta at this point
+    final.myProxy = new Proxy(final, {
+        get(t, p) {
+            return t[p];
+        }
+    });
+    (window.BdCompatLayer.queuedPlugins as any[]).push(final.myProxy);
 
     final.internals = wrapBetterDiscordPluginCode(BetterDiscordPlugin, filename);
     let { exports } = final.internals.module;
@@ -322,6 +330,11 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     };
     final.start = startFunction.bind(final);
     final.stop = stopFunction.bind(final);
+    var index = (window.BdCompatLayer.queuedPlugins as any[]).findIndex(x => x.filename === final.filename); // should be unique, right...?
+    if (index !== -1) {
+        (window.BdCompatLayer.queuedPlugins as any[]).splice(index, 1);
+    }
+    delete final.myProxy;
     console.log(final);
     return final;
 }
