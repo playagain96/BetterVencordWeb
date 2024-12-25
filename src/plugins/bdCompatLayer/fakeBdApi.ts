@@ -524,6 +524,24 @@ export const DOMHolder = {
         if (target) document.querySelector(target).append(element);
         return element;
     },
+    injectScript(targetName: string, url: string) { // who thought this is a good idea?
+        targetName = targetName.replace(/^[^a-z]+|[^\w-]+/gi, "-"); // TODO: move this to a function or something
+        return new Promise((resolve, reject) => {
+            const theRemoteScript = document
+                .querySelector("bd-scripts")?.querySelector(`#${targetName}`) || this.createElement("script", { id: targetName });
+            theRemoteScript.src = url;
+            theRemoteScript.onload = resolve;
+            theRemoteScript.onerror = reject;
+            document.querySelector("bd-scripts")?.append(theRemoteScript);
+        });
+    },
+    removeScript(targetName: string) {
+        targetName = targetName.replace(/^[^a-z]+|[^\w-]+/gi, "-");
+        const theRemoteScript = document
+            .querySelector("bd-scripts")?.querySelector(`#${targetName}`);
+        if (theRemoteScript != null)
+            theRemoteScript.remove();
+    },
 };
 
 class DOMWrapper {
@@ -739,6 +757,12 @@ class BdApiReImplementationInstance {
     }
     get Logger() {
         return addLogger();
+    }
+    get linkJS() {
+        return DOMHolder.injectScript;
+    }
+    get unlinkJS() {
+        return DOMHolder.removeScript;
     }
 }
 

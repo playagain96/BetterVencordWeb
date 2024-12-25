@@ -434,6 +434,8 @@ const thePlugin = {
         }, 500);
         const fakeBdStyles = document.createElement("bd-styles");
         document.body.appendChild(fakeBdStyles);
+        const fakeBdScripts = document.createElement("bd-scripts");
+        document.body.appendChild(fakeBdScripts);
         // const checkInterval = setInterval(() => {
         //     if (window.BdApi.ReqImpl.fs === undefined)
         //         return;
