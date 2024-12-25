@@ -23,7 +23,7 @@ import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
-import { docCreateElement } from "./utils";
+import { addLogger, docCreateElement } from "./utils";
 
 class PatcherWrapper {
     #label;
@@ -334,7 +334,7 @@ export const UIHolder = {
             color: "white",
         };
 
-        const React = getGlobalApi().React;
+        const { React } = getGlobalApi();
         const whiteTextContent = React.createElement("div", { style: whiteTextStyle }, content);
 
         moreReact.push(whiteTextContent);
@@ -737,11 +737,14 @@ class BdApiReImplementationInstance {
     get DOM() {
         return this.#dom;
     }
+    get Logger() {
+        return addLogger();
+    }
 }
 
 function assignToGlobal() {
     const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
-    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS"];
+    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS", "Logger"];
     const settersToSet = ["ContextMenu"];
     for (let index = 0; index < gettersToSet.length; index++) {
         const element = gettersToSet[index];
@@ -757,7 +760,7 @@ function assignToGlobal() {
     }
 }
 export function cleanupGlobal() {
-    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS"];
+    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS", "Logger"];
     for (let index = 0; index < gettersToSet.length; index++) {
         const element = gettersToSet[index];
         delete getGlobalApi()[element];
