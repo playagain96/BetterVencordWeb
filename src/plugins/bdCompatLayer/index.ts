@@ -632,7 +632,6 @@ const thePlugin = {
 };
 
 export default definePlugin({
-    // @ts-ignore
     name: "BD Compatibility Layer",
     ...thePlugin
 } as PluginDef);
