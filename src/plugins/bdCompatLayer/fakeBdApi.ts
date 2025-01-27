@@ -520,14 +520,16 @@ export const UIHolder = {
     buildSettingsPanel(options: { settings: SettingsType[], onChange: CallableFunction }) {
         const settings: React.ReactNode[] = [];
         const { React } = getGlobalApi();
-        const targetSettingsToSet = { enabled: true };
+        const defaultCatId = "null";
+        const targetSettingsToSet = { enabled: true, [defaultCatId]: { enabled: true, } };
         for (let i = 0; i < options.settings.length; i++) {
             const current = options.settings[i];
             if (current.type === "category" && current.settings) {
+                targetSettingsToSet[current.id] = { enabled: true, };
                 // let's hope no one makes category in category
                 for (let j = 0; j < current.settings.length; j++) {
                     const currentInCategory = current.settings[j];
-                    Object.defineProperty(targetSettingsToSet, currentInCategory.id, {
+                    Object.defineProperty(targetSettingsToSet[current.id], currentInCategory.id, {
                         get() {
                             if (typeof currentInCategory.value === "function")
                                 return currentInCategory.value();
@@ -541,7 +543,7 @@ export const UIHolder = {
                 }
             }
             else {
-                Object.defineProperty(targetSettingsToSet, current.id, {
+                Object.defineProperty(targetSettingsToSet[defaultCatId], current.id, {
                     get() {
                         if (typeof current.value === "function")
                             return current.value();
@@ -554,7 +556,7 @@ export const UIHolder = {
                 });
             }
         }
-        const craftOptions = (now: SettingsType[]) => {
+        const craftOptions = (now: SettingsType[], catName: string) => {
             const tempResult: React.ReactNode[] = [];
             for (let i = 0; i < now.length; i++) {
                 const current = now[i];
@@ -607,19 +609,19 @@ export const UIHolder = {
                             key: current.id,
                             option: fakeOption,
                             onChange(newValue) {
-                                targetSettingsToSet[current.id] = newValue;
+                                targetSettingsToSet[catName][current.id] = newValue;
                             },
                             onError() { },
-                            pluginSettings: targetSettingsToSet,
+                            pluginSettings: targetSettingsToSet[catName],
                         })
                     ]);
                 settings.push(craftingResult);
                 if (current.type === "category") {
-                    craftOptions(current.settings!);
+                    craftOptions(current.settings!, current.id);
                 }
             }
         };
-        craftOptions(options.settings);
+        craftOptions(options.settings, defaultCatId);
         const result = React.createElement("div", {}, settings);
         return result;
     }
