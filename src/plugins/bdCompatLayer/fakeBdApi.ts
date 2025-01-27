@@ -178,7 +178,8 @@ export const WebpackHolder = {
         return this.getByProps;
     },
     getModules(...etc) {
-        return this.getModule(etc[0], { ...etc.filter((x, y) => y > 0), first: false });
+        const [first, ...rest] = etc;
+        return this.getModule(first, { ...Object.assign({}, ...rest), first: false });
     },
     getByPrototypes(...fields) {
         return this.getModule(
@@ -854,7 +855,16 @@ class BdApiReImplementationInstance {
             }
 
             return undefined;
-        }
+        },
+        getNestedValue(obj: any, path: string) {
+            const properties = path.split(".");
+            let current = obj;
+            for (const prop of properties) {
+                if (current == null) return undefined;
+                current = current[prop];
+            }
+            return current;
+        },
     };
     get UI() {
         return UIHolder;
