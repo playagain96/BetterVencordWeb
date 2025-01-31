@@ -225,20 +225,21 @@ export const WebpackHolder = {
     },
     get modules() {
         // this function is really really wrong
-        const { cache } = Vencord.Webpack;
-        const result = {};
+        // const { cache } = Vencord.Webpack;
+        // const result = {};
 
-        for (const key in cache) {
-            if (
-                // eslint-disable-next-line no-prototype-builtins
-                cache.hasOwnProperty(key) &&
-                // eslint-disable-next-line no-prototype-builtins
-                cache[key].hasOwnProperty("exports")
-            ) {
-                result[key] = cache[key].exports;
-            }
-        }
-        return result;
+        // for (const key in cache) {
+        //     if (
+        //         // eslint-disable-next-line no-prototype-builtins
+        //         cache.hasOwnProperty(key) &&
+        //         // eslint-disable-next-line no-prototype-builtins
+        //         cache[key].hasOwnProperty("exports")
+        //     ) {
+        //         result[key] = cache[key].exports;
+        //     }
+        // }
+        // return result;
+        return Vencord.Webpack.wreq.m;
     },
 };
 
