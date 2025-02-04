@@ -188,12 +188,8 @@ export const WebpackHolder = {
         return this.getModule(first, { ...Object.assign({}, ...rest), first: false });
     },
     getByPrototypes(...fields) {
-        return this.getModule(
-            x =>
-                x.prototype &&
-                fields.every(field => field in x.prototype),
-            {}
-        );
+        const moreOpts = getOptions(fields);
+        return this.getModule(this.Filters.byPrototypeKeys(fields), moreOpts);
     },
     get getByPrototypeKeys() {
         return this.getByPrototypes;
