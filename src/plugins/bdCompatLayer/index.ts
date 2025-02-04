@@ -296,7 +296,7 @@ const thePlugin = {
                     });
                     cb(ev);
                     fetchResponse.catch(reason => {
-                        // eslint-disable-next-line dot-notation
+                        // eslint-disable-next-line @typescript-eslint/dot-notation
                         if (ev2.callbacks["error"]) // https://nodejs.org/api/http.html#class-httpclientrequest "For backward compatibility, res will only emit 'error' if there is an 'error' listener registered."
                             ev2.emit("error", reason);
                     });

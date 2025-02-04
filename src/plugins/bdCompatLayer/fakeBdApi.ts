@@ -25,7 +25,8 @@ const VenComponents: Record<OptionType, React.ComponentType<ISettingElementProps
     [OptionType.BOOLEAN]: SettingBooleanComponent,
     [OptionType.SELECT]: SettingSelectComponent,
     [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent
+    [OptionType.COMPONENT]: SettingCustomComponent,
+    [OptionType.CUSTOM]: () => null,
 };
 
 import { ISettingElementProps, SettingBooleanComponent, SettingCustomComponent, SettingNumericComponent, SettingSelectComponent, SettingSliderComponent, SettingTextComponent } from "@components/PluginSettings/components";
@@ -595,7 +596,7 @@ export const UIHolder = {
                     }
                     default: {
                         fakeOption.type = OptionType.COMPONENT;
-                        (fakeOption as PluginOptionComponent).component = () => { return React.createElement(React.Fragment); };
+                        (fakeOption as unknown as PluginOptionComponent).component = () => { return React.createElement(React.Fragment); };
                         break;
                     }
                 }

@@ -131,7 +131,7 @@ function openSettingsModalForPlugin(final: AssembledBetterDiscordPlugin) {
     let child: typeof panel | React.ReactElement = panel;
     if (panel instanceof Node || typeof panel === "string")
         child = class ReactWrapper extends React.Component {
-            elementRef: React.RefObject<Node>;
+            elementRef: React.RefObject<Node | null>;
             element: Node | string;
             constructor(props: {}) {
                 super(props);
@@ -249,7 +249,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         final.description = final.instance.getDescription();
     final.originalName = final.name;
     if (detectDuplicateName) {
-        // eslint-disable-next-line dot-notation
+        // eslint-disable-next-line @typescript-eslint/dot-notation
         if (Vencord.Plugins.plugins[final.name] && !Vencord.Plugins.plugins[final.name]["instance"]) {
             final.name += "-BD";
         }
@@ -289,7 +289,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     }
 
     const tempOptions = {};
-    // eslint-disable-next-line dot-notation
+    // eslint-disable-next-line @typescript-eslint/dot-notation
     tempOptions["versionLabel"] = {
         type: OptionType.COMPONENT,
         component: () => createTextForm("Version", final.version),
