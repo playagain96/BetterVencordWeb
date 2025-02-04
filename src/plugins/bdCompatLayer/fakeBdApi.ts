@@ -242,6 +242,9 @@ export const WebpackHolder = {
         // return result;
         return Vencord.Webpack.wreq.m;
     },
+    get getMangled() {
+        return Vencord.Webpack.mapMangledModule;
+    },
 };
 
 export const DataHolder = {
