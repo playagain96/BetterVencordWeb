@@ -523,6 +523,10 @@ export const UIHolder = {
             }
         };
     },
+    showChangelogModal() {
+        // yeah... no. atleast not right now (it's midnight again lol)
+        console.warn("Remind davil to implement changelog modal grrr!");
+    },
     buildSettingsPanel(options: { settings: SettingsType[], onChange: CallableFunction }) {
         const settings: React.ReactNode[] = [];
         const { React } = getGlobalApi();
