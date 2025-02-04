@@ -129,7 +129,12 @@ export const WebpackHolder = {
         // uuhhhh?
         get byStrings() {
             return Vencord.Webpack.filters.byCode;
-        }
+        },
+        byPrototypeKeys(fields) {
+            return x =>
+                x.prototype &&
+                fields.every(field => field in x.prototype);
+        },
     },
     getModule: BdApi_getModule,
     waitForModule(filter) {
