@@ -38,6 +38,7 @@ import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { addLogger, docCreateElement } from "./utils";
+import { ModalAPI } from "@utils/modal";
 
 class PatcherWrapper {
     #label;
@@ -346,7 +347,8 @@ export const UIHolder = {
             BRAND: getGlobalApi().findModuleByProps("colorBrand").colorBrand
         };
         const ConfirmationModal = getGlobalApi().Webpack.getModule(x => x.ConfirmModal).ConfirmModal;
-        const { openModal } = getGlobalApi().Webpack.getModule(x => x.closeModal && x.openModal && x.hasModalOpen);
+        const { openModal } = ModalAPI;
+        // const { openModal } = getGlobalApi().Webpack.getModule(x => x.closeModal && x.openModal && x.hasModalOpen);
 
         const {
             confirmText = settings.confirmText || "Confirm",
