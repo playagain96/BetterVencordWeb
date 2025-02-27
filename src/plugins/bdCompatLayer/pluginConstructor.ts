@@ -294,7 +294,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
         type: OptionType.COMPONENT,
         component: () => createTextForm("Version", final.version),
     };
-    createOption(tempOptions, "inviteLabel", "Author's Server", `https://discord.gg/${final.invite}`, true);
+    createOption(tempOptions, "inviteLabel", "Author's Server", final.invite ? `https://discord.gg/${final.invite}` : undefined, true);
     createOption(tempOptions, "sourceLabel", "Plugin Source", final.source, true);
     createOption(tempOptions, "websiteLabel", "Plugin's Website", final.website, true);
     createOption(tempOptions, "authorLabel", "Author's Website", final.authorLink, true);
