@@ -30,6 +30,7 @@ const VenComponents: Record<OptionType, React.ComponentType<ISettingElementProps
 };
 
 import { ISettingElementProps, SettingBooleanComponent, SettingCustomComponent, SettingNumericComponent, SettingSelectComponent, SettingSliderComponent, SettingTextComponent } from "@components/PluginSettings/components";
+import { ModalAPI } from "@utils/modal";
 import { OptionType, PluginOptionBase, PluginOptionComponent, PluginOptionSelect } from "@utils/types";
 import { Forms, Text } from "@webpack/common";
 
@@ -38,7 +39,6 @@ import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
 import { addLogger, docCreateElement } from "./utils";
-import { ModalAPI } from "@utils/modal";
 
 class PatcherWrapper {
     #label;
@@ -131,6 +131,24 @@ export const WebpackHolder = {
         get byStrings() {
             return Vencord.Webpack.filters.byCode;
         },
+        bySource(...something) {
+            const moduleCache = Vencord.Webpack.wreq.m;
+
+            return (_unused: unknown, module: { id?: number }) => {
+                if (!module?.id) return false;
+
+                let source: string;
+                try {
+                    source = String(moduleCache[module.id]);
+                } catch {
+                    return false;
+                }
+
+                return something.every(search =>
+                    typeof search === "string" ? source.includes(search) : search.test(source)
+                );
+            };
+        },
         byPrototypeKeys(fields) {
             return x =>
                 x.prototype &&
@@ -211,6 +229,10 @@ export const WebpackHolder = {
     getByStrings(...strings) {
         const moreOpts = getOptions(strings);
         return this.getModule(this.Filters.byStrings(...strings), moreOpts);
+    },
+    getBySource(...strings) {
+        const moreOpts = getOptions(strings);
+        return this.getModule(this.Filters.bySource(...strings), moreOpts);
     },
     findByUniqueProperties(props, first = true) {
         return first
