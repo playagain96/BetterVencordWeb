@@ -372,9 +372,9 @@ function parseNewMeta(pluginCode: string, filename: string) {
             } else if (element.startsWith("@description")) {
                 resultMeta.description = element.split("@description ")[1];
             } else if (element.startsWith("@authorId")) {
-                resultMeta.authors[0].id = Number(
-                    element.split("@authorId ")[1] + "n"
-                );
+                resultMeta.authors[0].id = BigInt(
+                    element.split("@authorId ")[1]
+                ) as unknown as number;
             } else if (element.startsWith("@author")) {
                 resultMeta.authors[0].name = element.split("@author ")[1];
                 // eslint-disable-next-line eqeqeq
