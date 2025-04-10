@@ -792,6 +792,9 @@ class BdApiReImplementationInstance {
                 { searchExports: true }
             );
         },
+        get Text() {
+            return Vencord.Webpack.Common.Text;
+        },
     };
     get React() {
         return Vencord.Webpack.Common.React;
@@ -811,6 +814,26 @@ class BdApiReImplementationInstance {
         return {
             getInternalInstance(node: Node & any) {
                 return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber")) as string] || null;
+            },
+            isMatch(fiber: any, isInclusive: boolean, targetList: string[]): boolean {
+                const type = fiber?.type;
+                const name = type?.displayName || type?.name;
+                if (!name) return false;
+                return isInclusive === targetList.includes(name);
+            },
+            // based on https://github.com/BetterDiscord/BetterDiscord/blob/d97802bfa7dd8987aa6a2bda37d8fe801502000d/src/betterdiscord/api/reactutils.ts#L120
+            getOwnerInstance(el: HTMLElement, opt = { include: undefined, exclude: ["Popout", "Tooltip", "Scroller", "BackgroundFlash"], filter: (_: any) => true }) {
+                const targetList = opt.include ?? opt.exclude;
+                const isInclusive = !!opt.include;
+                let fiberNode = getGlobalApi().ReactUtils.getInternalInstance(el);
+                while (fiberNode?.return) {
+                    fiberNode = fiberNode.return;
+                    const instance = fiberNode.stateNode;
+                    if (instance && typeof instance !== "function" && typeof instance !== "string" && getGlobalApi().ReactUtils.isMatch(fiberNode, isInclusive, targetList) && opt.filter(instance)) {
+                        return instance;
+                    }
+                }
+                return null;
             }
         };
     }
