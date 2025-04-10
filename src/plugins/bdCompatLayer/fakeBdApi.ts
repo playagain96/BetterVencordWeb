@@ -38,7 +38,7 @@ import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
-import { addLogger, docCreateElement } from "./utils";
+import { addLogger, createTextForm, docCreateElement } from "./utils";
 
 class PatcherWrapper {
     #label;
@@ -794,6 +794,62 @@ class BdApiReImplementationInstance {
         },
         get Text() {
             return Vencord.Webpack.Common.Text;
+        },
+        SwitchInput(props: { id: string, value: boolean, onChange: (v: boolean) => void }) {
+            return getGlobalApi().UI.buildSettingsPanel({
+                settings: [{
+                    id: props.id,
+                    name: "",
+                    type: "switch",
+                    value: props.value,
+                }],
+                onChange(c, id, v: boolean) {
+                    props.onChange(v);
+                },
+            });
+        },
+        SettingGroup(props: { id: string, name: string, children: React.ReactNode | React.ReactNode[] }) {
+            return Vencord.Webpack.Common.React.createElement("span", {}, [getGlobalApi().UI.buildSettingsPanel({
+                settings: [{
+                    id: props.id,
+                    name: props.name,
+                    type: "category",
+                    settings: [],
+                }],
+                onChange(c, id, v) { },
+            })], props.children); // ew
+        },
+        SettingItem(props: { id: string, name: string, note: string, children: React.ReactNode | React.ReactNode[] }) {
+            // return Vencord.Webpack.Common.React.createElement("div", {
+            //     id: `bd_compat-item-${props.id}`,
+            // }, [props.name, props.note, props.children]);
+            const opt = OptionType.COMPONENT;
+            const fakeElement = VenComponents[opt] as typeof VenComponents[keyof typeof VenComponents];
+            return Vencord.Webpack.Common.React.createElement("div", undefined, [Vencord.Webpack.Common.React.createElement(fakeElement, {
+                id: `bd_compat-item-${props.id}`,
+                key: `bd_compat-item-${props.id}`,
+                option: {
+                    type: opt,
+                    component: () => createTextForm(props.name, props.note, false),
+                },
+                onChange(newValue) { },
+                onError() { },
+                pluginSettings: { enabled: true, },
+            }), props.children]);
+        },
+        RadioInput(props: { name: string, onChange: (new_curr: string) => void, value: any, options: { name: string, value: any }[] }) {
+            return getGlobalApi().UI.buildSettingsPanel({
+                settings: [{
+                    id: `bd_compat-radio-${props.name}`,
+                    name: props.name,
+                    type: "dropdown",
+                    value: props.value,
+                    options: props.options.map(x => ({ label: x.name, value: x.value }))
+                }],
+                onChange(c, id, v: string) {
+                    props.onChange(v);
+                },
+            });
         },
     };
     get React() {
