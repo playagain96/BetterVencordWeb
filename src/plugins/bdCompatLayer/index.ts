@@ -21,9 +21,10 @@
 // import { readFileSync } from "fs";
 // const process = require("~process");
 import { Settings } from "@api/Settings";
+import { copyToClipboard } from "@utils/clipboard";
 import { Devs } from "@utils/constants";
 import definePlugin, { OptionType, PluginDef } from "@utils/types";
-import { Clipboard, React } from "@webpack/common";
+import { React } from "@webpack/common";
 
 import { PluginMeta } from "~plugins";
 
@@ -413,7 +414,7 @@ const thePlugin = {
                 return try1.clipboard;
             }
             return {
-                copy: Clipboard.copy,
+                copy: copyToClipboard,
             };
         })();
 
