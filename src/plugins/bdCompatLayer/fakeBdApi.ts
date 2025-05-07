@@ -149,7 +149,7 @@ export const WebpackHolder = {
                 );
             };
         },
-        byPrototypeKeys(fields) {
+        byPrototypeKeys(...fields) {
             return x =>
                 x.prototype &&
                 [...fields.flat()].every(field => field in x.prototype);
@@ -630,7 +630,7 @@ export const UIHolder = {
                     }
                     default: {
                         fakeOption.type = OptionType.COMPONENT;
-                        (fakeOption as unknown as PluginOptionComponent).component = () => { return React.createElement(React.Fragment); };
+                        (fakeOption as unknown as PluginOptionComponent).component = () => { return React.createElement(React.Fragment, {}, `Remind Davilarek to add setting of type: ${current.type}!\nThis is a placeholder.`); };
                         break;
                     }
                 }
