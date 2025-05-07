@@ -152,7 +152,7 @@ export const WebpackHolder = {
         byPrototypeKeys(fields) {
             return x =>
                 x.prototype &&
-                fields.every(field => field in x.prototype);
+                [...fields.flat()].every(field => field in x.prototype);
         },
     },
     getModule: BdApi_getModule,
@@ -228,7 +228,7 @@ export const WebpackHolder = {
     },
     getByStrings(...strings) {
         const moreOpts = getOptions(strings);
-        return this.getModule(this.Filters.byStrings(...strings), moreOpts);
+        return this.getModule(this.Filters.byStrings(...strings.flat()), moreOpts);
     },
     getBySource(...strings) {
         const moreOpts = getOptions(strings);
@@ -350,6 +350,8 @@ type SettingsType = {
     value?: any,
     options?: { label: string, value: number }[],
 };
+
+const _ReactDOM_With_createRoot = {} as typeof Vencord.Webpack.Common.ReactDOM & { createRoot: typeof Vencord.Webpack.Common.createRoot };
 
 export const UIHolder = {
     alert(title: string, content: any) {
@@ -864,7 +866,9 @@ class BdApiReImplementationInstance {
     enableSetting(collection, category, id) { }
     disableSetting(collection, category, id) { }
     get ReactDOM() {
-        return WebpackHolder.getModule(x => x.render && x.findDOMNode);
+        if (_ReactDOM_With_createRoot.createRoot === undefined)
+            Object.assign(_ReactDOM_With_createRoot, { ...Vencord.Webpack.Common.ReactDOM, createRoot: Vencord.Webpack.Common.createRoot });
+        return _ReactDOM_With_createRoot;
     }
     get ReactUtils() {
         return {
