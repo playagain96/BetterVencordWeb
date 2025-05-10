@@ -792,6 +792,15 @@ export const DOMHolder = {
         if (theRemoteScript != null)
             theRemoteScript.remove();
     },
+    parseHTML(html: string, asFragment = false) {
+        const template = document.createElement("template");
+        template.innerHTML = html.trim();
+        if (asFragment) {
+            return template.content.cloneNode(true);
+        }
+        const { childNodes } = template.content;
+        return childNodes.length === 1 ? childNodes[0] : childNodes;
+    },
 };
 
 class DOMWrapper {
