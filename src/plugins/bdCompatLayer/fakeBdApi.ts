@@ -37,7 +37,7 @@ import { Forms, Text } from "@webpack/common";
 import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
-import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
+import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher, ReactUtils_filler } from "./stuffFromBD";
 import { addLogger, createTextForm, docCreateElement } from "./utils";
 
 class PatcherWrapper {
@@ -965,6 +965,9 @@ class BdApiReImplementationInstance {
     }
     get ReactUtils() {
         return {
+            get wrapElement() {
+                return ReactUtils_filler.wrapElement;
+            },
             getInternalInstance(node: Node & any) {
                 return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber")) as string] || null;
             },

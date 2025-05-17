@@ -33,6 +33,7 @@ import { cleanupGlobal, createGlobalBdApi, getGlobalApi } from "./fakeBdApi";
 import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxyFallback, Patcher } from "./fakeStuff";
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
+import { ReactUtils_filler } from "./stuffFromBD";
 import { aquireNative, FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
@@ -419,6 +420,7 @@ const thePlugin = {
         })();
 
         const injectedAndPatched = new Promise<void>((resolve, reject) => {
+            ReactUtils_filler.setup({ React: React });
             addDiscordModules(proxyUrl).then(DiscordModulesInjectorOutput => {
                 const DiscordModules = DiscordModulesInjectorOutput.output;
                 const makeOverrideOriginal = Patcher.makeOverride;
