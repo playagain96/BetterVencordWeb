@@ -966,7 +966,7 @@ class BdApiReImplementationInstance {
     get ReactUtils() {
         return {
             get wrapElement() {
-                return ReactUtils_filler.wrapElement;
+                return ReactUtils_filler.wrapElement.bind(ReactUtils_filler);
             },
             getInternalInstance(node: Node & any) {
                 return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber")) as string] || null;
