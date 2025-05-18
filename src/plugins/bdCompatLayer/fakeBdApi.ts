@@ -37,7 +37,7 @@ import { Forms, Text } from "@webpack/common";
 import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
-import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher } from "./stuffFromBD";
+import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher, ReactUtils_filler } from "./stuffFromBD";
 import { addLogger, createTextForm, docCreateElement } from "./utils";
 
 class PatcherWrapper {
@@ -268,6 +268,90 @@ export const WebpackHolder = {
     },
     get getMangled() {
         return Vencord.Webpack.mapMangledModule;
+    },
+    getWithKey(filter, options: { target?: any } = {}) {
+        const { target: opt_target = null, ...unrelated } = options;
+        const cache = {
+            target: opt_target,
+            key: undefined as undefined | string,
+        };
+        let iterationCount = 0;
+        const keys = ["0", "1", "length"];
+        return new Proxy<never[]>([], {
+            get(_, prop) {
+                if (typeof prop === "symbol") {
+                    if (prop === Symbol.iterator) {
+                        return function* (this: ProxyHandler<never[]>) {
+                            yield this.get!(_, "0", undefined);
+                            yield this.get!(_, "1", undefined);
+                        }.bind(this);
+                    }
+                    if (prop === Symbol.toStringTag) return "Array";
+                    return Reflect.get(Array.prototype, prop, _);
+                }
+                if (prop === "next") { // not sure about this one
+                    return () => {
+                        if (iterationCount === 0) {
+                            iterationCount++;
+                            return { value: this.get!(_, "0", undefined), done: false };
+                        } else if (iterationCount === 1) {
+                            iterationCount++;
+                            return { value: this.get!(_, "1", undefined), done: false };
+                        } else {
+                            return { value: undefined, done: true };
+                        }
+                    };
+                }
+
+                switch (prop) {
+                    case "0":
+                        if (cache.target === null) {
+                            cache.target = WebpackHolder.getModule(
+                                mod => Object.values(mod).some(filter),
+                                unrelated,
+                            );
+                        }
+                        return cache.target;
+
+                    case "1":
+                        if (cache.target === null) {
+                            this.get!(_, "0", undefined);
+                        }
+                        if (cache.key === undefined && cache.target !== null) {
+                            cache.key = cache.target
+                                ? Object.keys(cache.target).find(k => filter(cache.target[k]))
+                                : undefined;
+                        }
+                        return cache.key;
+
+                    case "length":
+                        return 2;
+
+                    default:
+                        return undefined;
+                }
+            },
+
+            has(_, prop) {
+                return keys.includes(prop.toString());
+            },
+
+            getOwnPropertyDescriptor(_, prop) {
+                if (keys.includes(prop.toString())) {
+                    return {
+                        value: this.get!(_, prop, undefined),
+                        enumerable: prop.toString() !== "length",
+                        configurable: true,
+                        writable: false,
+                    };
+                }
+                return undefined;
+            },
+
+            ownKeys() {
+                return keys;
+            },
+        });
     },
 };
 
@@ -708,6 +792,15 @@ export const DOMHolder = {
         if (theRemoteScript != null)
             theRemoteScript.remove();
     },
+    parseHTML(html: string, asFragment = false) {
+        const template = document.createElement("template");
+        template.innerHTML = html.trim();
+        if (asFragment) {
+            return template.content.cloneNode(true);
+        }
+        const { childNodes } = template.content;
+        return childNodes.length === 1 ? childNodes[0] : childNodes;
+    },
 };
 
 class DOMWrapper {
@@ -872,6 +965,9 @@ class BdApiReImplementationInstance {
     }
     get ReactUtils() {
         return {
+            get wrapElement() {
+                return ReactUtils_filler.wrapElement.bind(ReactUtils_filler);
+            },
             getInternalInstance(node: Node & any) {
                 return node.__reactFiber$ || node[Object.keys(node).find(k => k.startsWith("__reactInternalInstance") || k.startsWith("__reactFiber")) as string] || null;
             },
