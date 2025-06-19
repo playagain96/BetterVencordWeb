@@ -200,7 +200,7 @@ export const WebpackHolder = {
         return this.getModule(this.Filters.byProps(...props), {});
     },
     get getByKeys() {
-        return this.getByProps;
+        return WebpackHolder.getByProps.bind(WebpackHolder);
     },
     getModules(...etc) {
         const [first, ...rest] = etc;
@@ -240,7 +240,7 @@ export const WebpackHolder = {
             : this.getAllByProps(...props);
     },
     getStore(name) {
-        return this.getModule(this.Filters.byStoreName(name));
+        return WebpackHolder.getModule(WebpackHolder.Filters.byStoreName(name));
     },
     // require: (() => {
     //     return Vencord.Webpack.wreq;
