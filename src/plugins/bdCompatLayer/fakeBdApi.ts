@@ -32,7 +32,7 @@ const VenComponents: Record<OptionType, React.ComponentType<ISettingElementProps
 import { ISettingElementProps, SettingBooleanComponent, SettingCustomComponent, SettingNumericComponent, SettingSelectComponent, SettingSliderComponent, SettingTextComponent } from "@components/PluginSettings/components";
 import { ModalAPI } from "@utils/modal";
 import { OptionType, PluginOptionBase, PluginOptionComponent, PluginOptionSelect } from "@utils/types";
-import { Forms, Text } from "@webpack/common";
+import { Forms, lodash, Text } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
@@ -1088,6 +1088,7 @@ class BdApiReImplementationInstance {
             return 0;
         },
         extend: ObjectMerger.perform.bind(ObjectMerger),
+        debounce: lodash.debounce,
     };
     get UI() {
         return UIHolder;
