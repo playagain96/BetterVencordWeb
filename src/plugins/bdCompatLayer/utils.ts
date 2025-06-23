@@ -45,22 +45,29 @@ export function evalInScope(js: string, contextAsScope: any) {
     return new Function(["contextAsScope", "js"], "return (function() { with(this) { return eval(js); } }).call(contextAsScope)")(contextAsScope, js);
 }
 
+const log_ = (type: "log" | "warn" | "error", ...stuff: any[]) => {
+    console[type]("[BV Compat Layer Plugin Ivoked Log]:", ...stuff);
+};
+
 export function addLogger() {
     return {
         warn: function (...args) {
-            console.warn(...args);
+            log_("warn", ...args);
         },
         info: function (...args) {
-            console.log(...args);
+            log_("log", ...args);
         },
         err: function (...args) {
-            console.error(...args);
+            log_("error", ...args);
         },
         stacktrace: function (...args) {
-            console.error(...args);
+            log_("error", ...args);
         },
         error: function (...args) {
-            console.error(...args);
+            log_("error", ...args);
+        },
+        log: function (...args) {
+            log_("log", ...args);
         },
     };
 }
