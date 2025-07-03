@@ -3,7 +3,7 @@
     "minimum_chrome_version": "91",
 
     "name": "BetterVencord Web",
-    "description": "The cutest Discord mod now in your browser + BD plugins support",
+    "description": "The cutest Discord mod now in your browser + BD plugin support",
     "author": "playagain96",
     "homepage_url": "https://github.com/playagain96/BetterVencordWeb",
     "icons": {
