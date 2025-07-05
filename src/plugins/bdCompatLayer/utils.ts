@@ -18,7 +18,7 @@
 
 import { Link } from "@components/Link";
 import { PluginNative } from "@utils/types";
-import { Forms, React } from "@webpack/common";
+import { Forms, lodash, React } from "@webpack/common";
 import * as fflate from "fflate";
 
 import { getGlobalApi } from "./fakeBdApi";
@@ -45,22 +45,29 @@ export function evalInScope(js: string, contextAsScope: any) {
     return new Function(["contextAsScope", "js"], "return (function() { with(this) { return eval(js); } }).call(contextAsScope)")(contextAsScope, js);
 }
 
+const log_ = (type: "log" | "warn" | "error", ...stuff: any[]) => {
+    console[type]("[BV Compat Layer Plugin Ivoked Log]:", ...stuff);
+};
+
 export function addLogger() {
     return {
         warn: function (...args) {
-            console.warn(...args);
+            log_("warn", ...args);
         },
         info: function (...args) {
-            console.log(...args);
+            log_("log", ...args);
         },
         err: function (...args) {
-            console.error(...args);
+            log_("error", ...args);
         },
         stacktrace: function (...args) {
-            console.error(...args);
+            log_("error", ...args);
         },
         error: function (...args) {
-            console.error(...args);
+            log_("error", ...args);
+        },
+        log: function (...args) {
+            log_("log", ...args);
         },
     };
 }
@@ -372,7 +379,7 @@ export const FSUtils = {
                 ),
                 err => {
                     if (err)
-                        console.error("Error during import",err);
+                        console.error("Error during import", err);
                     console.log("Success");
                 }
             );
@@ -599,3 +606,27 @@ export function aquireNative() {
     return Object.values(VencordNative.pluginHelpers)
         .find(m => m.bdCompatLayerUniqueId) as PluginNative<typeof import("./native")>;
 }
+
+export const ObjectMerger = {
+    customizer(objValue, srcValue, key, object, source) {
+        if (srcValue === object) return objValue;
+        if (Array.isArray(srcValue)) {
+            return lodash.cloneDeep(srcValue);
+        }
+        return undefined;
+    },
+
+    skip(obj: null | object | Array<any>) {
+        if (typeof (obj) !== "object") return true;
+        if (obj === null) return true;
+        if (Array.isArray(obj)) return true;
+        return false;
+    },
+
+    perform(t: {}, ...exts: object[]) {
+        return exts.reduce((result, extender) => {
+            if (this.skip(extender)) return result;
+            return lodash.mergeWith(result, extender, this.customizer);
+        }, t);
+    }
+};

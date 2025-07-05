@@ -32,13 +32,13 @@ const VenComponents: Record<OptionType, React.ComponentType<ISettingElementProps
 import { ISettingElementProps, SettingBooleanComponent, SettingCustomComponent, SettingNumericComponent, SettingSelectComponent, SettingSliderComponent, SettingTextComponent } from "@components/PluginSettings/components";
 import { ModalAPI } from "@utils/modal";
 import { OptionType, PluginOptionBase, PluginOptionComponent, PluginOptionSelect } from "@utils/types";
-import { Forms, Text } from "@webpack/common";
+import { Forms, lodash, Text } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants";
 import { fetchWithCorsProxyFallback } from "./fakeStuff";
 import { AssembledBetterDiscordPlugin } from "./pluginConstructor";
 import { getModule as BdApi_getModule, monkeyPatch as BdApi_monkeyPatch, Patcher, ReactUtils_filler } from "./stuffFromBD";
-import { addLogger, createTextForm, docCreateElement } from "./utils";
+import { addLogger, createTextForm, docCreateElement, ObjectMerger } from "./utils";
 
 class PatcherWrapper {
     #label;
@@ -200,7 +200,7 @@ export const WebpackHolder = {
         return this.getModule(this.Filters.byProps(...props), {});
     },
     get getByKeys() {
-        return this.getByProps;
+        return WebpackHolder.getByProps.bind(WebpackHolder);
     },
     getModules(...etc) {
         const [first, ...rest] = etc;
@@ -240,7 +240,7 @@ export const WebpackHolder = {
             : this.getAllByProps(...props);
     },
     getStore(name) {
-        return this.getModule(this.Filters.byStoreName(name));
+        return WebpackHolder.getModule(WebpackHolder.Filters.byStoreName(name));
     },
     // require: (() => {
     //     return Vencord.Webpack.wreq;
@@ -1076,6 +1076,19 @@ class BdApiReImplementationInstance {
             }
             return current;
         },
+        semverCompare(c: string, n: string) { // TODO: fix, this implementation is weak
+            const cParts = c.split(".").map(x => Number(x));
+            const nParts = n.split(".").map(x => Number(x));
+            for (let i = 0; i < 3; i++) {
+                const cNum = cParts[i] ?? 0;
+                const nNum = nParts[i] ?? 0;
+                if (cNum < nNum) return -1;
+                if (cNum > nNum) return 1;
+            }
+            return 0;
+        },
+        extend: ObjectMerger.perform.bind(ObjectMerger),
+        debounce: lodash.debounce,
     };
     get UI() {
         return UIHolder;
