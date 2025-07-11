@@ -19,7 +19,7 @@
 import ErrorBoundary from "@components/ErrorBoundary";
 import { ModalContent, ModalFooter, ModalHeader, ModalRoot, ModalSize, openModal } from "@utils/modal";
 import { OptionType, Plugin } from "@utils/types";
-import { Button, React } from "@webpack/common";
+import { Button, React, Text } from "@webpack/common";
 import { DetailedReactHTMLElement } from "react";
 
 import { PluginMeta } from "~plugins";
@@ -64,10 +64,10 @@ export type AssembledBetterDiscordPlugin = {
     myProxy: {} | undefined;
 };
 
-const modalStuff = {
-    TextElement_: undefined,
-    get TextElement() { return this.TextElement_ ??= getGlobalApi().Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors); },
-};
+// const modalStuff = {
+//     TextElement_: undefined,
+//     get TextElement() { return this.TextElement_ ??= getGlobalApi().Webpack.getModule(m => m?.Sizes?.SIZE_32 && m.Colors); },
+// };
 
 const pluginSettingsModalCreator = (props, name: string, child) => {
     return React.createElement(
@@ -89,6 +89,7 @@ const pluginSettingsModalCreator = (props, name: string, child) => {
                     separator: false,
                     className: "bd-addon-modal-header",
                 },
+                /*
                 React.createElement(
                     modalStuff.TextElement,
                     {
@@ -97,6 +98,14 @@ const pluginSettingsModalCreator = (props, name: string, child) => {
                         strong: true,
                     },
                     `${name} Settings`
+                )
+                */
+                React.createElement(
+                    Text,
+                    {
+                        variant: "text-lg/bold"
+                    },
+                    `${name} Settings`,
                 )
             ),
             React.createElement(
