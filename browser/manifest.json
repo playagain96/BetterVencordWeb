@@ -2,10 +2,10 @@
     "manifest_version": 3,
     "minimum_chrome_version": "111",
 
-    "name": "Vencord Web",
-    "description": "The cutest Discord mod now in your browser",
-    "author": "Vendicated",
-    "homepage_url": "https://github.com/Vendicated/Vencord",
+    "name": "BetterVencord Web",
+    "description": "The cutest Discord mod now in your browser + BD plugin support",
+    "author": "playagain96",
+    "homepage_url": "https://github.com/playagain96/BetterVencordWeb",
     "icons": {
         "128": "icon.png"
     },
