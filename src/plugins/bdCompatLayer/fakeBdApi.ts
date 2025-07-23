@@ -18,18 +18,9 @@
 
 /* eslint-disable eqeqeq */
 import { Settings } from "@api/Settings";
-const VenComponents: Record<OptionType, React.ComponentType<ISettingElementProps<any>>> = {
-    [OptionType.STRING]: SettingTextComponent,
-    [OptionType.NUMBER]: SettingNumericComponent,
-    [OptionType.BIGINT]: SettingNumericComponent,
-    [OptionType.BOOLEAN]: SettingBooleanComponent,
-    [OptionType.SELECT]: SettingSelectComponent,
-    [OptionType.SLIDER]: SettingSliderComponent,
-    [OptionType.COMPONENT]: SettingCustomComponent,
-    [OptionType.CUSTOM]: () => null,
-};
+const VenComponents = OptionComponentMap;
 
-import { ISettingElementProps, SettingBooleanComponent, SettingCustomComponent, SettingNumericComponent, SettingSelectComponent, SettingSliderComponent, SettingTextComponent } from "@components/PluginSettings/components";
+import { OptionComponentMap } from "@components/settings/tabs/plugins/components";
 import { ModalAPI } from "@utils/modal";
 import { OptionType, PluginOptionBase, PluginOptionComponent, PluginOptionSelect } from "@utils/types";
 import { Forms, lodash, Text } from "@webpack/common";
