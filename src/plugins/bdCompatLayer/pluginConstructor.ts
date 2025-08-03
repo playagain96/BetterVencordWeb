@@ -369,7 +369,7 @@ function parseLegacyMeta(pluginCode: string, filename: string) {
 function parseNewMeta(pluginCode: string, filename: string) {
     let lastSuccessfulMetaLine = 0;
     let metaEndLine = 0;
-    const resultMeta = { name: "", id: "", description: "", authors: [{}] as { id: number, name: string }[], version: "" };
+    const resultMeta = { name: "", id: "", description: "", authors: [] as { id: number, name: string }[], version: "" };
     let authorIds = [] as number[];
     let authorNames = [] as string[];
     try {
