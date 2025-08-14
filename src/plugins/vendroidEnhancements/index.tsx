@@ -72,7 +72,7 @@ export default definePlugin({
         try {
             contributors = (await (
                 await fetch(
-                    "https://vendroid-staging.nin0.dev/api/contributors"
+                    "https://vendroid.nin0.dev/api/contributors"
                 )
             ).json()).contributors;
         } catch { }
@@ -137,6 +137,12 @@ export default definePlugin({
             switch (channelId) {
                 case VENCORD_SUPPORT_ID: {
                     showNoSupportModal();
+                    break;
+                }
+                case EQUICORD_SUPPORT_ID: {
+                    // @ts-ignore
+                    if (Vencord.Api.isEquicord) showNoSupportModal("Equicord");
+                    break;
                 }
             }
         },
