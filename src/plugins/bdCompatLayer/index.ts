@@ -34,7 +34,7 @@ import { addContextMenu, addDiscordModules, FakeEventEmitter, fetchWithCorsProxy
 import { injectSettingsTabs, unInjectSettingsTab } from "./fileSystemViewer";
 import { addCustomPlugin, convertPlugin, removeAllCustomPlugins } from "./pluginConstructor";
 import { ReactUtils_filler } from "./stuffFromBD";
-import { aquireNative, FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
+import { aquireNative, compat_logger, FSUtils, getDeferred, patchMkdirSync, patchReadFileSync, reloadCompatLayer, simpleGET, ZIPUtils } from "./utils";
 // String.prototype.replaceAll = function (search, replacement) {
 //     var target = this;
 //     return target.split(search).join(replacement);
@@ -215,9 +215,9 @@ const thePlugin = {
         }
         else {
             const native = aquireNative();
-            console.warn("Waiting for reimplementation object to be ready...");
+            compat_logger.warn("Waiting for reimplementation object to be ready...");
             reimplementationsReady.promise.then(async () => {
-                console.warn("Enabling real fs...");
+                compat_logger.warn("Enabling real fs...");
                 // const nativeBridge = await native.getBridge();
                 // ReImplementationObject.fs = nativeBridge.fs;
                 // ReImplementationObject.path = nativeBridge.path;
@@ -372,29 +372,15 @@ const thePlugin = {
         window.BdApi = BdApiReImplementation;
         if (PluginMeta[PLUGIN_NAME].userPlugin === true) {
             BdApiReImplementation.UI.showConfirmationModal("Error", "BD Compatibility Layer will not work as a user plugin!", { cancelText: null, onCancel: null });
-            console.warn("Removing settings tab...");
+            compat_logger.warn("Removing settings tab...");
             unInjectSettingsTab();
-            console.warn("Removing compat layer...");
+            compat_logger.warn("Removing compat layer...");
             delete window.BdCompatLayer;
-            console.warn("Removing BdApi...");
+            compat_logger.warn("Removing BdApi...");
             cleanupGlobal();
             delete window.BdApi;
             throw new Error("BD Compatibility Layer will not work as a user plugin!");
         }
-        window // Talk about being tedious
-            .nuhuh = // Why the hell did vencord not expose process??
-            (bool = true) => {
-                BdApiReImplementation
-                    .Webpack
-                    .getModule(
-                        x =>
-                            x
-                                .logout)
-                    .logout();
-                console
-                    .log(
-                        "HAHAHAHH GET NUHUH'ED");
-            };
         // window.BdApi.UI = new UI();
         // @ts-ignore
         window.require = FakeRequireRedirect;
@@ -491,7 +477,7 @@ const thePlugin = {
                                 response.responseText
                             );
                         } catch (error) {
-                            console.error(
+                            compat_logger.error(
                                 error,
                                 "\nWhile loading: " +
                                 Settings.plugins[this.name][key]
@@ -590,18 +576,18 @@ const thePlugin = {
         `);
     },
     async stop() {
-        console.warn("Disabling observer...");
+        compat_logger.warn("Disabling observer...");
         window.BdCompatLayer.mainObserver.disconnect();
-        console.warn("Removing onSwitch listener...");
+        compat_logger.warn("Removing onSwitch listener...");
         window.BdCompatLayer.Router.listeners.delete(window.BdCompatLayer.mainRouterListener);
-        console.warn("UnPatching context menu...");
+        compat_logger.warn("UnPatching context menu...");
         getGlobalApi().Patcher.unpatchAll("ContextMenuPatcher");
-        console.warn("Removing plugins...");
+        compat_logger.warn("Removing plugins...");
         await removeAllCustomPlugins();
-        console.warn("Removing added css...");
+        compat_logger.warn("Removing added css...");
         getGlobalApi().DOM.removeStyle("OwOStylesOwO");
         getGlobalApi().DOM.removeStyle("bd-compat-layer-stuff");
-        console.warn("Removing settings tab...");
+        compat_logger.warn("Removing settings tab...");
         unInjectSettingsTab();
         // console.warn("Freeing blobs...");
         // Object.values(window.GeneratedPluginsBlobs).forEach(x => {
@@ -611,26 +597,26 @@ const thePlugin = {
         // URL.revokeObjectURL(window.BdCompatLayer.contextMenuBlobUrl);
         // URL.revokeObjectURL(window.BdCompatLayer.discordModulesBlobUrl);
         if (this.globalDefineWasNotExisting === true) {
-            console.warn("Removing global.define...");
+            compat_logger.warn("Removing global.define...");
             delete window.global.define;
         }
         if (this.globalWasNotExisting === true) {
-            console.warn("Removing global...");
+            compat_logger.warn("Removing global...");
             // @ts-ignore
             delete window.global;
         }
-        console.warn("Removing compat layer...");
+        compat_logger.warn("Removing compat layer...");
         delete window.BdCompatLayer;
-        console.warn("Removing BdApi...");
+        compat_logger.warn("Removing BdApi...");
         cleanupGlobal();
         delete window.BdApi;
         if (window.zip) {
-            console.warn("Removing ZIP...");
+            compat_logger.warn("Removing ZIP...");
             delete window.zip;
         }
-        console.warn("Removing FileSystem...");
+        compat_logger.warn("Removing FileSystem...");
         delete window.BrowserFS;
-        console.warn("Restoring buffer...");
+        compat_logger.warn("Restoring buffer...");
         window.Buffer = this.originalBuffer as BufferConstructor;
     },
 };
