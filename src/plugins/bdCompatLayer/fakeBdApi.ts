@@ -199,7 +199,7 @@ export const WebpackHolder = {
     },
     getByPrototypes(...fields) {
         const moreOpts = getOptions(fields);
-        return this.getModule(this.Filters.byPrototypeKeys(fields), moreOpts);
+        return WebpackHolder.getModule(WebpackHolder.Filters.byPrototypeKeys(fields), moreOpts);
     },
     get getByPrototypeKeys() {
         return this.getByPrototypes;
@@ -219,7 +219,7 @@ export const WebpackHolder = {
     },
     getByStrings(...strings) {
         const moreOpts = getOptions(strings);
-        return this.getModule(this.Filters.byStrings(...strings.flat()), moreOpts);
+        return WebpackHolder.getModule(WebpackHolder.Filters.byStrings(...strings.flat()), moreOpts);
     },
     getBySource(...strings) {
         const moreOpts = getOptions(strings);
@@ -1022,6 +1022,7 @@ class BdApiReImplementationInstance {
     }
     readonly Utils = {
         findInTree(tree, searchFilter, options = {}) {
+            const this_ = getGlobalApi().Utils;
             const { walkable = null, ignore = [] } = options as { walkable: string[], ignore: string[]; };
 
             function findInObject(obj) {
@@ -1044,14 +1045,14 @@ class BdApiReImplementationInstance {
 
             if (Array.isArray(tree)) {
                 for (const value of tree) {
-                    const result = this.findInTree(value, searchFilter, { walkable, ignore });
+                    const result = this_.findInTree(value, searchFilter, { walkable, ignore });
                     if (result !== undefined) return result;
                 }
             } else if (typeof tree === "object" && tree !== null) {
                 const keysToWalk = walkable || Object.keys(tree);
                 for (const key of keysToWalk) {
                     if (tree[key] === undefined) continue;
-                    const result = this.findInTree(tree[key], searchFilter, { walkable, ignore });
+                    const result = this_.findInTree(tree[key], searchFilter, { walkable, ignore });
                     if (result !== undefined) return result;
                 }
             }
