@@ -519,14 +519,14 @@ export const UIHolder = {
 
         const { timeout = 0, type = "default" } = options;
         const buttons = [
-            { label: "Close", onClick: () => { } },
+            { label: "Close", onClick: x => { x(); } },
             ...options.buttons || []
         ];
 
         const buttonElements = buttons.map((button, index) => {
             const onClickHandler = () => {
-                button.onClick();
-                closeNotification();
+                button.onClick(closeNotification);
+                // closeNotification();
             };
 
             // return React.createElement(
@@ -608,6 +608,7 @@ export const UIHolder = {
         if (timeout > 0) {
             setTimeout(closeNotification, timeout);
         }
+        return closeNotification;
     },
     showNotice(content, options) {
         return this.showNotice_("Notice", content, options);
