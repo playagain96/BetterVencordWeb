@@ -22,7 +22,7 @@ const VenComponents = OptionComponentMap;
 
 import { OptionComponentMap } from "@components/settings/tabs/plugins/components";
 import { ModalAPI } from "@utils/modal";
-import { OptionType, PluginOptionBase, PluginOptionComponent, PluginOptionSelect } from "@utils/types";
+import { OptionType, PluginOptionBase, PluginOptionComponent, PluginOptionSelect, PluginOptionSlider } from "@utils/types";
 import { Forms, lodash, Text } from "@webpack/common";
 
 import { PLUGIN_NAME } from "./constants";
@@ -424,6 +424,7 @@ type SettingsType = {
     shown?: boolean,
     value?: any,
     options?: { label: string, value: number; }[],
+    markers?: (number | { label: string, value: number })[],
 };
 
 const _ReactDOM_With_createRoot = {} as typeof Vencord.Webpack.Common.ReactDOM & { createRoot: typeof Vencord.Webpack.Common.createRoot; };
@@ -702,6 +703,15 @@ export const UIHolder = {
                         fakeOption.description = current.note!;
                         const fakeOptionAsSelect = fakeOption as PluginOptionSelect;
                         fakeOptionAsSelect.options = current.options!;
+                        break;
+                    }
+                    case "slider": {
+                        fakeOption.type = OptionType.SLIDER;
+                        fakeOption.description = current.note!;
+                        const fakeOptionAsSlider = fakeOption as PluginOptionSlider;
+                        if (typeof current.markers![0] === "object") fakeOptionAsSlider.markers = current.markers!.map(x => (x as { label: string, value: number }).value);
+                        else fakeOptionAsSlider.markers = current.markers! as number[];
+                        fakeOptionAsSlider.stickToMarkers = Reflect.get(current, "stickToMarkers");
                         break;
                     }
                     default: {
