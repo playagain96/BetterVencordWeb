@@ -587,7 +587,7 @@ export const UIHolder = {
         // ) : (
         //     React.isValidElement(content) ? content : React.createElement("div", { className: "content" }, " ") // Very nice looking fallback. I dont know why I dont optimize code along the way.
         // );
-        const contentComponent = docCreateElement("div", { className: "content" }, [typeof content === "string" ? docCreateElement("span", { innerText: title }) : content]);
+        const contentComponent = docCreateElement("div", { className: "content" }, [typeof content === "string" ? docCreateElement("span", { innerText: content }) : content]);
 
         // const customNotification = React.createElement(
         //     "div",
