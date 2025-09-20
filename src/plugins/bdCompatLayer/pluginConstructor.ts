@@ -243,7 +243,7 @@ export async function convertPlugin(BetterDiscordPlugin: string, filename: strin
     final.internals = wrapBetterDiscordPluginCode(BetterDiscordPlugin, filename);
     let { exports } = final.internals.module;
     if (typeof exports === "object") {
-        exports = exports[final.name];
+        exports = exports[final.name] ?? exports.default;
     }
     try {
         final.instance = exports.prototype ? new exports(final) : exports(final);
