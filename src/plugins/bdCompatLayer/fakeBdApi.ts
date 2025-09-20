@@ -1199,30 +1199,24 @@ class BdApiReImplementationInstance {
         return DOMHolder.removeScript.bind(DOMHolder);
     }
 }
+const api_gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS", "Logger", "linkJS", "unlinkJS", "clearCSS"];
+const api_settersToSet = ["ContextMenu"];
 
 function assignToGlobal() {
     const letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance = new BdApiReImplementationInstance();
-    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS", "Logger", "linkJS", "unlinkJS", "clearCSS"];
-    const settersToSet = ["ContextMenu"];
-    for (let index = 0; index < gettersToSet.length; index++) {
-        const element = gettersToSet[index];
-        let setter = undefined as ((v: any) => any) | undefined;
-        if (settersToSet.indexOf(element) !== -1) {
-            setter = (v => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element] = v);
-        }
-        Object.defineProperty(BdApiReImplementationInstance, element, {
-            get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[element],
-            set: setter,
-            configurable: true,
-        });
-    }
+    const descriptors = api_gettersToSet.reduce((acc, key) => {
+        acc[key] = {
+            get: () => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[key],
+            set: api_settersToSet.includes(key) ? v => letsHopeThisObjectWillBeTheOnlyGlobalBdApiInstance[key] = v : undefined,
+            configurable: true
+        };
+        return acc;
+    }, {} as PropertyDescriptorMap);
+    Object.defineProperties(BdApiReImplementationInstance, descriptors);
 }
 export function cleanupGlobal() {
-    const gettersToSet = ["Components", "ContextMenu", "DOM", "Data", "Patcher", "Plugins", "React", "ReactDOM", "ReactUtils", "UI", "Net", "Utils", "Webpack", "labelsOfInstancedAPI", "alert", "disableSetting", "enableSetting", "findModule", "findModuleByProps", "findAllModules", "getData", "isSettingEnabled", "loadData", "monkeyPatch", "saveData", "setData", "showConfirmationModal", "showNotice", "showToast", "suppressErrors", "injectCSS", "Logger", "linkJS", "unlinkJS", "clearCSS"];
-    for (let index = 0; index < gettersToSet.length; index++) {
-        const element = gettersToSet[index];
-        delete getGlobalApi()[element];
-    }
+    const globalApi = getGlobalApi();
+    api_gettersToSet.forEach(key => delete globalApi[key]);
 }
 type BdApiReImplementationGlobal = typeof BdApiReImplementationInstance & BdApiReImplementationInstance;
 
