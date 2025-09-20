@@ -346,11 +346,11 @@ export const WebpackHolder = {
         });
     },
     getBulk(...mapping: { filter: (m: any) => unknown, searchExports?: boolean }[]) {
-        const result = [] as any;
-        for (let i = 0; i < mapping.length; i++) {
+        const len = mapping.length;
+        const result = new Array(len);
+        for (let i = 0; i < len; i++) {
             const { filter, ...opts } = mapping[i];
-            const query = WebpackHolder.getModule(filter, opts);
-            result.push(query);
+            result[i] = WebpackHolder.getModule(filter, opts)
         }
         return result;
     },
