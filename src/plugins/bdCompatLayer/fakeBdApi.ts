@@ -887,6 +887,15 @@ class DOMWrapper {
     }
 }
 
+const components = {
+    Spinner_holder: null as React.Component | null,
+    get Spinner() {
+        if (components.Spinner_holder === null)
+            components.Spinner_holder = Vencord.Webpack.findByCode(".SPINNER_LOADING_LABEL");
+        return components.Spinner_holder;
+    },
+};
+
 class BdApiReImplementationInstance {
     #targetPlugin;
     #patcher: PatcherWrapper | typeof Patcher;
@@ -943,6 +952,12 @@ class BdApiReImplementationInstance {
         },
         get Text() {
             return Vencord.Webpack.Common.Text;
+        },
+        get Button() {
+            return Vencord.Webpack.Common.Button;
+        },
+        get Spinner() {
+            return components.Spinner;
         },
         SwitchInput(props: { id: string, value: boolean, onChange: (v: boolean) => void; }) {
             return getGlobalApi().UI.buildSettingsPanel({
