@@ -345,6 +345,15 @@ export const WebpackHolder = {
             },
         });
     },
+    getBulk(...mapping: { filter: (m: any) => unknown, searchExports?: boolean }[]) {
+        const result = [] as any;
+        for (let i = 0; i < mapping.length; i++) {
+            const { filter, ...opts } = mapping[i];
+            const query = WebpackHolder.getModule(filter, opts);
+            result.push(query);
+        }
+        return result;
+    },
 };
 
 export const DataHolder = {
