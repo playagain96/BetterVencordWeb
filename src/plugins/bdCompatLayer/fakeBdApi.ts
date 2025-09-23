@@ -147,7 +147,26 @@ export const WebpackHolder = {
                 [...fields.flat()].every(field => field in x.prototype);
         },
     },
-    getModule: BdApi_getModule,
+    // getModule: BdApi_getModule,
+    getModule(...args: Parameters<typeof BdApi_getModule>) {
+        if (args[1] && args[1].raw === true) {
+            const fn = args[0];
+            const final = {
+                id: 0,
+                exports: null,
+            };
+            BdApi_getModule((wrappedExport, module, index) => {
+                const result = fn(wrappedExport, module, index);
+                if (result) {
+                    final.exports = module.exports;
+                    final.id = parseInt(index, 10);
+                }
+                return result;
+            }, args[1]);
+            return final.exports === null ? undefined : final;
+        }
+        return BdApi_getModule(...args);
+    },
     waitForModule(filter) {
         return new Promise((resolve, reject) => {
             Vencord.Webpack.waitFor(filter, module => {
